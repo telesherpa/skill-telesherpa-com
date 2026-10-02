@@ -1,8 +1,8 @@
 # Tool-Katalog
 
-Diese Übersicht ist aus der Werkzeugliste des Dienstes erzeugt: **170 Tools**, davon
+Diese Übersicht ist aus der Werkzeugliste des Dienstes erzeugt: **172 Tools**, davon
 **100** sichtbar für ein Konto mit
-`login`+`public`+`telesherpa`, **108** mit `login`+`public`+`admin`, **6** ohne Token.
+`login`+`public`+`telesherpa`, **110** mit `login`+`public`+`admin`, **6** ohne Token.
 
 **Die Rollen-Spalte sagt, wer das Tool SIEHT.** Sie schützt nicht die Ausführung — die
 eigentliche Absicherung ist das Schreibrecht am Scope (`can_write`, `can_manage_scope`).

@@ -24,8 +24,8 @@ Credits zu laden und zu arbeiten.
   `Bad Request: Missing session ID` — auch mit perfektem Token. (Alternative für Clients ohne
   Session-Slot: stateless-Envelope per Protokoll 2026-07-28.)
   Details: `references/features/auth-token-lifecycle.md`.
-- **Der Katalog hat aktuell 170 Tools**: 100 sichtbar mit
-  `login`+`public`+`telesherpa`, 108 mit `login`+`public`+`admin`. Ohne Token sind **6** Tools
+- **Der Katalog hat aktuell 172 Tools**: 105 sichtbar mit
+  `login`+`public`+`telesherpa`, 110 mit `login`+`public`+`admin`. Ohne Token sind **6** Tools
   ausführbar (`register`, `activate`, `login`, `refresh_access_token`, `auth_status`,
   `onto_credit_pricing`).
   **`admin` ist keine Obermenge von `telesherpa`** — ein Teil der Tools ist nur für
@@ -120,7 +120,7 @@ Für Agenten relevant bei „ich muss mich ständig neu anmelden" und bei Push-F
 
 Jedes Feature hat eine eigene ausführliche Referenz unter `references/features/`:
 
-- **Tool-Katalog** — alle 170 Tools mit Rollen, gruppiert nach Ressource:
+- **Tool-Katalog** — alle 172 Tools mit Rollen, gruppiert nach Ressource:
   `references/features/tool-catalog.md`
 - **App-User (iOS & Android)** — App-Protokoll, Auth, App vs Web-Konfiguration:
   `references/features/app-user-ios-android.md`
