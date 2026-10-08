@@ -1,8 +1,13 @@
 # Tool-Katalog
 
-Diese Übersicht ist aus der Werkzeugliste des Dienstes erzeugt: **172 Tools**, davon
-**100** sichtbar für ein Konto mit
-`login`+`public`+`telesherpa`, **110** mit `login`+`public`+`admin`, **6** ohne Token.
+Diese Übersicht ist aus der Werkzeugliste des Dienstes erzeugt: **174 Tools**, davon
+**101** sichtbar für ein Konto mit
+`login`+`public`+`telesherpa`, **104** mit `login`+`public`+`admin`, **6** ohne Token.
+
+**Gemessen, nicht geschätzt:** die Zahlen stammen aus der Rollen-Zuordnung des Dienstes
+(`TOOL_ROLES`, 174 Einträge) und decken sich mit dem, was `/health` als `tools` meldet. Eine
+frühere Fassung dieses Katalogs nannte 172/100/110 — sie war aus zwei Quellen falsch
+zusammengeführt. Wer die Zahl stellt, nimmt `auth_status` (`tools_visible`).
 
 **Die Rollen-Spalte sagt, wer das Tool SIEHT.** Sie schützt nicht die Ausführung — die
 eigentliche Absicherung ist das Schreibrecht am Scope (`can_write`, `can_manage_scope`).
@@ -116,19 +121,20 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 | Tool | Rollen |
 |---|---|
-| `onto_property_def_create` | `admin` |
+| `onto_property_def_create` | `admin`, `telesherpa` |
 | `onto_property_def_delete` | `admin` |
 | `onto_property_def_index` | `admin` |
-| `onto_property_def_update` | `admin` |
+| `onto_property_def_delete_override` | `admin`, `telesherpa` |
+| `onto_property_def_update` | `admin`, `telesherpa` |
 
 ### `onto_property_set_*`
 
 | Tool | Rollen |
 |---|---|
-| `onto_property_set_create` | `admin` |
+| `onto_property_set_create` | `admin`, `telesherpa` |
 | `onto_property_set_delete` | `admin` |
 | `onto_property_set_index` | `admin` |
-| `onto_property_set_update` | `admin` |
+| `onto_property_set_update` | `admin`, `telesherpa` |
 
 ### `onto_interface_*`
 
@@ -241,6 +247,26 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 | `onto_file_delete` | `telesherpa` |
 | `onto_file_structured` | `telesherpa` |
 
+### `onto_series_*` (Sensor-Zeitreihen)
+
+| Tool | Rollen |
+|---|---|
+| `onto_series_range` | `telesherpa` |
+| `onto_series_last` | `telesherpa` |
+
+Eine Reihe hat **keine eigene udid** — ihre Identität ist das Paar
+`(object_udid, series_key)`. Der `series_key` ist derselbe String wie der Key des zugehörigen
+Property; das Property ist der **Zeiger** auf die Reihe (Def-Feld `computed = {"series": true}`),
+sein Wert trägt es nicht. Welche Reihen ein Objekt hat, nennt `onto_object_show` im Feld
+`series_keys`.
+
+Sichtbarkeit richtet sich nach dem **Scope des Property**, nicht des Objekts (fail-closed) —
+ein fremder Scope liefert 403, obwohl das Tool sichtbar ist.
+
+**Alle Zeitangaben sind UTC** (ISO 8601 mit `Z`, z. B. `2026-10-06T23:09:00Z`); das gilt für
+`points[].ts`, `series_ts` **und** für die Parameter `from`/`to`. Details und Use-Cases:
+`references/features/sensor-zeitreihen.md`.
+
 ### `onto_import_*`
 
 | Tool | Rollen |
@@ -251,6 +277,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 | `onto_import_delete_source` | `admin` |
 | `onto_import_delete_step` | `admin` |
 | `onto_import_index` | `admin` |
+| `onto_import_reorder_step` | `admin` |
 | `onto_import_run_step` | `admin` |
 | `onto_import_save_step` | `admin` |
 | `onto_import_sources` | `admin` |
@@ -360,6 +387,21 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 | `show_formdef` | `telesherpa` |
 | `submit_form_answer` | `telesherpa` |
 | `toggle_member_flag` | `telesherpa`, `admin` |
+
+## Zeitangaben — immer UTC
+
+**Jeder Zeitstempel, den dieser Dienst zurückgibt, ist UTC in ISO 8601 mit `Z`** — z. B.
+`2026-10-06T23:09:00Z`. Der Wert trägt seine Zone selbst; du brauchst keine Umrechnung und
+darfst keine annehmen.
+
+- **Nicht selbst umrechnen.** Wer UTC in eine Ortszeit umrechnet, um zwei Werte zu
+  vergleichen, baut den Fehler ein, den die Umrechnung vermeiden sollte. Vergleiche UTC mit UTC.
+- **Was du sendest, ist ebenfalls UTC.** `from`/`to` bei `onto_series_range` werden als UTC
+  gelesen — als `2026-10-06T23:09:00Z` oder `2026-10-06 23:09:00`. Ein angehängter Offset
+  (`+02:00`) gilt und wird umgerechnet.
+- **Die Web-Ansicht zeigt dagegen Betrachterzeit.** Zeigt die Oberfläche `01:09` und die API
+  `23:09`, sind beide richtig — das sind 2 Stunden Zonenunterschied, kein Fehler.
+- **Eine Dauer** immer aus zwei UTC-Werten **derselben** Quelle rechnen.
 
 ## Pitfalls
 

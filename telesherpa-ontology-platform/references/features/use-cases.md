@@ -50,6 +50,27 @@ Originaleigentümers angetastet wird. Details: `service-order-dispatch.md`,
 Veredelung (Geocoding, Vollständigkeitsprüfung, Struktur) — das ist, wofür andere Nutzer
 tatsächlich zahlen. Details: `marketplace-revenue-share.md`.
 
+## 3. Sensor-Zeitreihen: Flotte und Verlauf
+
+**Ausgangslage:** Ein Scope mit 10 Objekten, von denen eines Fahrzeug-Telemetrie führt —
+zwei Reihen, `location` (geo) und `speed`.
+
+**Ablauf:**
+1. `onto_object_index` → die Objekt-udids des Scopes
+2. `onto_series_last` mit `objects: [alle udids]`, `series: ["location", "speed"]` →
+   **ein** Aufruf statt N
+3. Für den Verlauf eines einzelnen Objekts: `onto_series_range` mit `resolution: 300`
+
+**Nachgemessenes Ergebnis:** bei 10 angefragten Objekten kommen **2 Werte** zurück — neun
+Objekte haben in diesen Reihen keinen Punkt. Das ist kein Fehler, sondern die korrekte Antwort
+auf „welche Messwerte gibt es". Die Antwort ist eine Liste **vorhandener Messwerte**, keine
+Objektliste.
+
+**Lernpunkt:** Wer „Anzahl Antwort = Anzahl Objekte" erwartet, hält eine korrekte Antwort für
+kaputt. Ebenso ist eine **leere** Liste ein gültiges Ergebnis — ein Fahrzeug, das gerade nichts
+sendet, ist nicht verschwunden. Alle Zeiten sind UTC mit `Z`. Details:
+`sensor-zeitreihen.md`.
+
 ## Eigene Automatisierungen bauen
 
 Die gezeigten Bausteine (Schema-Introspektion, Pagination, ServiceOrder-Dispatch) lassen sich

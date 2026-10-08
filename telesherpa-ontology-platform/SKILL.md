@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.0.0
+version: 1.1.0
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -17,6 +17,11 @@ Credits zu laden und zu arbeiten.
 ## Prinzip: Alles über MCP
 
 - Endpoint: `https://mcp.telesherpa.com` (Streamable HTTP).
+- **Alle Zeitstempel sind UTC in ISO 8601 mit `Z`** (`2026-10-06T23:09:00Z`). Nicht selbst in
+  eine Ortszeit umrechnen — vergleiche UTC mit UTC. Gesendete Zeiten (`from`/`to`) sind ebenfalls
+  UTC. Die Web-Ansicht zeigt dagegen Betrachterzeit: `01:09` in der Oberfläche und `23:09` in der
+  API sind derselbe Zeitpunkt. Details: `references/features/tool-catalog.md` (Abschnitt
+  „Zeitangaben"), echte Beispiele in `references/features/sensor-zeitreihen.md`.
 - `?format=json` in der URL = JSON-Modus (Agent nutzt immer diesen). Ohne das = Web-Modus
   (Session-Cookie, 302-Redirects).
 - **Auth braucht BEIDES**: gültigen `Authorization: Bearer *** **und** die
@@ -24,8 +29,8 @@ Credits zu laden und zu arbeiten.
   `Bad Request: Missing session ID` — auch mit perfektem Token. (Alternative für Clients ohne
   Session-Slot: stateless-Envelope per Protokoll 2026-07-28.)
   Details: `references/features/auth-token-lifecycle.md`.
-- **Der Katalog hat aktuell 172 Tools**: 105 sichtbar mit
-  `login`+`public`+`telesherpa`, 110 mit `login`+`public`+`admin`. Ohne Token sind **6** Tools
+- **Der Katalog hat aktuell 174 Tools**: 101 sichtbar mit
+  `login`+`public`+`telesherpa`, 104 mit `login`+`public`+`admin`. Ohne Token sind **6** Tools
   ausführbar (`register`, `activate`, `login`, `refresh_access_token`, `auth_status`,
   `onto_credit_pricing`).
   **`admin` ist keine Obermenge von `telesherpa`** — ein Teil der Tools ist nur für
@@ -120,8 +125,11 @@ Für Agenten relevant bei „ich muss mich ständig neu anmelden" und bei Push-F
 
 Jedes Feature hat eine eigene ausführliche Referenz unter `references/features/`:
 
-- **Tool-Katalog** — alle 172 Tools mit Rollen, gruppiert nach Ressource:
+- **Tool-Katalog** — alle 174 Tools mit Rollen, gruppiert nach Ressource:
   `references/features/tool-catalog.md`
+- **Sensor-Zeitreihen** — Reihen lesen (`onto_series_range`, `onto_series_last`), Raster statt
+  Rohpunkte, UTC-Zeiten, echte Use-Cases (Flotte, Tagesroute, Messkurve):
+  `references/features/sensor-zeitreihen.md`
 - **App-User (iOS & Android)** — App-Protokoll, Auth, App vs Web-Konfiguration:
   `references/features/app-user-ios-android.md`
 - **PWA & Session** — Home-Bildschirm-Installation, 30-Minuten-Session, Dauer-Anmeldung
