@@ -422,11 +422,48 @@ darfst keine annehmen.
 6. **Parameter sind in den Tool-Schemata dokumentiert, nicht hier.** Bei Unsicherheit
    `tools/list` auf das konkrete Tool ansehen — die `description` enthält das verifizierte
    Body-Format und die Pflichtfelder.
-7. **`admin` sieht NICHT alles.** Ein Teil der Tools trägt ausschließlich `telesherpa`, ein
+7. **Eine Tool-Zahl aus einem Suchmuster ist keine Messung.** Rolle oder Anzahl aus dem
+   Quelltext zu greppen scheitert still: falsche Anführungszeichen, über mehrere Stellen
+   verteilte Definitionen. Die Zahl aus der geladenen Datenstruktur lesen und gegen `/health`
+   stellen — siehe Abschnitt „Katalogzahlen" oben.
+8. **`admin` sieht NICHT alles.** Ein Teil der Tools trägt ausschließlich `telesherpa`, ein
    anderer ausschließlich `admin`; nur ein Teil beide. Ein Admin-Konto, das `change_password`
    oder `onto_catalog_apply` vermisst, hat keinen Fehler — die Rollenliste nennt dort nur
    `telesherpa`. Beim Prüfen immer **beide** Zahlen stellen (`auth_status` mit dem
    jeweiligen Konto).
+
+## Katalogzahlen: aus der Datenstruktur, nie aus einem Muster
+
+Die Rollen-Zahlen in diesem Dokument wurden **zweimal falsch** ermittelt, bevor sie stimmten:
+eine Textsuche im Server-Quelltext fand 8 statt 174 (das Muster erwartete einfache
+Anführungszeichen, die Datei nutzt doppelte) und danach 159 statt 174 (die Definitionen sind
+über mehrere Stellen verteilt und werden zur Laufzeit zusammengebaut).
+
+**Regel: die Zahl kommt aus der geladenen Datenstruktur, nicht aus einem regulären Ausdruck
+über den Quelltext.**
+
+```python
+import importlib.util
+spec = importlib.util.spec_from_file_location("srv", "<pfad>/server.py")
+m = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
+
+print(len(m.TOOL_ROLES))     # 174 — dieselbe Quelle, die /health als "tools" meldet
+```
+
+Drei Prüfungen, die eine falsche Zahl auffliegen lassen — jede einzelne hat hier gegriffen:
+
+1. **Gegenprobe gegen eine zweite Quelle.** `/health` meldet `tools`. Weichen die Zahlen ab,
+   ist die Zählung falsch, nicht die Anzeige. (165 gegen 174 war der erste Hinweis.)
+2. **Erwartete Anzahl unabhängig prüfen.** Die Liste der ohne Token ausführbaren Tools muss
+   sechs sein; ein Muster, das null findet, hat nichts gemessen, sondern nur nicht gepasst.
+3. **Werkzeug gegen Werkzeug.** Wird eine Zählung größer oder kleiner, sobald man den Parser
+   ändert, war sie nie belastbar.
+
+Für den Abgleich gegen dieses Dokument gilt zusätzlich: **nur `| \`tool\` | rolle |`-Zeilen
+zählen** und danach auf **beide Richtungen** prüfen — ein Tool ohne Tabellenzeile ist eine
+Lücke, ein Tabelleneintrag ohne Tool ein Phantom. In dieser Fassung: 174/174, 0 Lücken,
+0 Phantome, 0 Rollen-Abweichungen.
 
 ## Tool-Beschreibungen und Annotations
 
