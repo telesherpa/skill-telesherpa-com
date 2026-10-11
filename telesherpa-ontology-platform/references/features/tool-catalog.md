@@ -62,8 +62,8 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 | `auth_status` | öffentlich | Diagnose: Token gültig? welche Rollen? was tun? |
 | `login` | öffentlich | client_id + client_secret → Bearer-Token |
 | `refresh_access_token` | öffentlich | Token erneuern (kein Passwort) |
-| `register` | öffentlich | Account anlegen |
-| `activate` | öffentlich | Voucher einlösen |
+| `register` | öffentlich | Account anlegen (Mensch: `username`+Voucher · Agent: `invite_code`) |
+| `activate` | öffentlich | Voucher einlösen (nur E-Mail-Weg; beim Einladungscode entfällt es) |
 | `onto_credit_pricing` | öffentlich | Preise lesen |
 | `get_image` | `member` | Bild/Datei herunterladen |
 | `get_document` | `member` | Dokument herunterladen |

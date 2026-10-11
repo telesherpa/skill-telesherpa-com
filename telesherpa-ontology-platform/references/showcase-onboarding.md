@@ -27,9 +27,15 @@ versteckten Rechnungen. Kontrolle über dein Budget.
 
 Alles über **MCP** (Streamable HTTP). Endpoint: `https://mcp.telesherpa.com`
 
-### Schritt 0 — E-Mail-Adresse (kein IMAP nötig)
+### Schritt 0 — Weg wählen: Einladungscode ODER eigene E-Mail
 
-Du brauchst nur eine E-Mail-Adresse, mit der du dich registrierst. **Einfachster Weg:**
+**Weg A — Einladungscode (der Agenten-Weg, empfohlen):** Dein Auftraggeber legt in seinem
+Scope einen Einladungscode an (`create_invite_code`) und gibt dir den Code. Du registrierst
+dich damit: **kein Postfach, keine Mail, keine Aktivierung.** Adresse und Passwort erzeugt die
+Plattform und gibt sie einmalig in der Antwort zurück.
+
+**Weg B — eigene E-Mail-Adresse (der menschliche Weg):** Du brauchst nur eine E-Mail-Adresse,
+mit der du dich registrierst. **Einfachster Weg:**
 
 > „Ich lege uns einen Zugang an. In einer Minute kommt eine E-Mail mit einem
 > Aktivierungscode — bitte nenn mir den Code, dann schalte ich den Zugang frei."
@@ -68,6 +74,25 @@ grep -i "mcp-session-id" /tmp/mh.txt | tr -d '\r' | awk '{print $2}'
 
 ### Schritt 3 — Register
 
+**Weg A — Einladungscode** (Agenten-Weg: kein Postfach, kein `activate`). `invite_code`
+statt `username`/`password`; `accept_terms` bleibt Pflicht. Die Plattform erzeugt Adresse und
+Passwort selbst und gibt **beide einmalig** in der Antwort zurück (`username`, `password`) —
+danach nie wieder. Die Adressen liegen im eigenen Namensraum `agents.telesherpa.com`;
+dorthin geht **nie** Post. Die Rollen `login`, `public`, `member` sind sofort gesetzt, und der
+Code vergibt beim Anlegen gleich die Scope-Rechte, die er trägt.
+
+```bash
+curl -s -X POST "https://mcp.telesherpa.com" -H 'Content-Type: application/json' \
+  -H 'User-Agent: Telesherpa-MCP/1.0' -H "mcp-session-id: $SID" \
+  -d '{"jsonrpc":"2.0","id":"2","method":"tools/call","params":{"name":"register","arguments":{"invite_code":"CODE-VOM-AUFTRAGGEBER","accept_terms":true}}}'
+```
+
+> Codes, die zu einer **Scope-Vorlage (Bundle)** gehören, werden hier mit HTTP 403 abgewiesen —
+> die löst man nach der Anmeldung ein (`redeem_invite_code`). Ebenso wird ein Code verbraucht:
+> `max_uses` zählt, danach ist er ungültig.
+
+**Weg B — eigene E-Mail** (menschlicher Weg):
+
 ```bash
 curl -s -X POST "https://mcp.telesherpa.com" -H 'Content-Type: application/json' \
   -H 'User-Agent: Telesherpa-MCP/1.0' -H "mcp-session-id: $SID" \
@@ -76,7 +101,10 @@ curl -s -X POST "https://mcp.telesherpa.com" -H 'Content-Type: application/json'
 
 Feldname `username` (E-Mail). Password confirm muss matchen. Kein Captcha.
 
-### Schritt 4 — Aktivierungscode besorgen
+### Schritt 4 — Aktivierungscode besorgen (nur Weg B)
+
+> **Bei Weg A (Einladungscode) entfällt dieser Schritt und Schritt 5 vollständig** — das Konto
+> ist sofort aktiv. Weiter mit Schritt 6 (Login) und den Zugangsdaten aus der Register-Antwort.
 
 Der Standardweg: **den Menschen fragen.** Die Mail kommt innerhalb einer Minute, der Code
 ist 7 Zeichen lang, in der Mail unter „Selbstregistrierung" / „authorization request".
@@ -109,6 +137,11 @@ sich selbstständig, ohne Passwort, mit Rotation + Replay-Schutz. Details + Diag
 Auth-Fehlern: `references/features/auth-token-lifecycle.md`.
 
 ## Billing
+
+> **Das Konto startet mit Saldo 0** — auch beim Agenten-Weg (Einladungscode). Es gibt *kein*
+> automatisches Startguthaben: Credits kommen über einen prepaid-Code des Auftraggebers
+> (`onto_credit_chargeup`) oder per Karte (`onto_credit_checkout`). `billing_model` ist
+> `pay_per_use`, Anker = Tag der Anmeldung.
 
 - `onto_credit_pricing` (öffentlich): Preise je Operation, inkl. Scope-Kosten.
 - `onto_credit_balance`: Saldo + Usage + `earnings_30d`/`earnings_total` (Revenue-Share aus

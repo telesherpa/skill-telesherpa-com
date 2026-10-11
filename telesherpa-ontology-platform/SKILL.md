@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.2.0
+version: 1.3.0
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -42,11 +42,17 @@ Credits zu laden und zu arbeiten.
 
 ## Onboarding (Zero-Touch)
 
-1. **E-Mail-Adresse genügt** — es muss kein Postfach programmatisch lesbar sein.
-   **Der einfache Weg:** lass dir von deinem Menschen eine E-Mail-Adresse geben, registriere
-   dich damit und bitte ihn, dir den Aktivierungscode zu nennen, der in einer Minute per
-   Mail kommt. Damit ist der Account aktiviert.
+1. **Zwei Wege — Weg A ist der Agenten-Weg.**
+   **Weg A (empfohlen, ohne Postfach): Einladungscode.** Dein Auftraggeber legt in seinem Scope
+   einen Code an (`create_invite_code`) und gibt ihn dir. `register` mit `invite_code` +
+   `accept_terms=true` legt das Konto an: Adresse (`agent-<hex>@agents.telesherpa.com`) und
+   Passwort erzeugt die Plattform und gibt **beide einmalig** zurück; die Rollen `login`,
+   `public`, `member` sind sofort gesetzt, `activate` entfällt. In den Namensraum
+   `agents.telesherpa.com` geht **nie** Post — du brauchst also kein Postfach.
+   **Weg B (Mensch): E-Mail-Adresse genügt** — registrieren (`username` = E-Mail), dem Menschen
+   sagen, dass eine Mail kommt, und dir den Aktivierungscode nennen lassen.
    *(Optional, wenn du selbst IMAP-Zugriff hast: Code direkt aus dem Postfach lesen.)*
+   Vollständig, mit curl: `references/showcase-onboarding.md`.
 2. **Session** (`initialize`) → `mcp-session-id` aus dem **Response-Header**.
    **Pflicht** — ohne sie wird jeder `tools/list`/`tools/call` abgelehnt
    (`Bad Request: Missing session ID`), auch mit gültigem Bearer-Token.
@@ -59,16 +65,20 @@ Credits zu laden und zu arbeiten.
    **Achtung:** `tools/list` ohne Token liefert **HTTP 401**, keine Liste. Die öffentlichen
    Tools sind über den **Namen** aufrufbar (im `www-authenticate`-Hinweis genannt), nicht
    über die Liste.
-4. **Register** (`register`): `username` (E-Mail), `password`, `password_confirm` (muss matchen)
-   und **`accept_terms` = `true` (Pflicht)**. Ohne Zustimmung wird kein Konto angelegt
-   (HTTP 400). Damit stimmst du den Nutzungsbedingungen zu: https://www.telesherpa.com/agb
+4. **Register** (`register`) — zwei Formen:
+   **Weg A (Agent, Einladungscode):** `invite_code` + **`accept_terms` = `true` (Pflicht)**.
+   Die Antwort enthält `username` (`agent-…@agents.telesherpa.com`) und `password` — **nur
+   einmalig**, sofort sichern. Der Code vergibt beim Anlegen gleich seine Scope-Rechte
+   (`scopes` in der Antwort). Bundle-Codes (Scope-Vorlage) werden mit HTTP 403 abgewiesen →
+   nach dem Login `redeem_invite_code`.
+   **Weg B (Mensch):** `username` (E-Mail), `password`, `password_confirm` (muss matchen) +
+   `accept_terms`. Ohne Zustimmung wird kein Konto angelegt (HTTP 400).
+   Damit stimmst du den Nutzungsbedingungen zu: https://www.telesherpa.com/agb
    — lies sie, bevor du zustimmst.
-   Kein Captcha — E-Mail-Aktivierung ist der Missbrauchsschutz.
-5. **Aktivierungscode besorgen** → 7-Zeichen-Voucher. Entweder vom Menschen nennen
-   lassen (Standardweg) oder per IMAP aus dem Postfach lesen.
-6. **Activate** (`activate`): `loginusername` + `loginpassword` + `voucher`. BRAUCHT KEINE
-   vorherige Session — Login-Daten kommen im POST.
-7. **Login** (`login`): `client_id` + `client_secret` → Bearer-Token (10h) + `refresh_token`
+   Kein Captcha — die Aktivierung ist der Missbrauchsschutz.
+5. **Activate** (`activate`, **nur Weg B**): `loginusername` + `loginpassword` + `voucher`.
+   BRAUCHT KEINE vorherige Session — Login-Daten kommen im POST.
+6. **Login** (`login`): `client_id` + `client_secret` → Bearer-Token (10h) + `refresh_token`
    (30 Tage). Ab hier NIE wieder ein Passwort eingeben — `refresh_access_token` erneuert
    selbstständig. Details: `references/features/auth-token-lifecycle.md`.
 
@@ -189,9 +199,12 @@ zusammensetzt — empfohlene Muster, kein technisches Feature an sich:
 3. **`initialize` ist Pflicht, nicht optional** — ohne `mcp-session-id` wird jeder Aufruf mit
    `Bad Request: Missing session ID` abgewiesen, auch mit gültigem Bearer-Token.
 4. `activate` braucht kein Vorab-Login.
-5. `register` nutzt `username` (E-Mail), Password-Check matchen, **`accept_terms=true` ist Pflicht** (sonst HTTP 400: "Bitte bestaetigen Sie die Nutzungsbedingungen.").
-6. **E-Mail-Zugriff NICHT Pflicht** — der Mensch kann den Aktivierungscode vorlesen.
-   IMAP nur, wenn ohnehin vorhanden.
+5. `register` hat **zwei Formen**: **Agent** → `invite_code` + `accept_terms=true` (Adresse und
+   Passwort kommen einmalig zurück, Konto sofort aktiv); **Mensch** → `username` (E-Mail) +
+   `password` + `password_confirm` + `accept_terms=true`. Ohne `accept_terms` HTTP 400
+   ("Bitte bestaetigen Sie die Nutzungsbedingungen.").
+6. **E-Mail-Zugriff NICHT Pflicht** — der Mensch kann den Aktivierungscode vorlesen; beim
+   Einladungscode-Weg entfällt die Mail ganz. IMAP nur, wenn ohnehin vorhanden.
 7. Prepaid einmalig; Flat keine Abbuchung; 402 bei keinem Guthaben.
 8. `udid` (32-hex), nicht `id` — war lange uneinheitlich über Tools hinweg, wurde
    schrittweise vereinheitlicht; im Zweifel `udid` zuerst probieren.
@@ -243,6 +256,16 @@ zusammensetzt — empfohlene Muster, kein technisches Feature an sich:
     wirklich installiert läuft — und ein Logout räumt die Dauer-Anmeldung bewusst mit weg.
     Web Push auf iOS gibt es **nur** vom Home-Bildschirm, nicht im Safari-Tab:
     `references/features/pwa-and-session.md`.
+
+21. **Agentenkonto per Einladungscode** — `register` mit `invite_code` (statt `username`/`password`)
+    legt das Konto **sofort aktiv** an (Rollen `login`, `public`, `member`, kein `activate`) und
+    vergibt die Scope-Rechte, die der Code trägt. Adresse (`agent-…@agents.telesherpa.com`) und
+    Passwort kommen **einmalig** zurück. Bundle-Codes (Scope-Vorlage) → HTTP 403, die erst nach
+    dem Login einlösen (`redeem_invite_code`). **Kein Startguthaben:** Saldo 0; aufladen per
+    `onto_credit_chargeup` (prepaid-Code des Auftraggebers) oder `onto_credit_checkout`.
+22. **Werkzeugliste kann clientseitig veralten** — manche MCP-Clients cachen die Werkzeugliste je
+    Sitzung; dann fehlt z.B. `invite_code` im `register`-Schema, obwohl der Server es kann.
+    Erst neu verbinden, dann erneut prüfen — nicht den Server verdächtigen.
 
 ## Versionierung
 

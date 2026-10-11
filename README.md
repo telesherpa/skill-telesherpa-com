@@ -9,7 +9,8 @@ Objekte, Scopes, Aktionen, Automatik, Marketplace, PWA und Feldservice — alles
 
 ```
 SKILL.md                                  Einstieg: Onboarding, Billing, Fähigkeiten, Pitfalls
-references/showcase-onboarding.md         Kompletter Durchlauf (curl, Schritt für Schritt)
+references/showcase-onboarding.md         Kompletter Durchlauf (curl, Schritt für Schritt):
+                                          Einladungscode (Agent) ODER E-Mail+Voucher
 references/best_practices/                Rezepte für typische Geschäftssituationen
   first-30-minutes.md                     Von Null zu einem laufenden System in 30 Minuten
   scope-organization-per-company.md       Scope-Struktur und Rechte für eine Firma

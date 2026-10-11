@@ -325,8 +325,10 @@ wo arbeitet — ohne die Plattform zu öffnen.
 
 ## Reihenfolge zum Abhaken
 
-1. `register` → E-Mail des Kunden, Passwort
-2. Aktivierungscode vom Menschen erfragen → `activate`
+1. `register` → **Agent:** `invite_code` (vom Auftraggeber) + `accept_terms` — Konto sofort aktiv,
+   Zugangsdaten kommen in der Antwort; **Mensch:** E-Mail des Kunden, Passwort
+2. Aktivierungscode vom Menschen erfragen → `activate` *(nur beim E-Mail-Weg; beim
+   Einladungscode entfällt der Schritt)*
 3. `login` → Token sichern (danach nur noch `refresh_access_token`)
 4. `ontouser_scope_create` × 2 (arbeit, archiv)
 5. `onto_type_show` → verfügbares Formular prüfen
