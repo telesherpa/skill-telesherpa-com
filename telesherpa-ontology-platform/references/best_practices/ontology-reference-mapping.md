@@ -206,7 +206,7 @@ eindeutig und reiht sich sauber neben „Typen verwalten" ein.
 Admin-Typenliste, die ebenfalls Label + Code zeigt. Der Helfer liefert dafür
 `types_detail` (Array aus `{name,label}`) zusätzlich zu `types` (Array von Namen).
 
-**Sichtbarkeit:** Der Menü-Eintrag ist für alle mit Rolle `telesherpa` sichtbar — das ist
+**Sichtbarkeit:** Der Menü-Eintrag ist für alle mit Rolle `member` sichtbar — das ist
 praktisch jeder Kunde. Das ist vertretbar, weil die Rechte pro Scope geprüft werden:
 ohne `can_manage_scope` ist die Seite **lesbar**, aber nicht änderbar.
 

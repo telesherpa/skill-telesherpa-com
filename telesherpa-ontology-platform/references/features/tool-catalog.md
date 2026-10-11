@@ -1,11 +1,12 @@
 # Tool-Katalog
 
-Diese Übersicht ist aus der Werkzeugliste des Dienstes erzeugt: **174 Tools**, davon
-**101** sichtbar für ein Konto mit
-`login`+`public`+`telesherpa`, **104** mit `login`+`public`+`admin`, **6** ohne Token.
+Diese Übersicht ist aus der Werkzeugliste des Dienstes erzeugt: **175 Tools**, davon
+**108** sichtbar für ein Konto mit
+`login`+`public`+`member`, **111** mit `login`+`public`+`admin`, **6** ohne Token. Ein Konto mit
+`admin` **und** `member` sieht alle **175**.
 
 **Gemessen, nicht geschätzt:** die Zahlen stammen aus der Rollen-Zuordnung des Dienstes
-(`TOOL_ROLES`, 174 Einträge) und decken sich mit dem, was `/health` als `tools` meldet. Eine
+(`TOOL_ROLES`, 175 Einträge) und decken sich mit dem, was `/health` als `tools` meldet. Eine
 frühere Fassung dieses Katalogs nannte 172/100/110 — sie war aus zwei Quellen falsch
 zusammengeführt. Wer die Zahl stellt, nimmt `auth_status` (`tools_visible`).
 
@@ -13,10 +14,10 @@ zusammengeführt. Wer die Zahl stellt, nimmt `auth_status` (`tools_visible`).
 eigentliche Absicherung ist das Schreibrecht am Scope (`can_write`, `can_manage_scope`).
 Die Rollenzuordnung selbst ist nicht Teil der veröffentlichten Schnittstelle.
 
-**Achtung: `admin` ist KEINE Obermenge von `telesherpa`.** Ein Teil der Tools ist **nur** für
-`telesherpa` sichtbar, ein anderer **nur** für `admin`; nur ein Teil trägt beide Rollen. Ein
+**Achtung: `admin` ist KEINE Obermenge von `member`.** Ein Teil der Tools ist **nur** für
+`member` sichtbar, ein anderer **nur** für `admin`; nur ein Teil trägt beide Rollen. Ein
 Admin-Konto sieht also `change_password`, `onto_catalog_apply` oder `onto_actiondef_save`
-**nicht**, weil dort ausschließlich `telesherpa` steht. Wer nach einer Rollenänderung „mir fehlen
+**nicht**, weil dort ausschließlich `member` steht. Wer nach einer Rollenänderung „mir fehlen
 Tools" meldet, muss **beide** Zahlen prüfen — nicht annehmen, admin sehe alles.
 
 ## Ohne Token (öffentlich, 6 Tools)
@@ -48,7 +49,7 @@ erwartete **Anzahl** stellen. Eine Zahl deckt beide stillen Fälle auf.
 Drei Report-Tools der ersten Welt zeigten auf **gelöschte Pfade** (alle 404) und trugen
 **ausschließlich** einen Rollennamen, den es nicht gibt — also für niemanden sichtbar. Sie sind
 entfernt; die Funktion ist vollständig durch die `onto_report_*`-Tools abgedeckt (9 Tools:
-6 lesend für `admin`+`telesherpa`, 3 schreibend nur `admin`).
+6 lesend für `admin`+`member`, 3 schreibend nur `admin`).
 
 **Die Lehre:** ein Tool, das auf einen 404-Pfad zeigt UND für niemanden erreichbar ist, ist
 toter Ballast — es bläht den Katalog auf und kostet in der Tool-Qualitätsbewertung (Tool-Anzahl).
@@ -64,15 +65,15 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 | `register` | öffentlich | Account anlegen |
 | `activate` | öffentlich | Voucher einlösen |
 | `onto_credit_pricing` | öffentlich | Preise lesen |
-| `get_image` | `telesherpa` | Bild/Datei herunterladen |
-| `get_document` | `telesherpa` | Dokument herunterladen |
-| `upload_file_to_object` | `telesherpa` | Datei/Bild an ein Objekt (auch `structuredimage`) |
-| `upload_staging_csv` | `telesherpa` | CSV in die Import-Staging-Ablage |
-| `upload_code_allowlist` | `telesherpa`, `admin` | XLSX/XLS-Bulk der E-Mail-Allowlist eines Invite-Codes |
-| `change_password` | `telesherpa` | Passwort ändern |
-| `change_profile` | `telesherpa` | Profil ändern |
-| `renew_account` | `telesherpa` | Konto verlängern |
-| `get_notifications` | `telesherpa` | Benachrichtigungen |
+| `get_image` | `member` | Bild/Datei herunterladen |
+| `get_document` | `member` | Dokument herunterladen |
+| `upload_file_to_object` | `member` | Datei/Bild an ein Objekt (auch `structuredimage`) |
+| `upload_staging_csv` | `member` | CSV in die Import-Staging-Ablage |
+| `upload_code_allowlist` | `member`, `admin` | XLSX/XLS-Bulk der E-Mail-Allowlist eines Invite-Codes |
+| `change_password` | `member` | Passwort ändern |
+| `change_profile` | `member` | Profil ändern |
+| `renew_account` | `member` | Konto verlängern |
+| `get_notifications` | `member` | Benachrichtigungen |
 
 ## Tool-Katalog der Ontologie-Endpunkte
 
@@ -80,23 +81,23 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 | Tool | Rollen |
 |---|---|
-| `onto_object_addcomment` | `telesherpa` |
-| `onto_object_bulk_action` | `telesherpa` |
-| `onto_object_create` | `telesherpa` |
-| `onto_object_create_link` | `telesherpa` |
-| `onto_object_delete` | `telesherpa` |
-| `onto_object_delete_link` | `telesherpa` |
-| `onto_object_delete_property` | `telesherpa` |
-| `onto_object_execute_action` | `telesherpa` |
-| `onto_object_geocode` | `telesherpa` |
-| `onto_object_graph` | `telesherpa` |
-| `onto_object_index` | `telesherpa` |
-| `onto_object_search` | `telesherpa` |
+| `onto_object_addcomment` | `member` |
+| `onto_object_bulk_action` | `member` |
+| `onto_object_create` | `member` |
+| `onto_object_create_link` | `member` |
+| `onto_object_delete` | `member` |
+| `onto_object_delete_link` | `member` |
+| `onto_object_delete_property` | `member` |
+| `onto_object_execute_action` | `member` |
+| `onto_object_geocode` | `member` |
+| `onto_object_graph` | `member` |
+| `onto_object_index` | `member` |
+| `onto_object_search` | `member` |
 | `onto_object_search_scopes` | `admin` |
-| `onto_object_set_property` | `telesherpa` |
-| `onto_object_show` | `telesherpa` |
-| `onto_object_update` | `telesherpa` |
-| `onto_object_update_link` | `telesherpa` |
+| `onto_object_set_property` | `member` |
+| `onto_object_show` | `member` |
+| `onto_object_update` | `member` |
+| `onto_object_update_link` | `member` |
 
 ### `onto_type_*`
 
@@ -105,7 +106,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 | `onto_type_create` | `admin` |
 | `onto_type_delete` | `admin` |
 | `onto_type_index` | `admin` |
-| `onto_type_show` | `telesherpa` |
+| `onto_type_show` | `member` |
 | `onto_type_update` | `admin` |
 
 ### `onto_link_*`
@@ -121,20 +122,20 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 | Tool | Rollen |
 |---|---|
-| `onto_property_def_create` | `admin`, `telesherpa` |
+| `onto_property_def_create` | `admin`, `member` |
 | `onto_property_def_delete` | `admin` |
 | `onto_property_def_index` | `admin` |
-| `onto_property_def_delete_override` | `admin`, `telesherpa` |
-| `onto_property_def_update` | `admin`, `telesherpa` |
+| `onto_property_def_delete_override` | `admin`, `member` |
+| `onto_property_def_update` | `admin`, `member` |
 
 ### `onto_property_set_*`
 
 | Tool | Rollen |
 |---|---|
-| `onto_property_set_create` | `admin`, `telesherpa` |
+| `onto_property_set_create` | `admin`, `member` |
 | `onto_property_set_delete` | `admin` |
 | `onto_property_set_index` | `admin` |
-| `onto_property_set_update` | `admin`, `telesherpa` |
+| `onto_property_set_update` | `admin`, `member` |
 
 ### `onto_interface_*`
 
@@ -143,18 +144,18 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 | `onto_interface_create_def` | `admin` |
 | `onto_interface_delete_def` | `admin` |
 | `onto_interface_index` | `admin` |
-| `onto_interface_map_markers` | `telesherpa` |
-| `onto_interface_show` | `telesherpa` |
+| `onto_interface_map_markers` | `member` |
+| `onto_interface_show` | `member` |
 | `onto_interface_update_def` | `admin` |
 
 ### `onto_actiondef_*`
 
 | Tool | Rollen |
 |---|---|
-| `onto_actiondef_delete` | `telesherpa` |
+| `onto_actiondef_delete` | `member` |
 | `onto_actiondef_index` | `admin` |
-| `onto_actiondef_list` | `telesherpa` |
-| `onto_actiondef_save` | `telesherpa` |
+| `onto_actiondef_list` | `member` |
+| `onto_actiondef_save` | `member` |
 
 ### `onto_scope_*`
 
@@ -165,11 +166,11 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 | `onto_scope_delete` | `admin` |
 | `onto_scope_index` | `admin` |
 | `onto_scope_remove_profile` | `admin` |
-| `onto_scope_save_structuredimage_categories` | `telesherpa` |
+| `onto_scope_save_structuredimage_categories` | `member` |
 | `onto_scope_search` | `admin` |
 | `onto_scope_search_profiles` | `admin` |
 | `onto_scope_toggle_scope_flag` | `admin` |
-| `onto_scope_structuredimage_categories` | `telesherpa` |
+| `onto_scope_structuredimage_categories` | `member` |
 | `onto_scope_update` | `admin` |
 
 ### `onto_settings_*`
@@ -198,24 +199,24 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 | Tool | Rollen |
 |---|---|
-| `onto_report_aggregate` | `admin`, `telesherpa` |
+| `onto_report_aggregate` | `admin`, `member` |
 | `onto_report_copy` | `admin` |
-| `onto_report_csv` | `admin`, `telesherpa` |
+| `onto_report_csv` | `admin`, `member` |
 | `onto_report_delete` | `admin` |
-| `onto_report_index` | `admin`, `telesherpa` |
-| `onto_report_json` | `admin`, `telesherpa` |
-| `onto_report_map_data` | `admin`, `telesherpa` |
+| `onto_report_index` | `admin`, `member` |
+| `onto_report_json` | `admin`, `member` |
+| `onto_report_map_data` | `admin`, `member` |
 | `onto_report_save` | `admin` |
-| `onto_report_show` | `admin`, `telesherpa` |
+| `onto_report_show` | `admin`, `member` |
 
 ### `onto_catalog_*`
 
 | Tool | Rollen |
 |---|---|
-| `onto_catalog_apply` | `telesherpa` |
-| `onto_catalog_clear` | `telesherpa` |
-| `onto_catalog_index` | `telesherpa` |
-| `onto_catalog_presets` | `telesherpa` |
+| `onto_catalog_apply` | `member` |
+| `onto_catalog_clear` | `member` |
+| `onto_catalog_index` | `member` |
+| `onto_catalog_presets` | `member` |
 
 ### `onto_i18n_*`
 
@@ -235,24 +236,24 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 | Tool | Rollen |
 |---|---|
-| `onto_favorite_add` | `telesherpa` |
-| `onto_favorite_delete` | `telesherpa` |
-| `onto_favorite_index` | `telesherpa` |
-| `onto_favorite_toggle` | `telesherpa` |
+| `onto_favorite_add` | `member` |
+| `onto_favorite_delete` | `member` |
+| `onto_favorite_index` | `member` |
+| `onto_favorite_toggle` | `member` |
 
 ### `onto_file_*`
 
 | Tool | Rollen |
 |---|---|
-| `onto_file_delete` | `telesherpa` |
-| `onto_file_structured` | `telesherpa` |
+| `onto_file_delete` | `member` |
+| `onto_file_structured` | `member` |
 
 ### `onto_series_*` (Sensor-Zeitreihen)
 
 | Tool | Rollen |
 |---|---|
-| `onto_series_range` | `telesherpa` |
-| `onto_series_last` | `telesherpa` |
+| `onto_series_range` | `member` |
+| `onto_series_last` | `member` |
 
 Eine Reihe hat **keine eigene udid** — ihre Identität ist das Paar
 `(object_udid, series_key)`. Der `series_key` ist derselbe String wie der Key des zugehörigen
@@ -290,36 +291,37 @@ ein fremder Scope liefert 403, obwohl das Tool sichtbar ist.
 
 | Tool | Rollen |
 |---|---|
-| `onto_trigger_create` | `telesherpa` |
-| `onto_trigger_delete` | `telesherpa` |
-| `onto_trigger_index` | `admin`, `telesherpa` |
-| `onto_trigger_update` | `telesherpa` |
+| `onto_trigger_create` | `member` |
+| `onto_trigger_delete` | `member` |
+| `onto_trigger_index` | `admin`, `member` |
+| `onto_trigger_update` | `member` |
 
 ### `onto_function_*`
 
 | Tool | Rollen |
 |---|---|
-| `onto_function_create` | `telesherpa` |
-| `onto_function_delete` | `telesherpa` |
-| `onto_function_index` | `admin`, `telesherpa` |
-| `onto_function_run` | `admin`, `telesherpa` |
-| `onto_function_update` | `telesherpa` |
+| `onto_function_create` | `member` |
+| `onto_function_delete` | `member` |
+| `onto_function_index` | `admin`, `member` |
+| `onto_function_run` | `admin`, `member` |
+| `onto_function_update` | `member` |
 
 ### `onto_credit_*`
 
 | Tool | Rollen |
 |---|---|
-| `onto_credit_balance` | `admin`, `telesherpa` |
-| `onto_credit_chargeup` | `admin`, `telesherpa` |
-| `onto_credit_checkout` | `admin`, `telesherpa` |
+| `onto_credit_balance` | `admin`, `member` |
+| `onto_credit_chargeup` | `admin`, `member` |
+| `onto_credit_checkout` | `admin`, `member` |
 | `onto_credit_create_prepaid` | `admin` |
+| `onto_credit_receipt` | `admin`, `member` |
 
 ### `onto_watch_*`
 
 | Tool | Rollen |
 |---|---|
-| `onto_watch_changes` | `telesherpa` |
-| `onto_watch_cursor` | `telesherpa` |
+| `onto_watch_changes` | `member` |
+| `onto_watch_cursor` | `member` |
 
 ### `onto_action_*`
 
@@ -331,62 +333,62 @@ ein fremder Scope liefert 403, obwohl das Tool sichtbar ist.
 
 | Tool | Rollen |
 |---|---|
-| `ontouser_scope_assign_public` | `telesherpa`, `admin` |
-| `ontouser_scope_create` | `telesherpa`, `admin` |
-| `ontouser_scope_index` | `telesherpa`, `admin` |
-| `ontouser_scope_list_public` | `telesherpa`, `admin` |
-| `ontouser_scope_remove_public` | `telesherpa`, `admin` |
-| `ontouser_scope_set_visibility` | `telesherpa`, `admin` |
+| `ontouser_scope_assign_public` | `member`, `admin` |
+| `ontouser_scope_create` | `member`, `admin` |
+| `ontouser_scope_index` | `member`, `admin` |
+| `ontouser_scope_list_public` | `member`, `admin` |
+| `ontouser_scope_remove_public` | `member`, `admin` |
+| `ontouser_scope_set_visibility` | `member`, `admin` |
 
 ### `ontouser_interface_*`
 
 | Tool | Rollen |
 |---|---|
-| `ontouser_interface_map_markers` | `telesherpa` |
-| `ontouser_interface_show` | `telesherpa` |
+| `ontouser_interface_map_markers` | `member` |
+| `ontouser_interface_show` | `member` |
 
 ### `ontouser_notification_*`
 
 | Tool | Rollen |
 |---|---|
-| `ontouser_notification_index` | `telesherpa`, `admin` |
-| `ontouser_notification_read` | `telesherpa`, `admin` |
+| `ontouser_notification_index` | `member`, `admin` |
+| `ontouser_notification_read` | `member`, `admin` |
 
 ### `ontouser_object_*`
 
 | Tool | Rollen |
 |---|---|
-| `ontouser_object_show` | `telesherpa` |
+| `ontouser_object_show` | `member` |
 
 ### `ontouser_service_*`
 
 | Tool | Rollen |
 |---|---|
-| `ontouser_service_request` | `telesherpa`, `admin` |
+| `ontouser_service_request` | `member`, `admin` |
 
 ### Formular & Invite/Mitglieder (ohne Namenspräfix)
 
 | Tool | Rollen |
 |---|---|
-| `add_code_allowlist_entry` | `telesherpa`, `admin` |
-| `create_invite_code` | `telesherpa`, `admin` |
-| `delete_code_allowlist_entry` | `telesherpa`, `admin` |
-| `list_code_allowlist` | `telesherpa`, `admin` |
-| `list_formdefs` | `telesherpa` |
-| `list_invite_codes` | `telesherpa`, `admin` |
-| `list_members` | `telesherpa`, `admin` |
-| `onto_formdef_create` | `telesherpa` |
-| `onto_formdef_list_templates` | `telesherpa` |
-| `onto_formdef_save` | `telesherpa` |
-| `prepare_form_answer` | `telesherpa` |
-| `redeem_invite_code` | `telesherpa`, `admin` |
-| `remove_member` | `telesherpa`, `admin` |
-| `resolve_form_answer` | `telesherpa` |
-| `revoke_invite_code` | `telesherpa`, `admin` |
-| `show_form_answer` | `telesherpa` |
-| `show_formdef` | `telesherpa` |
-| `submit_form_answer` | `telesherpa` |
-| `toggle_member_flag` | `telesherpa`, `admin` |
+| `add_code_allowlist_entry` | `member`, `admin` |
+| `create_invite_code` | `member`, `admin` |
+| `delete_code_allowlist_entry` | `member`, `admin` |
+| `list_code_allowlist` | `member`, `admin` |
+| `list_formdefs` | `member` |
+| `list_invite_codes` | `member`, `admin` |
+| `list_members` | `member`, `admin` |
+| `onto_formdef_create` | `member` |
+| `onto_formdef_list_templates` | `member` |
+| `onto_formdef_save` | `member` |
+| `prepare_form_answer` | `member` |
+| `redeem_invite_code` | `member`, `admin` |
+| `remove_member` | `member`, `admin` |
+| `resolve_form_answer` | `member` |
+| `revoke_invite_code` | `member`, `admin` |
+| `show_form_answer` | `member` |
+| `show_formdef` | `member` |
+| `submit_form_answer` | `member` |
+| `toggle_member_flag` | `member`, `admin` |
 
 ## Zeitangaben — immer UTC
 
@@ -426,10 +428,10 @@ darfst keine annehmen.
    Quelltext zu greppen scheitert still: falsche Anführungszeichen, über mehrere Stellen
    verteilte Definitionen. Die Zahl aus der geladenen Datenstruktur lesen und gegen `/health`
    stellen — siehe Abschnitt „Katalogzahlen" oben.
-8. **`admin` sieht NICHT alles.** Ein Teil der Tools trägt ausschließlich `telesherpa`, ein
+8. **`admin` sieht NICHT alles.** Ein Teil der Tools trägt ausschließlich `member`, ein
    anderer ausschließlich `admin`; nur ein Teil beide. Ein Admin-Konto, das `change_password`
    oder `onto_catalog_apply` vermisst, hat keinen Fehler — die Rollenliste nennt dort nur
-   `telesherpa`. Beim Prüfen immer **beide** Zahlen stellen (`auth_status` mit dem
+   `member`. Beim Prüfen immer **beide** Zahlen stellen (`auth_status` mit dem
    jeweiligen Konto).
 
 ## Katalogzahlen: aus der Datenstruktur, nie aus einem Muster
@@ -438,6 +440,11 @@ Die Rollen-Zahlen in diesem Dokument wurden **zweimal falsch** ermittelt, bevor 
 eine Textsuche im Server-Quelltext fand 8 statt 174 (das Muster erwartete einfache
 Anführungszeichen, die Datei nutzt doppelte) und danach 159 statt 174 (die Definitionen sind
 über mehrere Stellen verteilt und werden zur Laufzeit zusammengebaut).
+
+**Stand 2026-10-11:** 175 Tools. Die Rolle hieß bis dahin `telesherpa` und heißt jetzt `member`
+(gleiche Zuordnung, nur der Name); neu hinzugekommen ist `onto_credit_receipt`. Gemessen am
+laufenden Dienst: `len(m.TOOL_ROLES)` = 175, ohne Token 6, `member` 108, `admin` 111,
+`admin`+`member` 175.
 
 **Regel: die Zahl kommt aus der geladenen Datenstruktur, nicht aus einem regulären Ausdruck
 über den Quelltext.**
@@ -448,7 +455,7 @@ spec = importlib.util.spec_from_file_location("srv", "<pfad>/server.py")
 m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
 
-print(len(m.TOOL_ROLES))     # 174 — dieselbe Quelle, die /health als "tools" meldet
+print(len(m.TOOL_ROLES))     # 175 — dieselbe Quelle, die /health als "tools" meldet
 ```
 
 Drei Prüfungen, die eine falsche Zahl auffliegen lassen — jede einzelne hat hier gegriffen:
@@ -462,7 +469,7 @@ Drei Prüfungen, die eine falsche Zahl auffliegen lassen — jede einzelne hat h
 
 Für den Abgleich gegen dieses Dokument gilt zusätzlich: **nur `| \`tool\` | rolle |`-Zeilen
 zählen** und danach auf **beide Richtungen** prüfen — ein Tool ohne Tabellenzeile ist eine
-Lücke, ein Tabelleneintrag ohne Tool ein Phantom. In dieser Fassung: 174/174, 0 Lücken,
+Lücke, ein Tabelleneintrag ohne Tool ein Phantom. In dieser Fassung: 175/175, 0 Lücken,
 0 Phantome, 0 Rollen-Abweichungen.
 
 ## Tool-Beschreibungen und Annotations

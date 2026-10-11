@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.1.0
+version: 1.2.0
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -29,13 +29,15 @@ Credits zu laden und zu arbeiten.
   `Bad Request: Missing session ID` — auch mit perfektem Token. (Alternative für Clients ohne
   Session-Slot: stateless-Envelope per Protokoll 2026-07-28.)
   Details: `references/features/auth-token-lifecycle.md`.
-- **Der Katalog hat aktuell 174 Tools**: 101 sichtbar mit
-  `login`+`public`+`telesherpa`, 104 mit `login`+`public`+`admin`. Ohne Token sind **6** Tools
+- **Der Katalog hat aktuell 175 Tools**: 108 sichtbar mit
+  `login`+`public`+`member`, 111 mit `login`+`public`+`admin`. Ohne Token sind **6** Tools
   ausführbar (`register`, `activate`, `login`, `refresh_access_token`, `auth_status`,
   `onto_credit_pricing`).
-  **`admin` ist keine Obermenge von `telesherpa`** — ein Teil der Tools ist nur für
-  `telesherpa` sichtbar, ein anderer nur für `admin`. Wer „mir fehlen Tools" meldet, muss
+  **`admin` ist keine Obermenge von `member`** — ein Teil der Tools ist nur für
+  `member` sichtbar, ein anderer nur für `admin`. Wer „mir fehlen Tools" meldet, muss
   die Zahl für SEIN Konto stellen (`auth_status`).
+  Die Rolle hieß bis 2026-10-11 `telesherpa` und heißt seither `member` — gemeint ist
+  dieselbe Rolle.
   Vollständige Liste mit Rollen: `references/features/tool-catalog.md`.
 
 ## Onboarding (Zero-Touch)
@@ -125,7 +127,7 @@ Für Agenten relevant bei „ich muss mich ständig neu anmelden" und bei Push-F
 
 Jedes Feature hat eine eigene ausführliche Referenz unter `references/features/`:
 
-- **Tool-Katalog** — alle 174 Tools mit Rollen, gruppiert nach Ressource:
+- **Tool-Katalog** — alle 175 Tools mit Rollen, gruppiert nach Ressource:
   `references/features/tool-catalog.md`
 - **Sensor-Zeitreihen** — Reihen lesen (`onto_series_range`, `onto_series_last`), Raster statt
   Rohpunkte, UTC-Zeiten, echte Use-Cases (Flotte, Tagesroute, Messkurve):
@@ -225,7 +227,7 @@ zusammensetzt — empfohlene Muster, kein technisches Feature an sich:
     Aufruf ohne Paginierungsparameter gegenprüfen, bevor man ein Rechteproblem vermutet.
 18. **Automatik (Regeln/Functions) lässt sich über MCP anlegen** —
     `onto_trigger_create/_update/_delete`, `onto_function_create/_update/_delete`
-    (`roles=[telesherpa]`, echte Sperre ist `can_manage_scope` im Ziel-Scope). Die Namen enden
+    (`roles=[member]`, echte Sperre ist `can_manage_scope` im Ziel-Scope). Die Namen enden
     auf `_create`/`_update`/`_delete`, **nicht `_save`** — wer nach `_save` sucht, meldet
     fälschlich „Tool fehlt". Lesen: `onto_trigger_index`/`onto_function_index`, Ausführen:
     `onto_function_run`. `body.object_types` ist beim Anlegen **Pflicht und nicht leer**

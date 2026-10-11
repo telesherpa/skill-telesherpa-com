@@ -92,7 +92,7 @@ curl -s -X POST "https://mcp.telesherpa.com" -H 'Content-Type: application/json'
 ```
 
 Login-Daten kommen im POST, nicht über die Session. Nach der Aktivierung ist der Account
-freigeschaltet (Rolle `telesherpa`) und das Billing-Modell ist gesetzt
+freigeschaltet (Rolle `member`) und das Billing-Modell ist gesetzt
 (`pay_per_use` bzw. `flat`).
 
 ### Schritt 6 — Login (Token) — LETZTER Schritt mit Passwort

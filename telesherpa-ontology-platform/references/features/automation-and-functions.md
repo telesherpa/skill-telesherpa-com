@@ -192,7 +192,7 @@ mitgibt (z.B. aus den Link-Definitionen) — sonst still ein leerer Wert.
 - **Dedupe 60 s** gegen Wiederholungsfeuer — verglichen wird `(Trigger, Objekt, Feld, **Wert**)`,
   über einen Fingerabdruck. Der **Wert** muss mit verglichen werden: sonst werden echte
   Wertewechsel verworfen.
-- **Rollen-Whitelist pro Definition** (Default `telesherpa`).
+- **Rollen-Whitelist pro Definition** (Default `member`).
 - **Automatik kostet KEINE Credits** — `charge_credits` läuft nur bei Auslösung durch einen Nutzer.
 - **Der Endpunkt ist nicht öffentlich:** er ist von aussen nicht erreichbar, Aufruf intern.
 
@@ -208,7 +208,7 @@ wird ebenfalls beim Speichern abgewiesen, damit eine Regel nicht feuert und nich
 | **HTTP (Web/Admin)** | in der Weboberfläche unter Automatik | dieselbe Funktion wie die MCP-Tools |
 
 Beide Wege enden auf **derselben** Funktion — MCP ist der Wrapper darum. Ein Agent braucht
-die Weboberfläche damit **nicht mehr**. Die sechs Schreib-Tools sind für die Rolle `telesherpa`
+die Weboberfläche damit **nicht mehr**. Die sechs Schreib-Tools sind für die Rolle `member`
 sichtbar (kein Admin nötig); die echte Sperre ist `can_manage_scope` pro Ziel-Scope.
 
 **Die Tool-Namen enden auf `_create`/`_update`/`_delete`, NICHT `_save`.** Ein Client, der nach

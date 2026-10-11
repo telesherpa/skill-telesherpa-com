@@ -26,7 +26,7 @@ Weboberfläche pflegen:
 | `onto_file_structured` | Bildliste **eines Objekts** (welche Kategorie ist gefüllt, welche leer?) |
 | `upload_file_to_object` | Bild hochladen (`type: structuredimage`, `name` = imagename) |
 
-Alle Scope-/Datei-Tools sind für die Rolle `telesherpa` sichtbar; das Schreiben braucht
+Alle Scope-/Datei-Tools sind für die Rolle `member` sichtbar; das Schreiben braucht
 zusätzlich **`can_manage_scope`** auf dem Scope (403 sonst).
 
 ### Kategorien lesen
