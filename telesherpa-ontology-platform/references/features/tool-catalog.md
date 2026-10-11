@@ -5,14 +5,13 @@ Diese Übersicht ist aus der Werkzeugliste des Dienstes erzeugt: **175 Tools**, 
 `login`+`public`+`member`, **111** mit `login`+`public`+`admin`, **6** ohne Token. Ein Konto mit
 `admin` **und** `member` sieht alle **175**.
 
-**Gemessen, nicht geschätzt:** die Zahlen stammen aus der Rollen-Zuordnung des Dienstes
-(`TOOL_ROLES`, 175 Einträge) und decken sich mit dem, was `/health` als `tools` meldet. Eine
-frühere Fassung dieses Katalogs nannte 172/100/110 — sie war aus zwei Quellen falsch
-zusammengeführt. Wer die Zahl stellt, nimmt `auth_status` (`tools_visible`).
+**Stand 2026-10-11.** Für das eigene Konto zählt `auth_status` (`tools_visible`) — das ist die
+Zahl, die dort gilt.
 
 **Die Rollen-Spalte sagt, wer das Tool SIEHT.** Sie schützt nicht die Ausführung — die
 eigentliche Absicherung ist das Schreibrecht am Scope (`can_write`, `can_manage_scope`).
-Die Rollenzuordnung selbst ist nicht Teil der veröffentlichten Schnittstelle.
+Maßgeblich für das eigene Konto bleibt `tools/list` mit dem eigenen Token; der Dienst prüft
+das Recht bei jedem Aufruf nach.
 
 **Achtung: `admin` ist KEINE Obermenge von `member`.** Ein Teil der Tools ist **nur** für
 `member` sichtbar, ein anderer **nur** für `admin`; nur ein Teil trägt beide Rollen. Ein
@@ -195,10 +194,10 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 | `onto_user_update` | `admin` |
 | `onto_user_update_profile` | `admin` |
 
-> **`onto_user_delete`** räumt in EINEM Aufruf alles zum Konto weg: `user_tokens`, Passkeys,
-> Sessions, Trackings, Rollen, Scope-Zuordnungen, Favoriten, Idempotenz-Zeilen, eigene
-> Benachrichtigungen, Profil und Konto — und zählt danach nach. `id` darf `users.id` **oder**
-> `profiles.id` sein, alternativ `email`. Die Antwort nennt `entfernt` und `behalten`
+> **`onto_user_delete`** räumt in EINEM Aufruf alles zum Konto weg: Token, Passkeys, Sitzungen,
+> Trackings, Rollen, Scope-Zuordnungen, Favoriten, Merkzeilen, eigene Benachrichtigungen,
+> Profil und Konto — und zählt danach nach. `id` darf die Konto-ID, die Profil-ID **oder** die
+> `email` sein. Die Antwort nennt `entfernt` und `behalten`
 > (Buchhaltung, Protokoll, Daten anderer). `onto_user_delete_profile` ist derselbe Weg
 > (Altname). Nicht gefunden = HTTP 404, kein stiller Erfolg.
 
@@ -431,53 +430,13 @@ darfst keine annehmen.
 6. **Parameter sind in den Tool-Schemata dokumentiert, nicht hier.** Bei Unsicherheit
    `tools/list` auf das konkrete Tool ansehen — die `description` enthält das verifizierte
    Body-Format und die Pflichtfelder.
-7. **Eine Tool-Zahl aus einem Suchmuster ist keine Messung.** Rolle oder Anzahl aus dem
-   Quelltext zu greppen scheitert still: falsche Anführungszeichen, über mehrere Stellen
-   verteilte Definitionen. Die Zahl aus der geladenen Datenstruktur lesen und gegen `/health`
-   stellen — siehe Abschnitt „Katalogzahlen" oben.
+7. **Die eigene Zahl kommt aus `auth_status`.** `tools_visible` gilt für das angemeldete
+   Konto; nach jeder Rechteänderung neu stellen statt aus diesem Katalog ableiten.
 8. **`admin` sieht NICHT alles.** Ein Teil der Tools trägt ausschließlich `member`, ein
    anderer ausschließlich `admin`; nur ein Teil beide. Ein Admin-Konto, das `change_password`
    oder `onto_catalog_apply` vermisst, hat keinen Fehler — die Rollenliste nennt dort nur
    `member`. Beim Prüfen immer **beide** Zahlen stellen (`auth_status` mit dem
    jeweiligen Konto).
-
-## Katalogzahlen: aus der Datenstruktur, nie aus einem Muster
-
-Die Rollen-Zahlen in diesem Dokument wurden **zweimal falsch** ermittelt, bevor sie stimmten:
-eine Textsuche im Server-Quelltext fand 8 statt 174 (das Muster erwartete einfache
-Anführungszeichen, die Datei nutzt doppelte) und danach 159 statt 174 (die Definitionen sind
-über mehrere Stellen verteilt und werden zur Laufzeit zusammengebaut).
-
-**Stand 2026-10-11:** 175 Tools. Die Rolle hieß bis dahin `telesherpa` und heißt jetzt `member`
-(gleiche Zuordnung, nur der Name); neu hinzugekommen ist `onto_credit_receipt`. Gemessen am
-laufenden Dienst: `len(m.TOOL_ROLES)` = 175, ohne Token 6, `member` 108, `admin` 111,
-`admin`+`member` 175.
-
-**Regel: die Zahl kommt aus der geladenen Datenstruktur, nicht aus einem regulären Ausdruck
-über den Quelltext.**
-
-```python
-import importlib.util
-spec = importlib.util.spec_from_file_location("srv", "<pfad>/server.py")
-m = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(m)
-
-print(len(m.TOOL_ROLES))     # 175 — dieselbe Quelle, die /health als "tools" meldet
-```
-
-Drei Prüfungen, die eine falsche Zahl auffliegen lassen — jede einzelne hat hier gegriffen:
-
-1. **Gegenprobe gegen eine zweite Quelle.** `/health` meldet `tools`. Weichen die Zahlen ab,
-   ist die Zählung falsch, nicht die Anzeige. (165 gegen 174 war der erste Hinweis.)
-2. **Erwartete Anzahl unabhängig prüfen.** Die Liste der ohne Token ausführbaren Tools muss
-   sechs sein; ein Muster, das null findet, hat nichts gemessen, sondern nur nicht gepasst.
-3. **Werkzeug gegen Werkzeug.** Wird eine Zählung größer oder kleiner, sobald man den Parser
-   ändert, war sie nie belastbar.
-
-Für den Abgleich gegen dieses Dokument gilt zusätzlich: **nur `| \`tool\` | rolle |`-Zeilen
-zählen** und danach auf **beide Richtungen** prüfen — ein Tool ohne Tabellenzeile ist eine
-Lücke, ein Tabelleneintrag ohne Tool ein Phantom. In dieser Fassung: 175/175, 0 Lücken,
-0 Phantome, 0 Rollen-Abweichungen.
 
 ## Tool-Beschreibungen und Annotations
 

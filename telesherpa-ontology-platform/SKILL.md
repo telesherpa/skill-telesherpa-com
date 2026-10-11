@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.4.0
+version: 1.4.1
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -50,9 +50,8 @@ Credits zu laden und zu arbeiten.
    `public`, `member` sind sofort gesetzt, `activate` entfällt. In den Namensraum
    `agents.telesherpa.com` geht **nie** Post — du brauchst also kein Postfach.
    **Startguthaben:** ein so angelegtes Konto bekommt **5.000 Credits = 50,00 EUR** gutgeschrieben
-   (Antwort: `credits.start_credits`, Buchungszeile mit `provider='startbudget'`) — es kann also
-   sofort arbeiten. Die Höhe steht in der Preis-Config (`onto_settings`, `key='pricing'`, Feld
-   `agent_start_credits`; `0` = aus), nicht im Code.
+   (Antwort: `credits.start_credits`) — es kann also sofort arbeiten. Die Höhe stellt der
+   Betreiber in der Server-Konfiguration ein (`0` = aus), nicht im Code.
    **Weg B (Mensch): E-Mail-Adresse genügt** — registrieren (`username` = E-Mail), dem Menschen
    sagen, dass eine Mail kommt, und dir den Aktivierungscode nennen lassen.
    *(Optional, wenn du selbst IMAP-Zugriff hast: Code direkt aus dem Postfach lesen.)*
@@ -267,14 +266,13 @@ zusammensetzt — empfohlene Muster, kein technisches Feature an sich:
     vergibt die Scope-Rechte, die der Code trägt. Adresse (`agent-…@agents.telesherpa.com`) und
     Passwort kommen **einmalig** zurück. Bundle-Codes (Scope-Vorlage) → HTTP 403, die erst nach
     dem Login einlösen (`redeem_invite_code`). **Startguthaben:** das Konto bekommt 5.000 Credits
-    (50,00 EUR) — Antwort `credits.start_credits`, Buchungszeile in `onto_credit_orders` mit
-    `provider='startbudget'`. Höhe in der Preis-Config (`onto_settings`, `key='pricing'`, Feld
-    `agent_start_credits`; `0` = aus). Weiter aufladen per
+    (50,00 EUR) — Antwort `credits.start_credits`. Die Höhe stellt der Betreiber in der
+    Server-Konfiguration ein (`0` = aus). Weiter aufladen per
     `onto_credit_chargeup` (prepaid-Code des Auftraggebers) oder `onto_credit_checkout`.
-22. **Konto löschen räumt alles weg — in EINEM Aufruf.** `onto_user_delete` nimmt die Konto-ID
-    (`users.id`) **oder** die Profil-ID (`profiles.id`) **oder** `email`; `onto_user_delete_profile`
-    ist derselbe Weg (Altname, räumt nicht weniger weg). Entfernt `user_tokens`, Passkeys, Sessions,
-    Trackings, Rollen, Scope-Zuordnungen, Favoriten, Idempotenz-Zeilen, eigene Benachrichtigungen,
+22. **Konto löschen räumt alles weg — in EINEM Aufruf.** `onto_user_delete` nimmt die Konto-ID,
+    die Profil-ID **oder** die `email`; `onto_user_delete_profile` ist derselbe Weg (Altname,
+    räumt nicht weniger weg). Entfernt Token, Passkeys, Sitzungen, Trackings, Rollen,
+    Scope-Zuordnungen, Favoriten, Merkzeilen, eigene Benachrichtigungen,
     Profil und Konto — und zählt danach nach. Die Antwort nennt `entfernt` und `behalten`
     (Buchhaltung, Protokoll, Daten anderer); Scopes mit weiteren Verwaltern blockieren (409).
     Nicht gefunden = HTTP 404 mit „es wurde nichts geloescht". Vorher tat ein Aufruf mit der
