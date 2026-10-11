@@ -195,6 +195,13 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 | `onto_user_update` | `admin` |
 | `onto_user_update_profile` | `admin` |
 
+> **`onto_user_delete`** räumt in EINEM Aufruf alles zum Konto weg: `user_tokens`, Passkeys,
+> Sessions, Trackings, Rollen, Scope-Zuordnungen, Favoriten, Idempotenz-Zeilen, eigene
+> Benachrichtigungen, Profil und Konto — und zählt danach nach. `id` darf `users.id` **oder**
+> `profiles.id` sein, alternativ `email`. Die Antwort nennt `entfernt` und `behalten`
+> (Buchhaltung, Protokoll, Daten anderer). `onto_user_delete_profile` ist derselbe Weg
+> (Altname). Nicht gefunden = HTTP 404, kein stiller Erfolg.
+
 ### `onto_report_*`
 
 | Tool | Rollen |

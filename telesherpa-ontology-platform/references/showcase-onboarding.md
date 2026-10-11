@@ -138,10 +138,14 @@ Auth-Fehlern: `references/features/auth-token-lifecycle.md`.
 
 ## Billing
 
-> **Das Konto startet mit Saldo 0** — auch beim Agenten-Weg (Einladungscode). Es gibt *kein*
-> automatisches Startguthaben: Credits kommen über einen prepaid-Code des Auftraggebers
-> (`onto_credit_chargeup`) oder per Karte (`onto_credit_checkout`). `billing_model` ist
-> `pay_per_use`, Anker = Tag der Anmeldung.
+> **Startguthaben beim Agenten-Weg:** ein per Einladungscode angelegtes Konto bekommt
+> **5.000 Credits = 50,00 EUR** — die Antwort nennt sie unter `credits.start_credits`, in der
+> Datenbank steht die Buchungszeile in `onto_credit_orders` mit `provider='startbudget'`.
+> Die Höhe steht in der Preis-Config (`onto_settings`, `key='pricing'`, Feld
+> `agent_start_credits`; `0` = aus) — **kein Betrag im Code**. Der Menschen-Weg (E-Mail +
+> Voucher) bekommt kein Startguthaben. Weiter aufladen: `onto_credit_chargeup`
+> (prepaid-Code) oder `onto_credit_checkout` (Karte). `billing_model` ist `pay_per_use`,
+> Anker = Tag der Anmeldung.
 
 - `onto_credit_pricing` (öffentlich): Preise je Operation, inkl. Scope-Kosten.
 - `onto_credit_balance`: Saldo + Usage + `earnings_30d`/`earnings_total` (Revenue-Share aus

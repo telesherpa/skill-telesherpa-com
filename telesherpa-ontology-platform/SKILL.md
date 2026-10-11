@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.3.0
+version: 1.4.0
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -49,6 +49,10 @@ Credits zu laden und zu arbeiten.
    Passwort erzeugt die Plattform und gibt **beide einmalig** zurück; die Rollen `login`,
    `public`, `member` sind sofort gesetzt, `activate` entfällt. In den Namensraum
    `agents.telesherpa.com` geht **nie** Post — du brauchst also kein Postfach.
+   **Startguthaben:** ein so angelegtes Konto bekommt **5.000 Credits = 50,00 EUR** gutgeschrieben
+   (Antwort: `credits.start_credits`, Buchungszeile mit `provider='startbudget'`) — es kann also
+   sofort arbeiten. Die Höhe steht in der Preis-Config (`onto_settings`, `key='pricing'`, Feld
+   `agent_start_credits`; `0` = aus), nicht im Code.
    **Weg B (Mensch): E-Mail-Adresse genügt** — registrieren (`username` = E-Mail), dem Menschen
    sagen, dass eine Mail kommt, und dir den Aktivierungscode nennen lassen.
    *(Optional, wenn du selbst IMAP-Zugriff hast: Code direkt aus dem Postfach lesen.)*
@@ -67,8 +71,9 @@ Credits zu laden und zu arbeiten.
    über die Liste.
 4. **Register** (`register`) — zwei Formen:
    **Weg A (Agent, Einladungscode):** `invite_code` + **`accept_terms` = `true` (Pflicht)**.
-   Die Antwort enthält `username` (`agent-…@agents.telesherpa.com`) und `password` — **nur
-   einmalig**, sofort sichern. Der Code vergibt beim Anlegen gleich seine Scope-Rechte
+   Die Antwort enthält `username` (`agent-…@agents.telesherpa.com`), `password` — **nur
+   einmalig**, sofort sichern — und das **Startguthaben** (`credits.start_credits`). Der Code
+   vergibt beim Anlegen gleich seine Scope-Rechte
    (`scopes` in der Antwort). Bundle-Codes (Scope-Vorlage) werden mit HTTP 403 abgewiesen →
    nach dem Login `redeem_invite_code`.
    **Weg B (Mensch):** `username` (E-Mail), `password`, `password_confirm` (muss matchen) +
@@ -261,9 +266,20 @@ zusammensetzt — empfohlene Muster, kein technisches Feature an sich:
     legt das Konto **sofort aktiv** an (Rollen `login`, `public`, `member`, kein `activate`) und
     vergibt die Scope-Rechte, die der Code trägt. Adresse (`agent-…@agents.telesherpa.com`) und
     Passwort kommen **einmalig** zurück. Bundle-Codes (Scope-Vorlage) → HTTP 403, die erst nach
-    dem Login einlösen (`redeem_invite_code`). **Kein Startguthaben:** Saldo 0; aufladen per
+    dem Login einlösen (`redeem_invite_code`). **Startguthaben:** das Konto bekommt 5.000 Credits
+    (50,00 EUR) — Antwort `credits.start_credits`, Buchungszeile in `onto_credit_orders` mit
+    `provider='startbudget'`. Höhe in der Preis-Config (`onto_settings`, `key='pricing'`, Feld
+    `agent_start_credits`; `0` = aus). Weiter aufladen per
     `onto_credit_chargeup` (prepaid-Code des Auftraggebers) oder `onto_credit_checkout`.
-22. **Werkzeugliste kann clientseitig veralten** — manche MCP-Clients cachen die Werkzeugliste je
+22. **Konto löschen räumt alles weg — in EINEM Aufruf.** `onto_user_delete` nimmt die Konto-ID
+    (`users.id`) **oder** die Profil-ID (`profiles.id`) **oder** `email`; `onto_user_delete_profile`
+    ist derselbe Weg (Altname, räumt nicht weniger weg). Entfernt `user_tokens`, Passkeys, Sessions,
+    Trackings, Rollen, Scope-Zuordnungen, Favoriten, Idempotenz-Zeilen, eigene Benachrichtigungen,
+    Profil und Konto — und zählt danach nach. Die Antwort nennt `entfernt` und `behalten`
+    (Buchhaltung, Protokoll, Daten anderer); Scopes mit weiteren Verwaltern blockieren (409).
+    Nicht gefunden = HTTP 404 mit „es wurde nichts geloescht". Vorher tat ein Aufruf mit der
+    Profil-ID still nichts und meldete trotzdem Erfolg — deshalb die Gegenprobe.
+23. **Werkzeugliste kann clientseitig veralten** — manche MCP-Clients cachen die Werkzeugliste je
     Sitzung; dann fehlt z.B. `invite_code` im `register`-Schema, obwohl der Server es kann.
     Erst neu verbinden, dann erneut prüfen — nicht den Server verdächtigen.
 
