@@ -27,6 +27,11 @@ Tools" meldet, muss **beide** Zahlen prüfen — nicht annehmen, admin sehe alle
 **Namen** aufrufbar (der `www-authenticate`-Header nennt sie). Ohne Token sind diese sechs auch
 **ausführbar**; alle anderen antworten ohne Token mit 401, auch wenn sie sichtbar wären.
 
+**Was das für den Client heißt:** Ein Client, der erst `initialize` und `tools/list` erfolgreich
+abschließen muss — die üblichen SDKs, Desktop-Clients, auch Hermes — bekommt ohne Token **gar
+keinen** Werkzeugkatalog. Der erste Aufruf muss die sechs Namen also kennen. Ein Werkzeug, das
+nicht im Katalog steht, existiert für den Agenten nicht, auch wenn der Server es ausführen würde.
+
 ### Eine Rollenliste ist stumm — in beide Richtungen
 
 Zwei Fälle, die **keine** Fehlermeldung erzeugen und deshalb leicht übersehen werden:

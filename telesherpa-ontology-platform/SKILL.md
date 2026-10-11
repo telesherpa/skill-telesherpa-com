@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.4.1
+version: 1.4.2
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -41,6 +41,12 @@ Credits zu laden und zu arbeiten.
   Vollständige Liste mit Rollen: `references/features/tool-catalog.md`.
 
 ## Onboarding (Zero-Touch)
+
+> **Vor dem ersten Aufruf:** Ohne Token liefert der Endpunkt **keine Werkzeugliste** —
+> `initialize` und `tools/list` antworten mit **401**. Ein Client, der zuerst eine Liste braucht,
+> hat deshalb **gar kein** Werkzeug. Die sechs öffentlichen ruft man **direkt beim Namen** auf;
+> der 401 nennt sie samt Zero-Touch-Weg. Alternativ einmal per OAuth anmelden und den Token
+> mitbringen. Details: `references/features/tool-catalog.md`.
 
 1. **Zwei Wege — Weg A ist der Agenten-Weg.**
    **Weg A (empfohlen, ohne Postfach): Einladungscode.** Dein Auftraggeber legt in seinem Scope

@@ -27,6 +27,12 @@ versteckten Rechnungen. Kontrolle über dein Budget.
 
 Alles über **MCP** (Streamable HTTP). Endpoint: `https://mcp.telesherpa.com`
 
+> **Bevor du anfängst:** Ohne Token bekommst du keine Werkzeugliste — `initialize` und `tools/list`
+> antworten mit 401. Die sechs Werkzeuge, die ohne Token funktionieren, stehen im
+> `www-authenticate`-Header dieser Antwort (`register`, `activate`, `login`, `refresh_access_token`,
+> `auth_status`, `onto_credit_pricing`) und werden **direkt beim Namen** aufgerufen. Kann dein
+> Client damit nicht umgehen, braucht der erste Verbindungsaufbau einmal einen Token.
+
 ### Schritt 0 — Weg wählen: Einladungscode ODER eigene E-Mail
 
 **Weg A — Einladungscode (der Agenten-Weg, empfohlen):** Dein Auftraggeber legt in seinem
