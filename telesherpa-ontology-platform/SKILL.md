@@ -1,13 +1,16 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.4.2
+version: 1.4.3
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
 ---
 
 # Telesherpa Ontology Platform for Agents and Field Service
+
+**Ablage im Repo:** alle Dateien liegen im Unterordner `telesherpa-ontology-platform/`. Rohe
+URLs brauchen ihn (`.../raw/branch/main/telesherpa-ontology-platform/SKILL.md`), ohne ihn kommt 404.
 
 **Einleitung:** Dies ist das Schaufenster und komplettes Onboarding der Telesherpa Ontology
 Platform (B2AI) für KI-Agenten und Field Service. Ein Agent lädt diesen Skill, um zu verstehen,
@@ -36,7 +39,8 @@ Credits zu laden und zu arbeiten.
   **`admin` ist keine Obermenge von `member`** — ein Teil der Tools ist nur für
   `member` sichtbar, ein anderer nur für `admin`. Wer „mir fehlen Tools" meldet, muss
   die Zahl für SEIN Konto stellen (`auth_status`).
-  Die Rolle hieß bis 2026-10-11 `telesherpa` und heißt seither `member` — gemeint ist
+  **Historische Bezeichnung:** dieselbe Rolle hieß bis 2026-10-11 `telesherpa`; `auth_status`
+  liefert heute ausschließlich `member`. Ältere Texte nennen die alte Bezeichnung — es ist
   dieselbe Rolle.
   Vollständige Liste mit Rollen: `references/features/tool-catalog.md`.
 
@@ -62,12 +66,16 @@ Credits zu laden und zu arbeiten.
    sagen, dass eine Mail kommt, und dir den Aktivierungscode nennen lassen.
    *(Optional, wenn du selbst IMAP-Zugriff hast: Code direkt aus dem Postfach lesen.)*
    Vollständig, mit curl: `references/showcase-onboarding.md`.
-2. **Session** (`initialize`) → `mcp-session-id` aus dem **Response-Header**.
-   **Pflicht** — ohne sie wird jeder `tools/list`/`tools/call` abgelehnt
-   (`Bad Request: Missing session ID`), auch mit gültigem Bearer-Token.
-   Lebensdauer 12 h Inaktivität, danach einfach neu `initialize`.
-   Clients ohne Session-Slot nutzen den stateless-Envelope (Protokoll 2026-07-28) —
-   siehe `references/features/auth-token-lifecycle.md`.
+2. **Session — zwei Betriebsarten, und welche gilt, hängt am Token.**
+   **Ohne Token gibt es keine Session:** `initialize` antwortet **401** und liefert **keine**
+   `mcp-session-id`. Der tokenlose Einstieg läuft deshalb immer als **stateless Envelope**
+   (Protokoll `2026-07-28`): Header `MCP-Protocol-Version: 2026-07-28`, `mcp-method: tools/call`,
+   `mcp-name: <werkzeug>`, und in `params._meta` Protokollversion plus eigene Fähigkeiten. So
+   sind die sechs öffentlichen Werkzeuge erreichbar — ohne diesen Envelope passiert gar nichts.
+   **Mit Token** liefert `initialize` 200; dann kommt `mcp-session-id` aus dem **Response-Header**,
+   und Aufrufe ohne diese ID werden abgelehnt (`Bad Request: Missing session ID`), auch mit
+   gültigem Bearer-Token. Lebensdauer 12 h Inaktivität, danach einfach neu `initialize`.
+   Details: `references/features/auth-token-lifecycle.md`.
 3. **Vor Login sichtbar (öffentlich, belegt):** `register`, `activate`, `login`,
    `refresh_access_token`, `auth_status`, `onto_credit_pricing`. Alles andere erscheint erst
    NACH Login (RBAC-Filter) — Sichtbarkeit ≠ Bug.

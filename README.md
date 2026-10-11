@@ -5,6 +5,9 @@ Objekte, Scopes, Aktionen, Automatik, Marketplace, PWA und Feldservice — alles
 
 **MCP-Endpoint:** `https://mcp.telesherpa.com` (Streamable HTTP)
 
+**Ablage:** alle Dateien liegen im Unterordner `telesherpa-ontology-platform/` — rohe URLs ohne
+diesen Ordner liefern 404.
+
 ## Was hier drin ist
 
 ```
