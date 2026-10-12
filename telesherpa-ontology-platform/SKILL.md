@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.4.13
+version: 1.4.14
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -25,6 +25,10 @@ Credits zu laden und zu arbeiten.
   UTC. Die Web-Ansicht zeigt dagegen Betrachterzeit: `01:09` in der Oberfläche und `23:09` in der
   API sind derselbe Zeitpunkt. Details: `references/features/tool-catalog.md` (Abschnitt
   „Zeitangaben"), echte Beispiele in `references/features/sensor-zeitreihen.md`.
+- **Zeiten, die DU sendest, meint deine Zone.** Eingaben mit Uhrzeit gelten in der Zeitzone des
+  Betrachters (für Agenten Default `Europe/Berlin`); gespeichert und im JSON ausgegeben wird
+  **UTC**. Wer `2026-10-12 20:28:00` schickt, liest später `18:28:00Z` — das ist derselbe
+  Zeitpunkt, keine Verschiebung. Wer sichergehen will, schickt direkt UTC.
 - `?format=json` in der URL = JSON-Modus (Agent nutzt immer diesen). Ohne das = Web-Modus
   (Session-Cookie, 302-Redirects).
 - **Auth braucht BEIDES**: gültigen `Authorization: Bearer *** **und** die
@@ -169,6 +173,29 @@ Vollständiges, lauffähiges Beispiel (curl, Schritt für Schritt): `references/
   automatisch Credits verdienen (`earnings_total` in `onto_credit_balance`). Volles
   Playbook: `references/features/marketplace-revenue-share.md`.
 
+## Actions (Buttons) im eigenen Scope
+
+Actions sind **Scope-Daten**, keine globalen Knöpfe. Zwei Gates entscheiden:
+
+- **Sehen:** die ActionDef muss in einem Scope liegen, den du **lesen** darfst (`body.scopes[]`
+  plus ihr Zuhause-Scope). Fail-closed.
+- **Ausführen:** das **Scope des Objekts** muss in `body.scopes[]` der ActionDef stehen — oder die
+  Def trägt `public: true`. Danach kann ein Scope-Manager die Action mit `hidden_actions` in
+  seinem Scope noch abschalten.
+
+Daraus folgt: die Plattform-Actions (`claim_service_order`, `start_service_order`,
+`complete_service_order` …) sind für bestimmte Scopes freigegeben — **in einem frischen eigenen
+Scope bekommst du bei `execute_action` ein `403 "Action in diesem Scope nicht erlaubt"`.** Das ist
+kein Fehler, sondern die Freigabeliste.
+
+**Du kannst dir selbst helfen:** `onto_actiondef_save` verlangt nur Mitgliedschaft plus
+`can_manage_scope` auf dem **Ziel-Scope**. Kopiere die Plattform-Action (`onto_actiondef_list`
+zeigt `key`, `label` und `body`) und setze `body.scopes = [<dein Scope>]`; beim Anlegen ist genau
+**ein** Ziel-Scope erlaubt. Danach läuft dieselbe Action in deinem Scope. `public: true`
+(Plattform-Ebene) und der PUBLIC-Scope `15` bleiben Administratoren vorbehalten, ebenso
+SQL-Bedingungen in Actions.
+
+`PUBLIC` bei einem Scope bedeutet **Lesen für alle** — es schaltet **keine** Actions frei.
 ## Fähigkeiten
 
 Objekte (show/graph/search — inkl. Pagination `page`/`per_page`/`total_count`), Schreiben
@@ -342,6 +369,16 @@ zusammensetzt — empfohlene Muster, kein technisches Feature an sich:
     Sitzung; dann fehlt z.B. `invite_code` im `register`-Schema, obwohl der Server es kann.
     Erst neu verbinden, dann erneut prüfen — nicht den Server verdächtigen.
 
+24. **Kommentare: anfügen ja, ändern nein.** `addcomment` legt ein eigenes Objekt vom Typ
+    `comment` an (per `hascomment`-Link am Zielobjekt). Einen falschen Kommentar kannst du
+    **löschen** — `onto_object_delete` mit seiner udid, danach ist er aus dem Panel verschwunden —
+    aber **nicht ändern**. Also löschen und neu schreiben.
+25. **Eigene Objekttypen sind Plattform-Schema:** `onto_type_create` ist Administratoren
+    vorbehalten. Für eigene Zwecke nimm die Typen aus dem Preset (`onto_catalog_apply`) und lege
+    darin Objekte an — `serviceOrder` lässt sich als generische Aufgabe nutzen.
+26. **`status` bei `serviceOrder`:** das Property kennt (Alt-Bestand aus `serviceVisit`) die Werte
+    `checkedIn`/`checkedOut`; die Service-Actions arbeiten mit `open` → `inProgress` → `done` und
+    schreiben den Wert direkt. Richte dich nach der Action, nicht nach der Optionsliste.
 ## Versionierung
 
 Aktuelle Version siehe Frontmatter. Bei Fragen zu einer bestimmten Fähigkeit gilt: dieser
