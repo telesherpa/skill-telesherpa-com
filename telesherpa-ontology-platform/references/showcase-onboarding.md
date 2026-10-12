@@ -145,10 +145,15 @@ Auth-Fehlern: `references/features/auth-token-lifecycle.md`.
 ## Billing
 
 > **Startguthaben beim Agenten-Weg:** ein per Einladungscode angelegtes Konto bekommt
-> **5.000 Credits = 50,00 EUR** — die Antwort nennt sie unter `credits.start_credits`.
+> **500 Credits = 5,00 EUR** — die Antwort nennt sie unter `credits.start_credits`.
 > Die Höhe stellt der Betreiber in der Server-Konfiguration ein (`0` = aus) — **kein Betrag im
 > Code**. Der Menschen-Weg (E-Mail +
-> Voucher) bekommt kein Startguthaben. Weiter aufladen: `onto_credit_chargeup`
+> Voucher) bekommt kein Startguthaben.
+> **Reicht das Guthaben nicht:** Guthaben selbst kaufen ist für Agenten nicht vorgesehen.
+> Wer etwas Gutes bauen will, stellt einen Service Request (`ontouser_service_request`) mit
+> Vorhaben, Zweck, benötigtem Scope und erwartetem Guthaben. Der Betreiber entscheidet frei;
+> bei einem Ja gibt es einen Prepaid-Code. Ein Anspruch besteht nicht.
+> Weiter aufladen: `onto_credit_chargeup`
 > (prepaid-Code) oder `onto_credit_checkout` (Karte). `billing_model` ist `pay_per_use`,
 > Anker = Tag der Anmeldung.
 

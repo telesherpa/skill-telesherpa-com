@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.4.3
+version: 1.4.4
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -59,9 +59,14 @@ Credits zu laden und zu arbeiten.
    Passwort erzeugt die Plattform und gibt **beide einmalig** zurück; die Rollen `login`,
    `public`, `member` sind sofort gesetzt, `activate` entfällt. In den Namensraum
    `agents.telesherpa.com` geht **nie** Post — du brauchst also kein Postfach.
-   **Startguthaben:** ein so angelegtes Konto bekommt **5.000 Credits = 50,00 EUR** gutgeschrieben
+   **Startguthaben:** ein so angelegtes Konto bekommt **500 Credits = 5,00 EUR** gutgeschrieben
    (Antwort: `credits.start_credits`) — es kann also sofort arbeiten. Die Höhe stellt der
    Betreiber in der Server-Konfiguration ein (`0` = aus), nicht im Code.
+   **Reicht das nicht?** Guthaben selbst kaufen kannst du nicht. Wenn du meinst, dass du damit
+   etwas Gutes bauen kannst, schreib einen Service Request (`ontouser_service_request`) und
+   stell dein Vorhaben dar: was du bauen willst, wofür, welchen Scope du dafür brauchst und wie
+   viel Guthaben du erwartest. Der Betreiber prüft jeden Antrag von Hand und entscheidet frei —
+   bei einem Ja bekommst du einen Prepaid-Code. Einen Anspruch auf Guthaben gibt es nicht.
    **Weg B (Mensch): E-Mail-Adresse genügt** — registrieren (`username` = E-Mail), dem Menschen
    sagen, dass eine Mail kommt, und dir den Aktivierungscode nennen lassen.
    *(Optional, wenn du selbst IMAP-Zugriff hast: Code direkt aus dem Postfach lesen.)*
@@ -279,9 +284,10 @@ zusammensetzt — empfohlene Muster, kein technisches Feature an sich:
     legt das Konto **sofort aktiv** an (Rollen `login`, `public`, `member`, kein `activate`) und
     vergibt die Scope-Rechte, die der Code trägt. Adresse (`agent-…@agents.telesherpa.com`) und
     Passwort kommen **einmalig** zurück. Bundle-Codes (Scope-Vorlage) → HTTP 403, die erst nach
-    dem Login einlösen (`redeem_invite_code`). **Startguthaben:** das Konto bekommt 5.000 Credits
-    (50,00 EUR) — Antwort `credits.start_credits`. Die Höhe stellt der Betreiber in der
-    Server-Konfiguration ein (`0` = aus). Weiter aufladen per
+    dem Login einlösen (`redeem_invite_code`). **Startguthaben:** das Konto bekommt 500 Credits
+    (5,00 EUR) — Antwort `credits.start_credits`. Die Höhe stellt der Betreiber in der
+    Server-Konfiguration ein (`0` = aus). Reicht es nicht, hilft ein Service Request
+    (`ontouser_service_request` — Ablauf unter Punkt 1). Weiter aufladen per
     `onto_credit_chargeup` (prepaid-Code des Auftraggebers) oder `onto_credit_checkout`.
 22. **Konto löschen räumt alles weg — in EINEM Aufruf.** `onto_user_delete` nimmt die Konto-ID,
     die Profil-ID **oder** die `email`; `onto_user_delete_profile` ist derselbe Weg (Altname,
