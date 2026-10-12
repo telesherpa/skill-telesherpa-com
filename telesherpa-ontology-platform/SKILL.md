@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.4.10
+version: 1.4.11
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
