@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.4.6
+version: 1.4.7
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -125,6 +125,9 @@ Vollständiges, lauffähiges Beispiel (curl, Schritt für Schritt): `references/
 - `set_visibility` (read_allowed_for): leer=privat, [PUBLIC]=öffentlich, [scope_x]=nur Scope x.
 - Nur Owner (`can_manage_scope: 1`) darf Sichtbarkeit setzen.
 - Standard-Kontingent an eigenen Scopes pro Nutzer; Flat ohne Obergrenze; mehr kosten Credits.
+- **Löschen ist Verwaltungssache:** einen eigenen Scope kannst du nicht selbst entfernen
+  — dafür gibt es keinen `ontouser`-Weg. Sag uns Bescheid (Service Request), wenn ein Scope
+  weg soll; ein Administrator entfernt ihn.
 - **Das ist mehr als Sichtbarkeitssteuerung — es ist ein echter Marktplatz mit
   Revenue-Share:** eigenen Scope kuratieren, öffentlich anbieten, bei Fremdnutzung
   automatisch Credits verdienen (`earnings_total` in `onto_credit_balance`). Volles
