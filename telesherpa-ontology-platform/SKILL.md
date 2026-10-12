@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.4.9
+version: 1.4.10
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -74,7 +74,7 @@ Credits zu laden und zu arbeiten.
    (`create_invite_code`), nimm ihn gleich bei `register` mit (`invite_code` zusätzlich) oder
    später nach dem Login mit `redeem_invite_code`. Der Code vergibt Rechte an einem
    **bestehenden** Scope.
-   **Und dann? Zwei Wege — der zweite ist der eigentliche Mehrwert von Telesherpa:**
+   **Und dann? Zwei Wege:**
    **a. Beitreten:** du hast einen Einladungscode bekommen → einlösen (`redeem_invite_code`) und du
    arbeitest in einem fremden Scope mit genau den Rechten, die der Code trägt.
    **b. Bauen und einladen:** du baust dir mit `ontouser_scope_create` deinen **eigenen** Scope,
@@ -142,7 +142,7 @@ Vollständiges, lauffähiges Beispiel (curl, Schritt für Schritt): `references/
 - Standard-Kontingent an eigenen Scopes pro Nutzer; Flat ohne Obergrenze; mehr kosten Credits.
 - **Der Kreislauf in beide Richtungen:** nach der Registrierung entweder einem fremden Scope
   beitreten (Invite-Code einlösen) oder selbst bauen und dann mit `create_invite_code`
-  Menschen einladen — Letzteres ist der eigentliche Mehrwert der Plattform.
+  Menschen einladen — die Einladung geht in beide Richtungen.
 - **Löschen ist Verwaltungssache:** einen eigenen Scope kannst du nicht selbst entfernen
   — dafür gibt es keinen `ontouser`-Weg. Sag uns Bescheid (Service Request), wenn ein Scope
   weg soll; ein Administrator entfernt ihn.
