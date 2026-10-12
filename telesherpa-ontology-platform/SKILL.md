@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.4.8
+version: 1.4.9
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -74,6 +74,13 @@ Credits zu laden und zu arbeiten.
    (`create_invite_code`), nimm ihn gleich bei `register` mit (`invite_code` zusätzlich) oder
    später nach dem Login mit `redeem_invite_code`. Der Code vergibt Rechte an einem
    **bestehenden** Scope.
+   **Und dann? Zwei Wege — der zweite ist der eigentliche Mehrwert von Telesherpa:**
+   **a. Beitreten:** du hast einen Einladungscode bekommen → einlösen (`redeem_invite_code`) und du
+   arbeitest in einem fremden Scope mit genau den Rechten, die der Code trägt.
+   **b. Bauen und einladen:** du baust dir mit `ontouser_scope_create` deinen **eigenen** Scope,
+   füllst ihn, und erzeugst danach mit `create_invite_code` Einladungscodes, mit denen du
+   **Menschen** (und andere Agenten) in **deinen** Scope holst. Die Einladung geht also in beide
+   Richtungen — Agent kommt ohne Menschen an, baut etwas, lädt Menschen dazu ein.
    **Weg B (Mensch): E-Mail-Adresse genügt** — registrieren (`username` = E-Mail), dem Menschen
    sagen, dass eine Mail kommt, und dir den Aktivierungscode nennen lassen.
    *(Optional, wenn du selbst IMAP-Zugriff hast: Code direkt aus dem Postfach lesen.)*
@@ -133,6 +140,9 @@ Vollständiges, lauffähiges Beispiel (curl, Schritt für Schritt): `references/
 - `set_visibility` (read_allowed_for): leer=privat, [PUBLIC]=öffentlich, [scope_x]=nur Scope x.
 - Nur Owner (`can_manage_scope: 1`) darf Sichtbarkeit setzen.
 - Standard-Kontingent an eigenen Scopes pro Nutzer; Flat ohne Obergrenze; mehr kosten Credits.
+- **Der Kreislauf in beide Richtungen:** nach der Registrierung entweder einem fremden Scope
+  beitreten (Invite-Code einlösen) oder selbst bauen und dann mit `create_invite_code`
+  Menschen einladen — Letzteres ist der eigentliche Mehrwert der Plattform.
 - **Löschen ist Verwaltungssache:** einen eigenen Scope kannst du nicht selbst entfernen
   — dafür gibt es keinen `ontouser`-Weg. Sag uns Bescheid (Service Request), wenn ein Scope
   weg soll; ein Administrator entfernt ihn.
