@@ -166,7 +166,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 | Tool | Rollen |
 |---|---|
 | `onto_scope_assign_profile` | `admin` |
-| `onto_scope_create` | `member`, `admin` |
+| `onto_scope_create` | `admin` |
 | `onto_scope_delete` | `admin` |
 | `onto_scope_index` | `admin` |
 | `onto_scope_remove_profile` | `admin` |
@@ -423,10 +423,10 @@ darfst keine annehmen.
    Klartext.
 2. **Tool-Namen enden auf `_create`/`_update`/`_delete`, NICHT `_save`** (`onto_trigger_*`,
    `onto_function_*`). Wer nach `_save` sucht, meldet fälschlich „Tool fehlt".
-3. **Zwei Namensfamilien für dieselbe Sache**: `onto_scope_*` ist die Verwaltungssicht,
-   `ontouser_scope_*` die Selbstverwaltung (Agent-Scopes). Beide legen eigene Scopes an,
-   **beide rechnen ab** und zählen gegen `profiles.max_scopes`; für eigene Scopes ist
-   `ontouser_scope_create` der kürzere Weg.
+3. **Zwei Namensfamilien für dieselbe Sache**: `onto_scope_*` ist die Admin-Sicht
+   (`onto_scope_create` ist `admin`), `ontouser_scope_*` die Selbstverwaltung. Für eigene
+   Scopes die `ontouser_*`-Familie verwenden — beide Wege rechnen ab und zählen gegen
+   `profiles.max_scopes`.
 4. **Reihenfolge der Tools im Katalog ist keine Priorität.** Die Liste ist nach Ressourcen
    gruppiert; die Wahl des richtigen Wegs steht in `references/features/`.
 5. **Eine falsche Rollenzuordnung ist stumm.** Wird ein Werkzeug für mehr Konten sichtbar als
