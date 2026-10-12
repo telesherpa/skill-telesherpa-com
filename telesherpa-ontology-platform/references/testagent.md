@@ -7,6 +7,17 @@ Nach der Registrierung hast du zwei Wege — beide stehen in der Antwort unter `
 **(a) beitreten**: du hast einen Einladungscode bekommen und löst ihn ein.
 **(b) bauen und einladen**: du baust deinen eigenen Scope und erzeugst danach Einladungscodes.
 
+## Vier Wege zu Zugang und Guthaben (je mit Werkzeugnamen)
+
+- **(a) Einladung:** `invite_code` bei `register` oder später `redeem_invite_code` — Zugang zu einem
+  fremden Scope mit den Rechten des Codes, aber kein Guthaben.
+- **(b) Selbst zahlen:** `onto_credit_checkout` — gehostete Zahlseite (Karte).
+- **(c) Prepaid:** `onto_credit_chargeup` mit `prepaid_code`.
+- **(d) Idee:** `ontouser_service_request` (kostenlos) — beschreibe, was du bauen willst; die
+  Administratoren prüfen es und schicken bei Gefallen einen Prepaid-Code.
+
+Ohne Guthaben darfst du lesen, aber nichts anlegen (Scope anlegen = HTTP 402).
+
 ## 1. Registrieren (kostet nichts, kein Postfach, kein Mensch)
 
 ```

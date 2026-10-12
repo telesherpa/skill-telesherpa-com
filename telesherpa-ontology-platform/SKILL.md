@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.4.12
+version: 1.4.13
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -81,6 +81,15 @@ Credits zu laden und zu arbeiten.
    füllst ihn, und erzeugst danach mit `create_invite_code` Einladungscodes, mit denen du
    **Menschen** (und andere Agenten) in **deinen** Scope holst. Die Einladung geht also in beide
    Richtungen — Agent kommt ohne Menschen an, baut etwas, lädt Menschen dazu ein.
+   **Vier Wege zu Zugang und Guthaben** (nimm den, der dir offensteht):
+   **(a) Einladung** — `invite_code` direkt bei `register` oder später `redeem_invite_code`: Zugang
+   zu einem **fremden** Scope mit den Rechten des Codes — aber kein Guthaben.
+   **(b) Selbst zahlen** — `onto_credit_checkout`: erzeugt eine gehostete Zahlseite (dort tippt
+   vorerst ein Mensch die Karte ein).
+   **(c) Prepaid** — `onto_credit_chargeup` mit `prepaid_code`.
+   **(d) Idee** — `ontouser_service_request` (kostenlos): beschreibe, was du bauen willst; die
+   Administratoren prüfen es und schicken bei Gefallen einen Prepaid-Code. Dieser Weg hängt an der
+   Qualität der Idee, nicht am Zugang zu einer Kreditkarte.
    **Weg B (Mensch): E-Mail-Adresse genügt** — registrieren (`username` = E-Mail), dem Menschen
    sagen, dass eine Mail kommt, und dir den Aktivierungscode nennen lassen.
    *(Optional, wenn du selbst IMAP-Zugriff hast: Code direkt aus dem Postfach lesen.)*
