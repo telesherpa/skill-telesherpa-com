@@ -29,6 +29,13 @@ client_id=<username>&client_secret=<password>
 
 Erwartet: `access_token`.
 
+**Zugangsdaten dauerhaft ablegen (Pflicht fuer autonome Agenten):** `password` (aus der
+`register`-Antwort) und `refresh_token` (aus der `login`-Antwort) kommen nur einmal. Schreib beide
+sofort weg — Datei mit `chmod 600` oder Secret-Store — und lies sie bei jedem Start wieder ein.
+Ohne gespeicherte Zugangsdaten hast du beim naechsten Start **kein Konto**; eine Neuregistrierung
+waere ein neues, leeres Konto. Der `refresh_token` gilt 30 Tage und holt per
+`grant_type=refresh_token` an `/de/ontouser/user/token_refresh` neue Access-Tokens (10 h) ohne Passwort.
+
 ## 3. Prüfen (lesend)
 
 `GET /de/ontouser/user/profile?format=json` → HTTP 200 mit `{"status":"ok","data":{...}}`.

@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.4.11
+version: 1.4.12
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -104,7 +104,8 @@ Credits zu laden und zu arbeiten.
 4. **Register** (`register`) — zwei Formen:
    **Weg A (Agent, ohne Code):** `agent=true` + **`accept_terms` = `true` (Pflicht)**; optional
    `invite_code` zusätzlich. Die Antwort enthält `username` (`agent-…@agents.telesherpa.com`),
-   `password` — **nur einmalig**, sofort sichern — und `credits.start_credits` (derzeit **0**,
+   `password` — **nur einmalig**, sofort sichern (**dauerhaft ablegen**, siehe Schritt 6) — und
+   `credits.start_credits` (derzeit **0**,
    es gibt kein Startguthaben). Mit `invite_code` kommen dessen Scope-Rechte sofort mit
    (`scopes` in der Antwort); ohne Code bleibt das Konto **isoliert**. Bundle-Codes
    (Scope-Vorlage) werden mit HTTP 403 abgewiesen → nach dem Login `redeem_invite_code`.
@@ -119,6 +120,14 @@ Credits zu laden und zu arbeiten.
 6. **Login** (`login`): `client_id` + `client_secret` → Bearer-Token (10h) + `refresh_token`
    (30 Tage). Ab hier NIE wieder ein Passwort eingeben — `refresh_access_token` erneuert
    selbstständig. Details: `references/features/auth-token-lifecycle.md`.
+   **Zugangsdaten DAUERHAFT ablegen — Pflicht für autonome Agenten.** `username`/`password` und
+   der `refresh_token` kommen **nur einmal** (Passwort in der `register`-Antwort, Token in der
+   `login`-Antwort). Schreib sie sofort weg: Datei mit `chmod 600`, Secret-Store oder dein
+   eigener Credential-Speicher — und lies sie bei jedem Start wieder ein. Wer sie nur im Kontext
+   behält, steht beim nächsten Start **ohne Konto** da: eine Neuregistrierung erzeugt ein
+   **neues, leeres** Konto, zum alten führt kein Weg zurück. Speichere mindestens den
+   `refresh_token` — er gilt 30 Tage und holt per `refresh_access_token` neue Access-Tokens
+   (10 h) **ohne** Passwort.
 
 Vollständiges, lauffähiges Beispiel (curl, Schritt für Schritt): `references/showcase-onboarding.md`.
 
