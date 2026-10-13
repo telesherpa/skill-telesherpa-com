@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.4.14
+version: 1.4.15
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -376,9 +376,35 @@ zusammensetzt — empfohlene Muster, kein technisches Feature an sich:
 25. **Eigene Objekttypen sind Plattform-Schema:** `onto_type_create` ist Administratoren
     vorbehalten. Für eigene Zwecke nimm die Typen aus dem Preset (`onto_catalog_apply`) und lege
     darin Objekte an — `serviceOrder` lässt sich als generische Aufgabe nutzen.
-26. **`status` bei `serviceOrder`:** das Property kennt (Alt-Bestand aus `serviceVisit`) die Werte
-    `checkedIn`/`checkedOut`; die Service-Actions arbeiten mit `open` → `inProgress` → `done` und
-    schreiben den Wert direkt. Richte dich nach der Action, nicht nach der Optionsliste.
+26. **Status ist pro Objekttyp ein eigenes Property — das Objekt-`status` ist etwas anderes.**
+    - **Lebenszyklus der Zeile:** `active`/`inactive`/`deleted` steht im Objekt selbst, nicht in
+      einem Property. Das setzt die Plattform (Sichtbarkeit, Soft-Delete), nicht der Agent.
+    - **Fachzustand:** je Objekttyp ein eigenes Property mit eigener Optionsliste —
+      `orderStatus` (`serviceOrder`: `open`/`inProgress`/`done`),
+      `visitStatus` (`serviceVisit`: `checkedIn`/`checkedOut`),
+      `inspectionStatus` (`inspection`: `draft`/`sent`),
+      `damageStatus` (`damageReport`: `draft`/`sent`),
+      `changeStatus` (`changeRequest`: `proposed`/`accepted`/`rejected`),
+      `inspectionResult` (`car`/`machine`: freier Text).
+    - Ein generisches Property `status` gibt es **nicht mehr**. Bis 2026-10-13 hing eines an vier
+      Typen gleichzeitig, mit der Werteliste von `serviceVisit` — daher die widersprüchlichen Werte.
+      Wer weiter `status` schreibt (z.B. über `onto_object_set_property`), erzeugt ein verwaistes
+      Property ohne Definition; es erscheint dann als roher Schlüssel in der Oberfläche.
+    - Die Service-Actions nennen den Key im Klartext (`condition.props` und `action.props`):
+      `claim_service_order`, `start_service_order`, `complete_service_order` lesen und schreiben
+      `orderStatus`; `checkin`/`checkout`/`checkout_other` `visitStatus`;
+      `suggestChange`/`reviewChange` `changeStatus`. Richte dich nach der Action.
+27. **Prompt-Typen in Actiondefs** (gilt für `prompts[]` in `onto_actiondef_save`): erlaubt sind
+    `text`, `textarea`, `int`, `float`, `select`, `picker`, `switch`, `slider`, `datepicker`,
+    `file`, `label`, `subform`, `images`, `documents`, `signature`. `datetime` gibt es **nicht** —
+    eine Definition damit lässt sich gar nicht mehr speichern (`prompts[0].type "datetime" ist
+    unbekannt`, HTTP 400), auch nicht mit unverändertem Body. Für Datum und Uhrzeit `datepicker`
+    verwenden.
+28. **Actions sind Schema, nicht Daten.** `onto_actiondef_save` verlangt Verwaltungsrecht
+    (`can_manage_scope`) am Ziel-Scope — Schreibrecht genügt nicht: „Kein Recht auf Scope X: eine
+    Actiondef ist eine Definition (Schema) und darf nur von einem Verwalter geändert werden".
+    Denselben Schutz gibt es für `actiondef`-Werte: direktes Schreiben ins Objekt oder per
+    `set_property` wird abgewiesen.
 ## Versionierung
 
 Aktuelle Version siehe Frontmatter. Bei Fragen zu einer bestimmten Fähigkeit gilt: dieser
