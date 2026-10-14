@@ -164,7 +164,18 @@ Was daraus folgt:
 - Die **Bewertung gehört in den Report, nicht in den Scan**: Abstand zur vorigen Kontrolle am
   selben Punkt gegen `interval_min`, dazu die Wegzeit seit der vorigen Kontrolle an einem **anderen**
   Punkt desselben Kontos — auffällig kurze Wegzeiten entlarven Abhaken ohne Ortswechsel.
-- Zähler im Actiondef (`counter`) und Report-SQL nutzen beide `{scope_where}`.
+- Zähler im Actiondef (`counter`) und Interface-SQL setzen **`{scope_where}`** ein; die Plattform
+  ersetzt den Platzhalter dort mit den Lese-Scopes des Aufrufers (fail-closed: ohne Lese-Scope
+  bleibt `AND 1=0`).
+- **Im Report-SQL wird `{scope_where}` NICHT ersetzt.** Steht der Platzhalter in der Report-Abfrage,
+  bricht die Abfrage mit einem SQL-Syntaxfehler ab; fehlt jede Scope-Bedingung, wertet der Report
+  **über alle Scopes** aus. Wer einen Report baut, schreibt den Scope darum ausdrücklich hin — die
+  Plattform scoped nicht für ihn. (Gegengeprüft 2026-10-14 an Report 156 „Kontrollen" und am
+  Fehlerlog.)
+- Filterwerte sind **Fremdeingabe** und laufen serverseitig durch die Escape-Funktion der
+  Datenbank. Das ist belegt (2026-10-14) — es war bis dahin genau hier eine Lücke, über die ein
+  `member` mit einem doppelten Anführungszeichen aus dem Filter ausbrechen und per `UNION` fremde
+  Tabellen lesen konnte.
 - Der Report-Header ist eine **kommagetrennte Zeichenkette** (`explode(',')`), keine JSON-Struktur,
   und darf in einer Überschrift kein Komma enthalten. Filter kommen in der Reihenfolge der
   `search_cols` und wirken **nur per POST**; die JSON-/GET-Route ignoriert sie.
