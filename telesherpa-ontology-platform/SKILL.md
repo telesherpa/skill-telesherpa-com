@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.4.15
+version: 1.5.0
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -222,6 +222,13 @@ Web Push und einer eigenen Dauer-Anmeldung; die Web-Session selbst bleibt bei 30
 Für Agenten relevant bei „ich muss mich ständig neu anmelden" und bei Push-Fragen:
 `references/features/pwa-and-session.md`.
 
+**Scan-Flows (QR):** Am Ort oder Gegenstand hängt ein Code mit der Objekt-UDID. Der Server
+entscheidet auf `POST /onto/object/match_actions`, welche Aktion passt (Bedingung und
+Verknüpfungsregel serverseitig geprüft, beide Scan-Reihenfolgen), ob sie sofort läuft oder Knöpfe
+zeigt, und liefert Zähler über `POST /onto/object/counter`. Der Nachweis steht im
+Aktionsprotokoll. Diese Wege sind **HTTP, nicht MCP** (Rolle `member`) — Details:
+`references/features/scan-and-checkpoints.md`.
+
 ## Features (Detail-Referenzen)
 
 Jedes Feature hat eine eigene ausführliche Referenz unter `references/features/`:
@@ -253,6 +260,10 @@ Jedes Feature hat eine eigene ausführliche Referenz unter `references/features/
 - **Echte Use-Cases** — end-to-end verifizierte Beispiele (Feldservice-Dokumentationslücke
   schließen, öffentlichen Scope kuratieren + monetarisieren), plus ein konzipiertes
   Qualitäts-Audit-Muster: `references/features/use-cases.md`
+- **Scan-Flows (QR)** — Kontrollpunkt, Einlass, Regal: der Server entscheidet, welche Aktion zu
+  einem Scan passt, und ob sie sofort läuft oder bestätigt werden muss; Bedingungen,
+  Verknüpfungsregeln, Zähler und dreistufige Rückmeldung am Actiondef, Nachweis im
+  Aktionsprotokoll: `references/features/scan-and-checkpoints.md`
 
 ## Best Practices (Rezepte für Self-Service)
 
@@ -278,6 +289,9 @@ zusammensetzt — empfohlene Muster, kein technisches Feature an sich:
   Geodaten; und die Falle, dass Schema-Introspektion und Objekt-Ansicht zwei getrennte Quellen
   sind. Lizenz-Übersicht für Kompatibilitäts-Aussagen:
   `references/best_practices/ontology-reference-mapping.md`
+- **Kontrollgänge per QR aufbauen** — Arbeitsanweisung von der Entscheidung über Typ und Felder bis
+  zur Abnahme am laufenden Dienst, mit dem Nachweis-Report und dem Missbrauchsblick (Wegzeit,
+  Zähler): `references/best_practices/checkpoint-rounds.md`
 
 ## Pitfalls (wichtigste)
 
@@ -405,6 +419,20 @@ zusammensetzt — empfohlene Muster, kein technisches Feature an sich:
     Actiondef ist eine Definition (Schema) und darf nur von einem Verwalter geändert werden".
     Denselben Schutz gibt es für `actiondef`-Werte: direktes Schreiben ins Objekt oder per
     `set_property` wird abgewiesen.
+29. **Felder und Aktionsschlüssel umbenennen ist ein Eingriff an sieben Stellen.** Betroffen sind
+    Property-Defs, Property-Sets, Objekttypen, die **Datenwerte** (`onto_properties.key`), die
+    Actiondefs (Name, Feld `key` **und der Wert** der Property `key` — daran löst die Engine die
+    Aktion auf), die Historie in `onto_action_logs` (`action` **und** das JSON in `payload`), das
+    Report-SQL, Interfaces und Presets. Wer nur die Definition ändert, bekommt einen Report mit
+    null Zeilen und einen Scanner, der die Aktion nicht mehr findet. Vorher prüfen, ob der
+    Zielschlüssel frei ist — der Schlüssel ist je Scope eindeutig, und `area`, `code`, `title`,
+    `description` sind oft schon vergeben; sonst bricht die Änderung mittendrin ab. Beschriftungen
+    werden dabei zu Sprachschlüsseln (`mo.<Key>`), nicht zu Klartext.
+30. **Die Scan-Wege sind kein MCP-Werkzeug.** `POST /onto/object/match_actions`,
+    `POST /onto/object/execute_action`, `POST /onto/object/counter` und die Seite
+    `GET /ontouser/scan` laufen über HTTP mit Session/Bearer (Rolle `member`); in `tools/list`
+    stehen sie nicht. Beschreibt man sie, muss der HTTP-Weg mitgeliefert werden — und die
+    Oberflächenthemenseite (`themes/qrscan/`) ist Beispiel, nicht Vertrag.
 ## Versionierung
 
 Aktuelle Version siehe Frontmatter. Bei Fragen zu einer bestimmten Fähigkeit gilt: dieser
