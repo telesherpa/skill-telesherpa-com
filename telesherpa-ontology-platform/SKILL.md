@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.5.0
+version: 1.6.0
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -263,7 +263,9 @@ Jedes Feature hat eine eigene ausführliche Referenz unter `references/features/
 - **Scan-Flows (QR)** — Kontrollpunkt, Einlass, Regal: der Server entscheidet, welche Aktion zu
   einem Scan passt, und ob sie sofort läuft oder bestätigt werden muss; Bedingungen,
   Verknüpfungsregeln, Zähler und dreistufige Rückmeldung am Actiondef, Nachweis im
-  Aktionsprotokoll: `references/features/scan-and-checkpoints.md`
+  Aktionsprotokoll. Zwei erprobte Fälle sind durchbeschrieben: **Event-Einlasskontrolle** (Ticket,
+  zweiter Scan wird abgewiesen) und **chaotische Lagerhaltung** (Platz entsteht beim Einscannen):
+  `references/features/scan-and-checkpoints.md`
 
 ## Best Practices (Rezepte für Self-Service)
 

@@ -91,6 +91,72 @@ automatisch.* Ausnahmen gibt es nicht, auch nicht bei `scan.ausfuehrung: "auto"`
   Sprachdateien zeigt die Oberfläche den Rohschlüssel (`mo.Checkpoint`). Vorher prüfen, welche
   Schlüssel es schon gibt (`onto_i18n_matrix`) — `mo.Area` heißt „Areal", nicht „Bereich".
 
+## Anwendungsfall: Event-Einlasskontrolle (Typ `ticket`)
+
+Am Eingang wird das gedruckte Ticket gescannt. Ein **Code genügt** — es gibt kein Gegenüber-Objekt,
+denn der Gast muss nichts vorzeigen außer dem Ticket.
+
+| Teil | Konfiguration (erprobt) |
+|---|---|
+| Aktion | `qr_admit`, Label „Einlass: Ticket einlassen", `object_types: ["ticket"]`, Rolle `member` |
+| Bedingung | `admitted ne "ja"` → Meldung **„Dieses Ticket wurde schon eingelassen"** |
+| Wirkung | `admitted = "ja"`, `admitted_at = {now}`, Verknüpfung `concerns` von `{object_udid}` nach `{user_person}` mit `replace: "source"` (wer das Ticket gerade hält) |
+| Zähler | **„Schon eingelassen"**: aktive Tickets mit `admitted = "ja"` |
+| Rückmeldung | drei Stufen, `dedupe_ms: 2000` (derselbe Code binnen 2 s bucht nicht doppelt) |
+| Gegenstück | `qr_leave`, Label „Auslass: Ticket verlassen": Bedingung `admitted eq "ja"` → **„Dieses Ticket ist nicht auf der Veranstaltung"**; setzt `admitted = ""`, `left_at = {now}` und löst die Verknüpfung (`remove: true`, `require: "present"`) |
+
+Was daraus folgt — und warum es so gebaut ist:
+
+- **Die Bedingung ist die Kontrolle, nicht die Oberfläche.** Der zweite Scan wird serverseitig
+  abgewiesen und sagt in Klartext, warum. Am Eingang ist das der wichtigste Fall: er kommt
+  fünfhundertmal am Abend vor.
+- **Der Zustand `admitted` ist die Wahrheit**, die Verknüpfung zeigt nur, wer das Ticket zuletzt
+  hatte (`replace: "source"` — der letzte Halter gewinnt).
+- **Zähler zählen Zustand, nicht Ereignisse.** „Schon eingelassen" ist die Zahl der Tickets im
+  Zustand eingelassen. Wer „aktuell drin" will, muss die Ausgelassenen abziehen (`left_at`
+  berücksichtigen) — sonst steht am Abend die Gesamtzahl aller Einlässe da.
+- **`qr_leave` läuft nie automatisch**: es löst eine Verknüpfung, also gibt es Knöpfe. `qr_admit`
+  läuft bei einem Code sofort (nur `remove` erzwingt Bestätigung, `replace` nicht — wer eine
+  bewusste Tipp-Bestätigung will, setzt `scan.ausfuehrung: "bestaetigen"`).
+- **Ein Ticket ohne Veranstaltungsbezug ist wertlos.** `event` gehört gefüllt, sonst zählt der
+  Zähler Tickets aus allen Veranstaltungen zusammen.
+- **Was der Nachweis nicht kann:** er zeigt Ticket, Zeit und Konto — nicht, dass die Person
+  anwesend war, und nicht, dass niemand mit zwei Tickets zweimal eintritt. Wer das braucht,
+  arbeitet mit Person statt Ticket (eigener Auftrag).
+
+## Anwendungsfall: Chaotische Lagerhaltung (Typen `package`, `storage`)
+
+Kein fester Platz: **das Paket bekommt seinen Platz in dem Moment, in dem es hingestellt wird.**
+Der Platz ist ein Objekt (`storage`) mit eigenem aufgeklebten Code — eine Regalnummer, ein
+Bodenfeld, eine Kiste.
+
+| Teil | Konfiguration (erprobt) |
+|---|---|
+| Einchecken | `qr_shelf_in`, Label „Regal: Paket einchecken", `object_types: ["package"]`, Prompt `place` (`required`, `object_types: ["storage"]` → **Objektauswahl**, der Client füllt die UDID ein) |
+| Verknüpfung | `concerns` von `{object_udid}` nach `{place}`, `replace: "source"`, `require: "absent"` → Meldung **„Das Paket ist an diesem Platz schon eingecheckt"** |
+| Auschecken | `qr_shelf_out`: setzt `place = ""` und löst dieselbe Verknüpfung (`remove: true`, `require: "present"`) → **„Das Paket ist an diesem Platz nicht eingecheckt"** |
+
+Was daraus folgt:
+
+- **Zwei Codes, aber die Reihenfolge ist frei.** Der Client kann Paket zuerst und Platz zuerst
+  scannen — der Server prüft beide Wege und legt fest, worauf ausgeführt wird. Wer als erstes
+  scannt, ist keine Bedienregel, die man dem Lager erklären muss.
+- **Der Regalcode ist die Adresse.** Es gibt keine Stammdatenpflege vorab: Platzobjekt anlegen,
+  Code drucken, ankleben. Deshalb funktioniert „chaotisch" überhaupt — das Regal muss nicht in
+  einer Liste stehen, es muss nur einen Code tragen.
+- **`require: "absent"` / `"present"` machen den Fehler sichtbar.** Doppelte Einbuchung oder
+  Ausbuchung am falschen Regal enden in einem Satz, nicht in einem stillen Datenfehler.
+- **Auschecken läuft nie automatisch** (`remove`) — dort wird bewusst getippt. Einchecken darf
+  nach dem Prompt sofort laufen.
+- **Ein Zustand, nicht zwei.** Aktuell führt die Einbuchung nur die Verknüpfung, die Ausbuchung
+  räumt zusätzlich das Feld `place` am Paket. Das ist ein Widerspruch in der Quelle der Wahrheit:
+  entweder Verknüpfung **oder** Feld pflegen. Ein Zustand, den man doppelt führt, fällt irgendwann
+  auseinander. (Erbe: das Testpaket trägt noch den alten Wert `platz_udid` — nicht deklariert,
+  Aufräumen wäre eine Datenänderung.)
+- **Kein Platz pro Paket im Modell.** Die Aussage „Paket P liegt in Kiste K" steckt in der
+  Verknüpfung, nicht in einer Liste. Auswertungen („wie viele Pakete in dieser Kiste") zählen über
+  die Verknüpfung; ein Zähler auf der Regalseite ist noch nicht gebaut.
+
 ## Nachweis
 
 - Quelle ist `onto_action_logs`. Für den Kontrollnachweis zählt jede Ausführung mit
@@ -117,3 +183,10 @@ automatisch.* Ausnahmen gibt es nicht, auch nicht bei `scan.ausfuehrung: "auto"`
 4. **Der Client cached.** Nach jeder Änderung an `themes/qrscan/*.js` den Cache-Buster prüfen
    (`?v=<filemtime>`); sonst testet der Nutzer die alte Fassung.
 5. **Der Fehlertext gehört dem Nutzer.** `message`/`text` in Klartext formulieren, keine Codes.
+6. **`replace` erzwingt keine Bestätigung — nur `remove` tut das.** Wer beim Einlass einen bewussten
+   Tipp will, verlässt sich nicht auf die Verknüpfungsart, sondern setzt `scan.ausfuehrung:
+   "bestaetigen"`. Umgekehrt gilt: eine Aktion ohne `remove` läuft bei genau einem Kandidaten
+   sofort — auch wenn sie eine bestehende Verknüpfung ersetzt.
+7. **Derselbe Zustand an zwei Stellen ist ein Fehler mit Ansage.** Verknüpfung **und** Feld
+   (`place`) gleichzeitig zu führen, klingt harmlos und fällt erst auf, wenn die beiden
+   auseinanderlaufen. Eine Quelle der Wahrheit festlegen, die andere nur lesen.
