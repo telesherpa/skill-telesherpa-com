@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.6.1
+version: 1.6.2
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -434,7 +434,7 @@ zusammensetzt — empfohlene Muster, kein technisches Feature an sich:
     `POST /onto/object/execute_action`, `POST /onto/object/counter` und die Seite
     `GET /ontouser/scan` laufen über HTTP mit Session/Bearer (Rolle `member`); in `tools/list`
     stehen sie nicht. Beschreibt man sie, muss der HTTP-Weg mitgeliefert werden — und die
-    Oberflächenthemenseite (`themes/qrscan/`) ist Beispiel, nicht Vertrag.
+    Oberfläche ist Beispiel, nicht Vertrag.
 ## Versionierung
 
 Aktuelle Version siehe Frontmatter. Bei Fragen zu einer bestimmten Fähigkeit gilt: dieser

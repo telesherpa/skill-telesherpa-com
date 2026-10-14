@@ -112,7 +112,7 @@ Punkt, Soll aus `interval_min`, Bewertung, voriger Punkt, Wegzeit, Rundgang.
   Reihenfolge der `search_cols`; die JSON-/GET-Route ignoriert sie.
 - **Den Scope im Report-SQL ausschreiben.** `{scope_where}` wird im Report **nicht** ersetzt (das
   gilt nur für Actiondef-Zähler und Interface-SQL): mit Platzhalter bricht die Abfrage ab, ohne
-  Scope-Bedingung wertet sie über alle Scopes aus. Beides am 2026-10-14 gegengeprüft.
+  Scope-Bedingung wertet sie über alle Scopes aus.
 - `candownload = 1` gibt den CSV-Export frei (für Prüfungen und Akten).
 - `candownload` heißt auch: was der Report zeigt, lässt sich als Datei mitnehmen. Scope und Filter
   sind damit Teil der Zusage an den Kunden, nicht nur eine Anzeigefrage.

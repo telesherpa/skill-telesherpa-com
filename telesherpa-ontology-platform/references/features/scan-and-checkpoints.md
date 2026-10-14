@@ -14,10 +14,9 @@ bestätigen muss, und mit dem Nachweis im Aktionsprotokoll.
 5. Der **Nachweis** entsteht im Aktionsprotokoll `onto_action_logs`, je Ausführung eine Zeile mit
    `action` (Aktionsschlüssel), Objekt, Konto und `scope_id`.
 
-Die Oberfläche ist eine Themenseite: `views/ontouser/scan.php` (Route `GET /ontouser/scan`, Rolle
-`member`) lädt `themes/qrscan/scan.js` (Kamera, Ton, Rückmeldung) und
-`themes/qrscan/scan_page.js` (Liste, Knöpfe, Zähler; Cache-Buster `?v=<filemtime>`). Der **Vertrag
-ist der Server**, nicht die Seite — dieselben Aufrufe funktionieren aus jeder Oberfläche.
+Die mitgelieferte Oberfläche bedient die Route `GET /ontouser/scan` (Rolle `member`) — Kamera, Ton,
+Rückmeldung, Ergebnisliste und Knöpfe, mit Cache-Buster an den eigenen Dateien. Der **Vertrag ist
+der Server**, nicht die Seite — dieselben Aufrufe funktionieren aus jeder Oberfläche.
 
 ## Server-Vertrag (HTTP, Rolle `member`)
 
@@ -170,12 +169,11 @@ Was daraus folgt:
 - **Im Report-SQL wird `{scope_where}` NICHT ersetzt.** Steht der Platzhalter in der Report-Abfrage,
   bricht die Abfrage mit einem SQL-Syntaxfehler ab; fehlt jede Scope-Bedingung, wertet der Report
   **über alle Scopes** aus. Wer einen Report baut, schreibt den Scope darum ausdrücklich hin — die
-  Plattform scoped nicht für ihn. (Gegengeprüft 2026-10-14 an Report 156 „Kontrollen" und am
-  Fehlerlog.)
-- Filterwerte sind **Fremdeingabe** und laufen serverseitig durch die Escape-Funktion der
-  Datenbank. Das ist belegt (2026-10-14) — es war bis dahin genau hier eine Lücke, über die ein
-  `member` mit einem doppelten Anführungszeichen aus dem Filter ausbrechen und per `UNION` fremde
-  Tabellen lesen konnte.
+  Plattform scoped nicht für ihn.
+- Filterwerte sind **Fremdeingabe**. Für die eingebauten Filter behandelt die Plattform sie
+  serverseitig korrekt; für **selbst geschriebenes** SQL (Report-Abfrage, Interface-SQL) gilt das
+  nicht automatisch — dort müssen Spaltennamen aus der eigenen Definition stammen und Werte über die
+  Escape-Funktion der Datenbank laufen.
 - Der Report-Header ist eine **kommagetrennte Zeichenkette** (`explode(',')`), keine JSON-Struktur,
   und darf in einer Überschrift kein Komma enthalten. Filter kommen in der Reihenfolge der
   `search_cols` und wirken **nur per POST**; die JSON-/GET-Route ignoriert sie.
@@ -191,8 +189,8 @@ Was daraus folgt:
    obwohl die Aktionen im Protokoll stehen.
 3. **Plausibilität nicht in den Scan legen.** Der Scan muss schnell bleiben; die Bewertung rechnet
    der Report aus denselben Rohdaten.
-4. **Der Client cached.** Nach jeder Änderung an `themes/qrscan/*.js` den Cache-Buster prüfen
-   (`?v=<filemtime>`); sonst testet der Nutzer die alte Fassung.
+4. **Der Client cached.** Nach jeder Änderung an einer Client-Datei den Cache-Buster prüfen
+   (`?v=<Dateizeit>`); sonst testet der Nutzer die alte Fassung.
 5. **Der Fehlertext gehört dem Nutzer.** `message`/`text` in Klartext formulieren, keine Codes.
 6. **`replace` erzwingt keine Bestätigung — nur `remove` tut das.** Wer beim Einlass einen bewussten
    Tipp will, verlässt sich nicht auf die Verknüpfungsart, sondern setzt `scan.ausfuehrung:
