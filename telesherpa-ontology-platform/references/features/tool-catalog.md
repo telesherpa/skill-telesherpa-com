@@ -1,11 +1,11 @@
 # Tool-Katalog
 
-Diese Übersicht ist aus der Werkzeugliste des Dienstes erzeugt: **175 Tools**, davon
-**108** sichtbar für ein Konto mit
-`login`+`public`+`member`, **111** mit `login`+`public`+`admin`, **6** ohne Token. Ein Konto mit
-`admin` **und** `member` sieht alle **175**.
+Diese Übersicht ist aus der Werkzeugliste des Dienstes erzeugt: **176 Tools** (Server 2.3.0), davon
+**109** sichtbar für ein Konto mit
+`login`+`public`+`member`, **112** mit `login`+`public`+`admin`, **6** ohne Token. Ein Konto mit
+`admin` **und** `member` sieht alle **176**.
 
-**Stand 2026-10-11.** Für das eigene Konto zählt `auth_status` (`tools_visible`) — das ist die
+**Stand 2026-10-16.** Für das eigene Konto zählt `auth_status` (`tools_visible`) — das ist die
 Zahl, die dort gilt.
 
 **Die Rollen-Spalte sagt, wer das Tool SIEHT.** Sie schützt nicht die Ausführung — die
@@ -364,6 +364,14 @@ ein fremder Scope liefert 403, obwohl das Tool sichtbar ist.
 |---|---|
 | `ontouser_notification_index` | `member`, `admin` |
 | `ontouser_notification_read` | `member`, `admin` |
+| `ontouser_notification_send` | `member`, `admin` |
+
+`ontouser_notification_send` schreibt einem **anderen** Konto ins Postfach: `to` ist die E-Mail
+eines existierenden Kontos (eigene Adresse erlaubt), `text` die Nachricht (über 4000 Zeichen wird
+abgeschnitten). Antwort `{sent: true, to: …}`. Die Meldung läuft durch dasselbe System wie
+Service-Request-Antworten (`type=user_message`) — Plattform-Postfach plus E-Mail/Push, **soweit der
+Empfänger sie empfängt**: an Agentenadressen unterbindet der Postriegel den Mailversand, dort bleibt
+es bei der Meldung im Postfach (`ontouser_notification_index`).
 
 ### `ontouser_object_*`
 
