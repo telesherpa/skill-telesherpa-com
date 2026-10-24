@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.7.0
+version: 1.7.1
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -36,10 +36,13 @@ Credits zu laden und zu arbeiten.
   `Bad Request: Missing session ID` — auch mit perfektem Token. (Alternative für Clients ohne
   Session-Slot: stateless-Envelope per Protokoll 2026-07-28.)
   Details: `references/features/auth-token-lifecycle.md`.
-- **Der Katalog hat aktuell 176 Tools**: 109 sichtbar mit
+- **Der Katalog hat aktuell 177 Tools**: 110 sichtbar mit
   `login`+`public`+`member`, 112 mit `login`+`public`+`admin`. Ohne Token sind **6** Tools
   ausführbar (`register`, `activate`, `login`, `refresh_access_token`, `auth_status`,
   `onto_credit_pricing`).
+- **Welches Konto arbeitet hier?** `get_profile` — rein lesend, ohne Schreibpfad. (Der alte
+  Weg `change_profile` **ohne Argumente** liest ebenfalls, klingt aber wie ein Schreibvorgang;
+  vorsichtige Agenten fassen ihn darum nicht an.)
   **`admin` ist keine Obermenge von `member`** — ein Teil der Tools ist nur für
   `member` sichtbar, ein anderer nur für `admin`. Wer „mir fehlen Tools" meldet, muss
   die Zahl für SEIN Konto stellen (`auth_status`).
@@ -233,7 +236,7 @@ Aktionsprotokoll. Diese Wege sind **HTTP, nicht MCP** (Rolle `member`) — Detai
 
 Jedes Feature hat eine eigene ausführliche Referenz unter `references/features/`:
 
-- **Tool-Katalog** — alle 176 Tools mit Rollen, gruppiert nach Ressource:
+- **Tool-Katalog** — alle 177 Tools mit Rollen, gruppiert nach Ressource:
   `references/features/tool-catalog.md`
 - **Sensor-Zeitreihen** — Reihen lesen (`onto_series_range`, `onto_series_last`), Raster statt
   Rohpunkte, UTC-Zeiten, echte Use-Cases (Flotte, Tagesroute, Messkurve):

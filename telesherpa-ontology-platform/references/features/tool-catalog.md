@@ -1,11 +1,11 @@
 # Tool-Katalog
 
-Diese Übersicht ist aus der Werkzeugliste des Dienstes erzeugt: **176 Tools** (Server 2.3.0), davon
-**109** sichtbar für ein Konto mit
+Diese Übersicht ist aus der Werkzeugliste des Dienstes erzeugt: **177 Tools** (Server 2.3.0), davon
+**110** sichtbar für ein Konto mit
 `login`+`public`+`member`, **112** mit `login`+`public`+`admin`, **6** ohne Token. Ein Konto mit
-`admin` **und** `member` sieht alle **176**.
+`admin` **und** `member` sieht alle **177**.
 
-**Stand 2026-10-16.** Für das eigene Konto zählt `auth_status` (`tools_visible`) — das ist die
+**Stand 2026-10-24.** Für das eigene Konto zählt `auth_status` (`tools_visible`) — das ist die
 Zahl, die dort gilt.
 
 **Die Rollen-Spalte sagt, wer das Tool SIEHT.** Sie schützt nicht die Ausführung — die
@@ -75,7 +75,8 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 | `upload_staging_csv` | `member` | CSV in die Import-Staging-Ablage |
 | `upload_code_allowlist` | `member`, `admin` | XLSX/XLS-Bulk der E-Mail-Allowlist eines Invite-Codes |
 | `change_password` | `member` | Passwort ändern |
-| `change_profile` | `member` | Profil ändern |
+| `change_profile` | `member` | Profil ändern (ohne Argumente: Profil **lesen**) |
+| `get_profile` | `member` | Eigenes Profil rein lesend abrufen — kein Schreibpfad |
 | `renew_account` | `member` | Konto verlängern |
 | `get_notifications` | `member` | Benachrichtigungen |
 
