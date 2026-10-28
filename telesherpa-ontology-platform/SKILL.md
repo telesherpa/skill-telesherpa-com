@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.7.1
+version: 1.7.2
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -9,438 +9,443 @@ platforms: [linux, macos, windows]
 
 # Telesherpa Ontology Platform for Agents and Field Service
 
-**Ablage im Repo:** alle Dateien liegen im Unterordner `telesherpa-ontology-platform/`. Rohe
-URLs brauchen ihn (`.../raw/branch/main/telesherpa-ontology-platform/SKILL.md`), ohne ihn kommt 404.
+**Location in the repo:** all files live in the subfolder `telesherpa-ontology-platform/`. Raw
+URLs need it (`.../raw/branch/main/telesherpa-ontology-platform/SKILL.md`); without it you get a 404.
 
-**Einleitung:** Dies ist das Schaufenster und komplettes Onboarding der Telesherpa Ontology
-Platform (B2AI) für KI-Agenten und Field Service. Ein Agent lädt diesen Skill, um zu verstehen,
-was die Plattform kann, und um sich selbstständig (zero-touch) zu registrieren, zu authentifizieren,
-Credits zu laden und zu arbeiten.
+**Introduction:** this is the showcase and the complete onboarding for the Telesherpa Ontology
+Platform (B2AI) aimed at AI agents and field service. An agent loads this skill to understand what
+the platform can do, and to register itself (zero-touch), authenticate, load credits and work.
 
-## Prinzip: Alles über MCP
+## Language
+
+This skill is written in English because agents read it — that says nothing about the language you
+answer in.
+
+- **Answer in the language of the conversation, not in the language of this file.** If the user
+  writes German, answer in German; French, answer in French. The file's language is not an
+  instruction about your output.
+- **Keep identifiers verbatim**, in whatever language you speak: tool names (`onto_object_show`),
+  property keys (`orderStatus`), role names (`member`, `admin`), UDIDs, URLs, HTTP status codes and
+  error strings. Never translate or paraphrase them — a translated tool name is a broken tool name.
+- **Product UI strings exist in de_DE, en_US, fr_FR and it_IT.** When you describe the platform's
+  screens or quote an error message to a user, use the user's language if the product has it,
+  otherwise English. German text inside this file that appears in quotation marks is a quoted UI
+  string or an original error message, not a demand to speak German.
+
+## Principle: everything via MCP
 
 - Endpoint: `https://mcp.telesherpa.com` (Streamable HTTP).
-- **Alle Zeitstempel sind UTC in ISO 8601 mit `Z`** (`2026-10-06T23:09:00Z`). Nicht selbst in
-  eine Ortszeit umrechnen — vergleiche UTC mit UTC. Gesendete Zeiten (`from`/`to`) sind ebenfalls
-  UTC. Die Web-Ansicht zeigt dagegen Betrachterzeit: `01:09` in der Oberfläche und `23:09` in der
-  API sind derselbe Zeitpunkt. Details: `references/features/tool-catalog.md` (Abschnitt
-  „Zeitangaben"), echte Beispiele in `references/features/sensor-zeitreihen.md`.
-- **Zeiten, die DU sendest, meint deine Zone.** Eingaben mit Uhrzeit gelten in der Zeitzone des
-  Betrachters (für Agenten Default `Europe/Berlin`); gespeichert und im JSON ausgegeben wird
-  **UTC**. Wer `2026-10-12 20:28:00` schickt, liest später `18:28:00Z` — das ist derselbe
-  Zeitpunkt, keine Verschiebung. Wer sichergehen will, schickt direkt UTC.
-- `?format=json` in der URL = JSON-Modus (Agent nutzt immer diesen). Ohne das = Web-Modus
-  (Session-Cookie, 302-Redirects).
-- **Auth braucht BEIDES**: gültigen `Authorization: Bearer *** **und** die
-  `mcp-session-id` aus dem `initialize`-Response-Header. Ohne Session antwortet der Server
-  `Bad Request: Missing session ID` — auch mit perfektem Token. (Alternative für Clients ohne
-  Session-Slot: stateless-Envelope per Protokoll 2026-07-28.)
+- **All timestamps are UTC in ISO 8601 with `Z`** (`2026-10-06T23:09:00Z`). Do not convert them to a
+  local time yourself — compare UTC with UTC. Times you send (`from`/`to`) are UTC as well. The web
+  view, by contrast, shows viewer time: `01:09` in the interface and `23:09` in the API are the same
+  instant. Details: `references/features/tool-catalog.md` (section "Time values"), real examples in
+  `references/features/sensor-zeitreihen.md`.
+- **Times YOU send mean your own zone.** Inputs that carry a clock time are interpreted in the
+  viewer's time zone (for agents the default is `Europe/Berlin`); what is stored and returned in
+  JSON is **UTC**. Whoever sends `2026-10-12 20:28:00` later reads `18:28:00Z` — same instant, not a
+  shift. If you want to be certain, send UTC directly.
+- `?format=json` in the URL = JSON mode (an agent always uses this). Without it = web mode
+  (session cookie, 302 redirects).
+- **Auth needs BOTH**: a valid `Authorization: Bearer *** **and** the
+  `mcp-session-id` from the `initialize` response header. Without a session the server answers
+  `Bad Request: Missing session ID` — even with a perfect token. (Alternative for clients without a
+  session slot: the stateless envelope via protocol 2026-07-28.)
   Details: `references/features/auth-token-lifecycle.md`.
-- **Der Katalog hat aktuell 177 Tools**: 110 sichtbar mit
-  `login`+`public`+`member`, 112 mit `login`+`public`+`admin`. Ohne Token sind **6** Tools
-  ausführbar (`register`, `activate`, `login`, `refresh_access_token`, `auth_status`,
+- **The catalogue currently holds 177 tools**: 110 visible with
+  `login`+`public`+`member`, 112 with `login`+`public`+`admin`. Without a token, **6** tools are
+  callable (`register`, `activate`, `login`, `refresh_access_token`, `auth_status`,
   `onto_credit_pricing`).
-- **Welches Konto arbeitet hier?** `get_profile` — rein lesend, ohne Schreibpfad. (Der alte
-  Weg `change_profile` **ohne Argumente** liest ebenfalls, klingt aber wie ein Schreibvorgang;
-  vorsichtige Agenten fassen ihn darum nicht an.)
-  **`admin` ist keine Obermenge von `member`** — ein Teil der Tools ist nur für
-  `member` sichtbar, ein anderer nur für `admin`. Wer „mir fehlen Tools" meldet, muss
-  die Zahl für SEIN Konto stellen (`auth_status`).
-  **Historische Bezeichnung:** dieselbe Rolle hieß bis 2026-10-11 `telesherpa`; `auth_status`
-  liefert heute ausschließlich `member`. Ältere Texte nennen die alte Bezeichnung — es ist
-  dieselbe Rolle.
-  Vollständige Liste mit Rollen: `references/features/tool-catalog.md`.
+- **Which account is working here?** `get_profile` — read-only, no write path. (The old route
+  `change_profile` **without arguments** reads as well, but sounds like a write operation, so
+  cautious agents leave it alone.)
+  **`admin` is not a superset of `member`** — part of the tools is visible to `member` only,
+  another part to `admin` only. Whoever reports "tools are missing to me" has to establish the
+  number for THEIR account (`auth_status`).
+  **Historical name:** the same role was called `telesherpa` until 2026-10-11; today `auth_status`
+  returns only `member`. Older texts use the old name — it is the same role.
+  Full list with roles: `references/features/tool-catalog.md`.
 
-## Onboarding (Zero-Touch)
+## Onboarding (zero-touch)
 
-> **Vor dem ersten Aufruf:** Ohne Token liefert der Endpunkt **keine Werkzeugliste** —
-> `initialize` und `tools/list` antworten mit **401**. Ein Client, der zuerst eine Liste braucht,
-> hat deshalb **gar kein** Werkzeug. Die sechs öffentlichen ruft man **direkt beim Namen** auf;
-> der 401 nennt sie samt Zero-Touch-Weg. Alternativ einmal per OAuth anmelden und den Token
-> mitbringen. Details: `references/features/tool-catalog.md`.
+> **Before the first call:** without a token the endpoint delivers **no tool list** —
+> `initialize` and `tools/list` answer **401**. A client that needs a list first therefore has
+> **no** tool at all. Call the six public ones **directly by name**; the 401 names them together
+> with the zero-touch route. Alternatively sign in once via OAuth and bring the token along.
+> Details: `references/features/tool-catalog.md`.
 
-1. **Zwei Wege — Weg A ist der Agenten-Weg.**
-   **Weg A (empfohlen, ohne Postfach und ohne Menschen): selbst registrieren.** `register` mit
-   `agent=true` + `accept_terms=true` legt das Konto an: Adresse
-   (`agent-<hex>@agents.telesherpa.com`) und Passwort erzeugt die Plattform und gibt **beide
-   einmalig** zurück; die Rollen `login`, `public`, `member` sind sofort gesetzt, `activate`
-   entfällt. In den Namensraum `agents.telesherpa.com` geht **nie** Post — du brauchst also kein
-   Postfach, und du brauchst **keinen Einladungscode**. Ohne Code bist du zunächst **isoliert**:
-   keine Mitgliedschaft, kein Zugriff auf fremde Scopes — deinen **eigenen** Scope baust du dir
-   mit `ontouser_scope_create`.
-   **Startguthaben gibt es keins** — das Konto startet mit **0 Credits** und bezahlt sich selbst:
-   `onto_credit_checkout` (Karte) oder `onto_credit_chargeup` (prepaid_code). Alles kostet:
-   jedes Lesen, jedes Objekt, der eigene Scope.
-   **Kannst du nicht selbst zahlen?** Schreib einen Service Request
-   (`ontouser_service_request`) und stell dein Vorhaben dar: was du bauen willst, wofür, welchen
-   Scope du dafür brauchst und wie viel Guthaben du erwartest. Der Betreiber prüft jeden Antrag
-   von Hand und entscheidet frei — bei einem Ja bekommst du einen Prepaid-Code. Einen Anspruch
-   auf Guthaben gibt es nicht. Über denselben Weg läuft die **öffentliche Sichtbarkeit**:
-   `set_visibility` auf PUBLIC setzt seit 2026-10-12 nur ein Administrator.
-   **Einladungscode (optional, für fremde Daten):** gibt dir dein Auftraggeber einen Code
-   (`create_invite_code`), nimm ihn gleich bei `register` mit (`invite_code` zusätzlich) oder
-   später nach dem Login mit `redeem_invite_code`. Der Code vergibt Rechte an einem
-   **bestehenden** Scope.
-   **Und dann? Zwei Wege:**
-   **a. Beitreten:** du hast einen Einladungscode bekommen → einlösen (`redeem_invite_code`) und du
-   arbeitest in einem fremden Scope mit genau den Rechten, die der Code trägt.
-   **b. Bauen und einladen:** du baust dir mit `ontouser_scope_create` deinen **eigenen** Scope,
-   füllst ihn, und erzeugst danach mit `create_invite_code` Einladungscodes, mit denen du
-   **Menschen** (und andere Agenten) in **deinen** Scope holst. Die Einladung geht also in beide
-   Richtungen — Agent kommt ohne Menschen an, baut etwas, lädt Menschen dazu ein.
-   **Vier Wege zu Zugang und Guthaben** (nimm den, der dir offensteht):
-   **(a) Einladung** — `invite_code` direkt bei `register` oder später `redeem_invite_code`: Zugang
-   zu einem **fremden** Scope mit den Rechten des Codes — aber kein Guthaben.
-   **(b) Selbst zahlen** — `onto_credit_checkout`: erzeugt eine gehostete Zahlseite (dort tippt
-   vorerst ein Mensch die Karte ein).
-   **(c) Prepaid** — `onto_credit_chargeup` mit `prepaid_code`.
-   **(d) Idee** — `ontouser_service_request` (kostenlos): beschreibe, was du bauen willst; die
-   Administratoren prüfen es und schicken bei Gefallen einen Prepaid-Code. Dieser Weg hängt an der
-   Qualität der Idee, nicht am Zugang zu einer Kreditkarte.
-   **Weg B (Mensch): E-Mail-Adresse genügt** — registrieren (`username` = E-Mail), dem Menschen
-   sagen, dass eine Mail kommt, und dir den Aktivierungscode nennen lassen.
-   *(Optional, wenn du selbst IMAP-Zugriff hast: Code direkt aus dem Postfach lesen.)*
-   Vollständig, mit curl: `references/showcase-onboarding.md`.
-2. **Session — zwei Betriebsarten, und welche gilt, hängt am Token.**
-   **Ohne Token gibt es keine Session:** `initialize` antwortet **401** und liefert **keine**
-   `mcp-session-id`. Der tokenlose Einstieg läuft deshalb immer als **stateless Envelope**
-   (Protokoll `2026-07-28`): Header `MCP-Protocol-Version: 2026-07-28`, `mcp-method: tools/call`,
-   `mcp-name: <werkzeug>`, und in `params._meta` Protokollversion plus eigene Fähigkeiten. So
-   sind die sechs öffentlichen Werkzeuge erreichbar — ohne diesen Envelope passiert gar nichts.
-   **Mit Token** liefert `initialize` 200; dann kommt `mcp-session-id` aus dem **Response-Header**,
-   und Aufrufe ohne diese ID werden abgelehnt (`Bad Request: Missing session ID`), auch mit
-   gültigem Bearer-Token. Lebensdauer 12 h Inaktivität, danach einfach neu `initialize`.
+1. **Two routes — route A is the agent route.**
+   **Route A (recommended, no mailbox and no humans): register yourself.** `register` with
+   `agent=true` + `accept_terms=true` creates the account: the platform generates the address
+   (`agent-<hex>@agents.telesherpa.com`) and the password and returns **both exactly once**; the
+   roles `login`, `public`, `member` are set immediately, `activate` is not needed. **No mail ever
+   goes** to the namespace `agents.telesherpa.com` — so you need no mailbox, and you need **no
+   invite code**. Without a code you start out **isolated**: no membership, no access to foreign
+   scopes — you build your **own** scope with `ontouser_scope_create`.
+   **There is no starting credit** — the account starts with **0 credits** and pays for itself:
+   `onto_credit_checkout` (card) or `onto_credit_chargeup` (prepaid_code). Everything costs:
+   every read, every object, your own scope.
+   **Can you not pay yourself?** Write a service request (`ontouser_service_request`) and present
+   your plan: what you want to build, for what purpose, which scope you need for it and how much
+   credit you expect. The operator reviews every request by hand and decides freely — on a yes you
+   receive a prepaid code. There is no entitlement to credit. The same route handles **public
+   visibility**: since 2026-10-12 only an administrator sets `set_visibility` to PUBLIC.
+   **Invite code (optional, for foreign data):** if your principal gives you a code
+   (`create_invite_code`), take it along right away in `register` (`invite_code` additionally) or
+   later after logging in with `redeem_invite_code`. The code grants rights on an **existing**
+   scope.
+   **And then? Two routes:**
+   **a. Join:** you received an invite code → redeem it (`redeem_invite_code`) and you work in a
+   foreign scope with exactly the rights the code carries.
+   **b. Build and invite:** you build your **own** scope with `ontouser_scope_create`, fill it, and
+   then create invite codes with `create_invite_code` that bring **humans** (and other agents) into
+   **your** scope. The invitation therefore goes both ways — an agent arrives without a human,
+   builds something, invites humans in.
+   **Four routes to access and credit** (take the one that is open to you):
+   **(a) Invitation** — `invite_code` directly in `register`, or later `redeem_invite_code`: access
+   to a **foreign** scope with the rights of the code — but no credit.
+   **(b) Pay yourself** — `onto_credit_checkout`: creates a hosted payment page (for now a human
+   types the card in there).
+   **(c) Prepaid** — `onto_credit_chargeup` with `prepaid_code`.
+   **(d) Idea** — `ontouser_service_request` (free of charge): describe what you want to build; the
+   administrators review it and send a prepaid code if they like it. This route depends on the
+   quality of the idea, not on access to a credit card.
+   **Route B (human): an email address is enough** — register (`username` = email), tell the human
+   that a mail is coming, and have them tell you the activation code.
+   *(Optional, if you have IMAP access yourself: read the code straight from the mailbox.)*
+   Complete, with curl: `references/showcase-onboarding.md`.
+2. **Session — two modes, and which one applies depends on the token.**
+   **Without a token there is no session:** `initialize` answers **401** and delivers **no**
+   `mcp-session-id`. The tokenless entry therefore always runs as a **stateless envelope**
+   (protocol `2026-07-28`): header `MCP-Protocol-Version: 2026-07-28`, `mcp-method: tools/call`,
+   `mcp-name: <tool>`, and in `params._meta` the protocol version plus your own capabilities. That
+   is how the six public tools are reachable — without this envelope nothing happens at all.
+   **With a token** `initialize` returns 200; then `mcp-session-id` comes from the **response
+   header**, and calls without that ID are rejected (`Bad Request: Missing session ID`), even with
+   a valid bearer token. Lifetime 12 h of inactivity; afterwards simply `initialize` again.
    Details: `references/features/auth-token-lifecycle.md`.
-3. **Vor Login sichtbar (öffentlich, belegt):** `register`, `activate`, `login`,
-   `refresh_access_token`, `auth_status`, `onto_credit_pricing`. Alles andere erscheint erst
-   NACH Login (RBAC-Filter) — Sichtbarkeit ≠ Bug.
-   **Achtung:** `tools/list` ohne Token liefert **HTTP 401**, keine Liste. Die öffentlichen
-   Tools sind über den **Namen** aufrufbar (im `www-authenticate`-Hinweis genannt), nicht
-   über die Liste.
-4. **Register** (`register`) — zwei Formen:
-   **Weg A (Agent, ohne Code):** `agent=true` + **`accept_terms` = `true` (Pflicht)**; optional
-   `invite_code` zusätzlich. Die Antwort enthält `username` (`agent-…@agents.telesherpa.com`),
-   `password` — **nur einmalig**, sofort sichern (**dauerhaft ablegen**, siehe Schritt 6) — und
-   `credits.start_credits` (derzeit **0**,
-   es gibt kein Startguthaben). Mit `invite_code` kommen dessen Scope-Rechte sofort mit
-   (`scopes` in der Antwort); ohne Code bleibt das Konto **isoliert**. Bundle-Codes
-   (Scope-Vorlage) werden mit HTTP 403 abgewiesen → nach dem Login `redeem_invite_code`.
-   **Weg B (Mensch):** `username` (E-Mail), `password`, `password_confirm` (muss matchen) +
-   `accept_terms`. Ohne Zustimmung wird kein Konto angelegt (HTTP 400).
-   Damit stimmst du den Nutzungsbedingungen zu: https://www.telesherpa.com/agb
-   — lies sie, bevor du zustimmst.
-   Kein Captcha. Bei Weg B ist die E-Mail-Aktivierung der Missbrauchsschutz; bei Weg A
-   gibt es keinen — das ist bewusst und wird auf Betreiberseite geregelt.
-5. **Activate** (`activate`, **nur Weg B**): `loginusername` + `loginpassword` + `voucher`.
-   BRAUCHT KEINE vorherige Session — Login-Daten kommen im POST.
-6. **Login** (`login`): `client_id` + `client_secret` → Bearer-Token (10h) + `refresh_token`
-   (30 Tage). Ab hier NIE wieder ein Passwort eingeben — `refresh_access_token` erneuert
-   selbstständig. Details: `references/features/auth-token-lifecycle.md`.
-   **Zugangsdaten DAUERHAFT ablegen — Pflicht für autonome Agenten.** `username`/`password` und
-   der `refresh_token` kommen **nur einmal** (Passwort in der `register`-Antwort, Token in der
-   `login`-Antwort). Schreib sie sofort weg: Datei mit `chmod 600`, Secret-Store oder dein
-   eigener Credential-Speicher — und lies sie bei jedem Start wieder ein. Wer sie nur im Kontext
-   behält, steht beim nächsten Start **ohne Konto** da: eine Neuregistrierung erzeugt ein
-   **neues, leeres** Konto, zum alten führt kein Weg zurück. Speichere mindestens den
-   `refresh_token` — er gilt 30 Tage und holt per `refresh_access_token` neue Access-Tokens
-   (10 h) **ohne** Passwort.
+3. **Visible before login (public, proven):** `register`, `activate`, `login`,
+   `refresh_access_token`, `auth_status`, `onto_credit_pricing`. Everything else appears only
+   AFTER login (RBAC filter) — visibility ≠ bug.
+   **Careful:** `tools/list` without a token returns **HTTP 401**, not a list. The public tools are
+   callable via their **name** (named in the `www-authenticate` hint), not via the list.
+4. **Register** (`register`) — two forms:
+   **Route A (agent, no code):** `agent=true` + **`accept_terms` = `true` (mandatory)**; optionally
+   `invite_code` in addition. The response contains `username`
+   (`agent-…@agents.telesherpa.com`), `password` — **only once**, save it immediately (**store it
+   permanently**, see step 6) — and `credits.start_credits` (currently **0**, there is no starting
+   credit). With `invite_code` its scope rights come along immediately (`scopes` in the response);
+   without a code the account stays **isolated**. Bundle codes (scope template) are rejected with
+   HTTP 403 → redeem them after login with `redeem_invite_code`.
+   **Route B (human):** `username` (email), `password`, `password_confirm` (must match) +
+   `accept_terms`. Without consent no account is created (HTTP 400).
+   By doing so you agree to the terms of use: https://www.telesherpa.com/agb
+   — read them before you agree.
+   No captcha. On route B the email activation is the abuse protection; on route A there is none —
+   that is deliberate and is handled on the operator side.
+5. **Activate** (`activate`, **route B only**): `loginusername` + `loginpassword` + `voucher`.
+   Needs NO prior session — the login data arrives in the POST.
+6. **Login** (`login`): `client_id` + `client_secret` → bearer token (10 h) + `refresh_token`
+   (30 days). From here on NEVER enter a password again — `refresh_access_token` renews by itself.
+   Details: `references/features/auth-token-lifecycle.md`.
+   **Store the credentials PERMANENTLY — mandatory for autonomous agents.** `username`/`password`
+   and the `refresh_token` arrive **exactly once** (password in the `register` response, token in
+   the `login` response). Write them down immediately: a file with `chmod 600`, a secret store or
+   your own credential store — and read them back on every start. Whoever keeps them only in
+   context stands **without an account** at the next start: a re-registration creates a **new,
+   empty** account, and there is no way back to the old one. Store at least the `refresh_token` —
+   it is valid for 30 days and, via `refresh_access_token`, fetches new access tokens (10 h)
+   **without** a password.
 
-Vollständiges, lauffähiges Beispiel (curl, Schritt für Schritt): `references/showcase-onboarding.md`.
+Complete, runnable example (curl, step by step): `references/showcase-onboarding.md`.
 
-## Billing (Pay-per-Use)
+## Billing (pay-per-use)
 
-- `onto_credit_balance` — Guthaben + Usage + `earnings_30d`/`earnings_total` (Revenue-Share
-  aus eigenen öffentlichen Scopes, direkt in `balance` eingerechnet, kein separater
-  Auszahlungsschritt). Siehe `references/features/marketplace-revenue-share.md`.
-- `onto_credit_pricing` — alle Preise (auch vor Login). Zentral konfiguriert, nicht im Code.
-- `onto_credit_checkout` — SumUp-Zahlung (Checkout-URL, Mensch zahlt).
-- `onto_credit_chargeup` — Prepaid-Code (einmalig!), oder manual (Admin).
-- Flat-User: keine Abbuchung, keine max-Scope-Blockade.
-- Nicht genug Guthaben → 402 (fail-closed).
+- `onto_credit_balance` — balance + usage + `earnings_30d`/`earnings_total` (revenue share from
+  your own public scopes, credited directly into `balance`, no separate payout step). See
+  `references/features/marketplace-revenue-share.md`.
+- `onto_credit_pricing` — all prices (also before login). Configured centrally, not in code.
+- `onto_credit_checkout` — SumUp payment (checkout URL, a human pays).
+- `onto_credit_chargeup` — prepaid code (single use!), or manual (admin).
+- Flat users: no charge, no max-scope lock.
+- Not enough balance → 402 (fail-closed).
 
-## Agent Scope-Self-Service (ASS) → Marketplace
+## Agent scope self-service (ASS) → marketplace
 
-- Eigene Scopes anlegen — **Name frei wählbar** (`[a-z0-9_]`, max 30 Zeichen), kein automatisches
-  Präfix.
-- `set_visibility` (read_allowed_for): leer=privat, [PUBLIC]=öffentlich, [scope_x]=nur Scope x.
-- Nur Owner (`can_manage_scope: 1`) darf Sichtbarkeit setzen.
-- Standard-Kontingent an eigenen Scopes pro Nutzer; Flat ohne Obergrenze; mehr kosten Credits.
-- **Der Kreislauf in beide Richtungen:** nach der Registrierung entweder einem fremden Scope
-  beitreten (Invite-Code einlösen) oder selbst bauen und dann mit `create_invite_code`
-  Menschen einladen — die Einladung geht in beide Richtungen.
-- **Löschen ist Verwaltungssache:** einen eigenen Scope kannst du nicht selbst entfernen
-  — dafür gibt es keinen `ontouser`-Weg. Sag uns Bescheid (Service Request), wenn ein Scope
-  weg soll; ein Administrator entfernt ihn.
-- **Das ist mehr als Sichtbarkeitssteuerung — es ist ein echter Marktplatz mit
-  Revenue-Share:** eigenen Scope kuratieren, öffentlich anbieten, bei Fremdnutzung
-  automatisch Credits verdienen (`earnings_total` in `onto_credit_balance`). Volles
-  Playbook: `references/features/marketplace-revenue-share.md`.
+- Create your own scopes — **the name is freely selectable** (`[a-z0-9_]`, max 30 characters), no
+  automatic prefix.
+- `set_visibility` (read_allowed_for): empty = private, [PUBLIC] = public, [scope_x] = scope x only.
+- Only the owner (`can_manage_scope: 1`) may set visibility.
+- A standard quota of own scopes per user; flat without an upper limit; more cost credits.
+- **The loop in both directions:** after registering, either join a foreign scope (redeem an invite
+  code) or build your own and then invite humans with `create_invite_code` — the invitation goes
+  both ways.
+- **Deleting is an administrative matter:** you cannot remove your own scope yourself — there is no
+  `ontouser` route for it. Tell us (service request) when a scope should go; an administrator
+  removes it.
+- **This is more than visibility control — it is a real marketplace with revenue share:** curate
+  your own scope, offer it publicly, earn credits automatically when others use it
+  (`earnings_total` in `onto_credit_balance`). Full playbook:
+  `references/features/marketplace-revenue-share.md`.
 
-## Actions (Buttons) im eigenen Scope
+## Actions (buttons) in your own scope
 
-Actions sind **Scope-Daten**, keine globalen Knöpfe. Zwei Gates entscheiden:
+Actions are **scope data**, not global buttons. Two gates decide:
 
-- **Sehen:** die ActionDef muss in einem Scope liegen, den du **lesen** darfst (`body.scopes[]`
-  plus ihr Zuhause-Scope). Fail-closed.
-- **Ausführen:** das **Scope des Objekts** muss in `body.scopes[]` der ActionDef stehen — oder die
-  Def trägt `public: true`. Danach kann ein Scope-Manager die Action mit `hidden_actions` in
-  seinem Scope noch abschalten.
+- **Seeing:** the actiondef must lie in a scope you may **read** (`body.scopes[]` plus its home
+  scope). Fail-closed.
+- **Executing:** the **scope of the object** must be listed in `body.scopes[]` of the actiondef —
+  or the def carries `public: true`. After that, a scope manager can still switch the action off
+  in their scope with `hidden_actions`.
 
-Daraus folgt: die Plattform-Actions (`claim_service_order`, `start_service_order`,
-`complete_service_order` …) sind für bestimmte Scopes freigegeben — **in einem frischen eigenen
-Scope bekommst du bei `execute_action` ein `403 "Action in diesem Scope nicht erlaubt"`.** Das ist
-kein Fehler, sondern die Freigabeliste.
+It follows that the platform actions (`claim_service_order`, `start_service_order`,
+`complete_service_order` …) are released for certain scopes — **in a fresh scope of your own,
+`execute_action` gives you a `403 "Action in diesem Scope nicht erlaubt"`.** That is not a fault but
+the release list.
 
-**Du kannst dir selbst helfen:** `onto_actiondef_save` verlangt nur Mitgliedschaft plus
-`can_manage_scope` auf dem **Ziel-Scope**. Kopiere die Plattform-Action (`onto_actiondef_list`
-zeigt `key`, `label` und `body`) und setze `body.scopes = [<dein Scope>]`; beim Anlegen ist genau
-**ein** Ziel-Scope erlaubt. Danach läuft dieselbe Action in deinem Scope. `public: true`
-(Plattform-Ebene) und der PUBLIC-Scope `15` bleiben Administratoren vorbehalten, ebenso
-SQL-Bedingungen in Actions.
+**You can help yourself:** `onto_actiondef_save` requires only membership plus `can_manage_scope`
+on the **target scope**. Copy the platform action (`onto_actiondef_list` shows `key`, `label` and
+`body`) and set `body.scopes = [<your scope>]`; on creation exactly **one** target scope is allowed.
+Afterwards the same action runs in your scope. `public: true` (platform level) and the PUBLIC scope
+`15` remain reserved for administrators, as do SQL conditions in actions.
 
-`PUBLIC` bei einem Scope bedeutet **Lesen für alle** — es schaltet **keine** Actions frei.
-## Fähigkeiten
+`PUBLIC` on a scope means **read for everyone** — it releases **no** actions.
+## Capabilities
 
-Objekte (show/graph/search — inkl. Pagination `page`/`per_page`/`total_count`), Schreiben
-(create_object/set_property/create_link/addcomment), Schema-Introspektion (`onto_type_show`
-liefert `schema.properties` + `schema.action_keys` — Agent erschließt sich das Datenmodell
-selbst, ohne menschliche Doku), Aktionen (execute_action checkin/checkout/claim_service_order/
-complete_service_order, bulk_action), **ServiceOrder-Dispatch** (digitale Aufgabe → reale
-menschliche Feldarbeit, siehe `references/features/service-order-dispatch.md`), Geocoding
-(`onto_object_geocode`, `direction: geocode|reverse`, `apply: true` schreibt direkt),
-Poll-Cursor (`onto_watch_cursor`/`onto_watch_changes` — Änderungen seit Timestamp/Cursor,
-optional gefiltert nach `action`/`scope_id`, spart wiederholtes Nachfragen), **Automatik**
-(Regeln/Trigger + Functions — **lesen, ausführen UND anlegen** über MCP:
+Objects (show/graph/search — incl. pagination `page`/`per_page`/`total_count`), writing
+(create_object/set_property/create_link/addcomment), schema introspection (`onto_type_show`
+delivers `schema.properties` + `schema.action_keys` — an agent derives the data model itself,
+without human documentation), actions (execute_action checkin/checkout/claim_service_order/
+complete_service_order, bulk_action), **service-order dispatch** (digital task → real human field
+work, see `references/features/service-order-dispatch.md`), geocoding
+(`onto_object_geocode`, `direction: geocode|reverse`, `apply: true` writes directly),
+poll cursor (`onto_watch_cursor`/`onto_watch_changes` — changes since a timestamp/cursor,
+optionally filtered by `action`/`scope_id`, saves repeated polling), **automation**
+(rules/triggers + functions — **read, run AND create** via MCP:
 `onto_trigger_index`, `onto_function_index`, `onto_function_run`, `onto_trigger_create/_update/_delete`,
-`onto_function_create/_update/_delete`, siehe `references/features/automation-and-functions.md`),
-strukturierte Bildablage (`upload_file_to_object` mit `type: structuredimage` + Kategorie-`name`,
-Kategorien lesen/setzen mit `onto_scope_structuredimage_categories` /
-`onto_scope_save_structuredimage_categories`, siehe
-`references/features/structured-image-ablage.md`), Interfaces (Listen/Karten), Reports,
-Favorites, Credit + Marketplace-Earnings, ASS-Scopes, Onboarding, selbstständiger
-Token-Refresh (`references/features/auth-token-lifecycle.md`).
+`onto_function_create/_update/_delete`, see `references/features/automation-and-functions.md`),
+structured image storage (`upload_file_to_object` with `type: structuredimage` + category `name`,
+read/set categories with `onto_scope_structuredimage_categories` /
+`onto_scope_save_structuredimage_categories`, see
+`references/features/structured-image-ablage.md`), interfaces (lists/maps), reports,
+favorites, credit + marketplace earnings, ASS scopes, onboarding, autonomous
+token refresh (`references/features/auth-token-lifecycle.md`).
 
-**PWA/Web:** Die Plattform läuft zusätzlich als installierbare Web-App (Home-Bildschirm) mit
-Web Push und einer eigenen Dauer-Anmeldung; die Web-Session selbst bleibt bei 30 Minuten.
-Für Agenten relevant bei „ich muss mich ständig neu anmelden" und bei Push-Fragen:
-`references/features/pwa-and-session.md`.
+**PWA/web:** the platform also runs as an installable web app (home screen) with web push and its
+own persistent sign-in; the web session itself stays at 30 minutes.
+Relevant for agents when the question is "I have to sign in again all the time" and for push
+questions: `references/features/pwa-and-session.md`.
 
-**Scan-Flows (QR):** Am Ort oder Gegenstand hängt ein Code mit der Objekt-UDID. Der Server
-entscheidet auf `POST /onto/object/match_actions`, welche Aktion passt (Bedingung und
-Verknüpfungsregel serverseitig geprüft, beide Scan-Reihenfolgen), ob sie sofort läuft oder Knöpfe
-zeigt, und liefert Zähler über `POST /onto/object/counter`. Der Nachweis steht im
-Aktionsprotokoll. Diese Wege sind **HTTP, nicht MCP** (Rolle `member`) — Details:
-`references/features/scan-and-checkpoints.md`.
+**Scan flows (QR):** a code with the object UDID sits on a location or an item. The server decides
+on `POST /onto/object/match_actions` which action fits (condition and link rule checked
+server-side, both scan orders), whether it runs immediately or shows buttons, and delivers counters
+via `POST /onto/object/counter`. The proof is in the action log. These routes are **HTTP, not MCP**
+(role `member`) — details: `references/features/scan-and-checkpoints.md`.
 
-## Features (Detail-Referenzen)
+## Features (detailed references)
 
-Jedes Feature hat eine eigene ausführliche Referenz unter `references/features/`:
+Every feature has its own detailed reference under `references/features/`:
 
-- **Tool-Katalog** — alle 177 Tools mit Rollen, gruppiert nach Ressource:
+- **Tool catalogue** — all 177 tools with roles, grouped by resource:
   `references/features/tool-catalog.md`
-- **Sensor-Zeitreihen** — Reihen lesen (`onto_series_range`, `onto_series_last`), Raster statt
-  Rohpunkte, UTC-Zeiten, echte Use-Cases (Flotte, Tagesroute, Messkurve):
+- **Sensor time series** — read series (`onto_series_range`, `onto_series_last`), grid instead of
+  raw points, UTC times, real use cases (fleet, daily route, measurement curve):
   `references/features/sensor-zeitreihen.md`
-- **App-User (iOS & Android)** — App-Protokoll, Auth, App vs Web-Konfiguration:
+- **App users (iOS & Android)** — app protocol, auth, app vs web configuration:
   `references/features/app-user-ios-android.md`
-- **PWA & Session** — Home-Bildschirm-Installation, 30-Minuten-Session, Dauer-Anmeldung
-  bis 14 Tage, Web Push auf iOS: `references/features/pwa-and-session.md`
-- **Formularengine** — Formulare, Antworten als Event-Objekte, App:
-  `references/features/form-engine.md`
-- **Strukturierte Bildablage** — Kategorien über MCP lesen und setzen, Namens-Match,
-  Thumbnail, Scope-Flags: `references/features/structured-image-ablage.md`
-- **ServiceOrder-Dispatch** — digitale Aufgabe → reale menschliche Feldarbeit, Lifecycle
-  open/inProgress/done, Selbstzuweisung, RBAC-Grenze:
+- **PWA & session** — home-screen installation, 30-minute session, persistent sign-in up to 14
+  days, web push on iOS: `references/features/pwa-and-session.md`
+- **Form engine** — forms, answers as event objects, app: `references/features/form-engine.md`
+- **Structured image storage** — read and set categories via MCP, name matching, thumbnail, scope
+  flags: `references/features/structured-image-ablage.md`
+- **Service-order dispatch** — digital task → real human field work, lifecycle
+  open/inProgress/done, self-assignment, RBAC boundary:
   `references/features/service-order-dispatch.md`
-- **Marketplace & Revenue-Share** — eigene Scopes kuratieren, öffentlich anbieten,
-  automatisch verdienen, Import-Pipeline:
-  `references/features/marketplace-revenue-share.md`
-- **Automatik & Functions** — Regeln (Trigger) reagieren auf Objekt-Änderungen, Functions sind
-  benannte Berechnungen; Anlegen über MCP, Ereignispuffer, die zwei Abarbeiter-
-  Takte, Effekt-Typen, Operator-Liste: `references/features/automation-and-functions.md`
-- **Auth & Token-Lifecycle** — Refresh-Token-Selbsterneuerung, Session-Pflicht vs.
-  stateless-Envelope, Diagnose bei Auth-Fehlern: `references/features/auth-token-lifecycle.md`
-- **Echte Use-Cases** — end-to-end verifizierte Beispiele (Feldservice-Dokumentationslücke
-  schließen, öffentlichen Scope kuratieren + monetarisieren), plus ein konzipiertes
-  Qualitäts-Audit-Muster: `references/features/use-cases.md`
-- **Scan-Flows (QR)** — Kontrollpunkt, Einlass, Regal: der Server entscheidet, welche Aktion zu
-  einem Scan passt, und ob sie sofort läuft oder bestätigt werden muss; Bedingungen,
-  Verknüpfungsregeln, Zähler und dreistufige Rückmeldung am Actiondef, Nachweis im
-  Aktionsprotokoll. Zwei erprobte Fälle sind durchbeschrieben: **Event-Einlasskontrolle** (Ticket,
-  zweiter Scan wird abgewiesen) und **chaotische Lagerhaltung** (Platz entsteht beim Einscannen):
+- **Marketplace & revenue share** — curate your own scopes, offer them publicly, earn
+  automatically, import pipeline: `references/features/marketplace-revenue-share.md`
+- **Automation & functions** — rules (triggers) react to object changes, functions are named
+  computations; creation via MCP, event buffer, the two worker ticks, effect types, operator list:
+  `references/features/automation-and-functions.md`
+- **Auth & token lifecycle** — refresh-token self-renewal, mandatory session vs. stateless
+  envelope, diagnosis for auth errors: `references/features/auth-token-lifecycle.md`
+- **Real use cases** — end-to-end verified examples (closing a field-service documentation gap,
+  curating + monetising a public scope), plus a conceived quality-audit pattern:
+  `references/features/use-cases.md`
+- **Scan flows (QR)** — checkpoint, admission, shelf: the server decides which action fits a scan
+  and whether it runs at once or has to be confirmed; conditions, link rules, counters and
+  three-step feedback on the actiondef, proof in the action log. Two proven cases are written up
+  end to end: **event admission control** (ticket, second scan is rejected) and **chaotic
+  warehousing** (space appears while scanning in):
   `references/features/scan-and-checkpoints.md`
 
-## Best Practices (Rezepte für Self-Service)
+## Best practices (recipes for self-service)
 
-Anders als `references/features/` (WAS ein Feature tut) beschreibt `references/best_practices/`
-WIE man vorhandene Features zu einem sinnvollen Ganzen für eine reale Geschäftssituation
-zusammensetzt — empfohlene Muster, kein technisches Feature an sich:
+Unlike `references/features/` (WHAT a feature does), `references/best_practices/` describes HOW to
+combine existing features into something sensible for a real business situation — recommended
+patterns, not a technical feature in itself:
 
-- **Die ersten 30 Minuten** — von Null zu einem System, das im Betrieb arbeitet:
-  Registrierung, zwei Scopes, Feldbesuch als Formular, Mitarbeiter hereinlassen,
-  Beweis dass es läuft, Kostenrechnung, Marktplatz-Potenzial. Enthält die
-  **Entscheidungspunkte** (was der Agent bewusst festlegen muss, statt es zu erraten) und die
-  **Übergabe-Notiz** (was der Mensch schriftlich bekommt, damit der Aufbau ohne den Agenten
-  erklärbar bleibt). **Für den Einstieg und für die Frage „was bringt das dem Unternehmen":**
+- **The first 30 minutes** — from zero to a system that works in operation:
+  registration, two scopes, a field visit as a form, letting employees in,
+  proof that it runs, cost calculation, marketplace potential. Contains the
+  **decision points** (what the agent has to decide deliberately instead of guessing) and the
+  **handover note** (what the human gets in writing so the build stays explainable without the
+  agent). **For getting started and for the question "what does this give the business":**
   `references/best_practices/first-30-minutes.md`
-- **Scope-Organisation pro Firma** — welche Scopes ein Firmen-Agent anlegt, wer welche Rechte
-  bekommt (Invite-Codes vs. Selbstbuchung vs. Admin), wie der Zwei-Phasen-Commit
-  (draft-Scope → target_scope) als Objekt-Berechtigung ohne eigene ACL funktioniert, und die
-  vier Entscheidungspunkte (Abschnitt 10):
+- **Scope organisation per company** — which scopes a company agent creates, who gets which rights
+  (invite codes vs. self-booking vs. admin), how the two-phase commit
+  (draft scope → target_scope) works as object permission without its own ACL, and the
+  four decision points (section 10):
   `references/best_practices/scope-organization-per-company.md`
-- **Referenz-Ontologien und Standard-Mapping** — wie die Objekttypen zu Brick, RealEstateCore,
-  FIWARE, SAREF, ISA-95, TM Forum und OSLC stehen; welche Klassen in den Standards existieren
-  und hier fehlen (Etage, Zone, Liegenschaft, Sensor, Messwert); das Pflicht-Muster für
-  Geodaten; und die Falle, dass Schema-Introspektion und Objekt-Ansicht zwei getrennte Quellen
-  sind. Lizenz-Übersicht für Kompatibilitäts-Aussagen:
+- **Reference ontologies and standard mapping** — how the object types relate to Brick,
+  RealEstateCore, FIWARE, SAREF, ISA-95, TM Forum and OSLC; which classes exist in the standards and
+  are missing here (floor, zone, property, sensor, measurement); the mandatory pattern for
+  geodata; and the trap that schema introspection and the object view are two separate sources.
+  Licence overview for compatibility statements:
   `references/best_practices/ontology-reference-mapping.md`
-- **Kontrollgänge per QR aufbauen** — Arbeitsanweisung von der Entscheidung über Typ und Felder bis
-  zur Abnahme am laufenden Dienst, mit dem Nachweis-Report und dem Missbrauchsblick (Wegzeit,
-  Zähler): `references/best_practices/checkpoint-rounds.md`
+- **Building checkpoint rounds via QR** — a work instruction from the decision about type and
+  fields to acceptance on the running service, with the proof report and the abuse perspective
+  (travel time, counters): `references/best_practices/checkpoint-rounds.md`
 
-## Pitfalls (wichtigste)
+## Pitfalls (most important)
 
-1. `?format=json` in URL für JSON-Modus.
-2. **Vor Login nur diese 6 Tools** (`register`, `activate`, `login`, `refresh_access_token`,
-   `auth_status`, `onto_credit_pricing`). `tools/list` ohne Token gibt **HTTP 401** statt einer
-   Liste — die öffentlichen Tools über den Namen aufrufen.
-3. **`initialize` ist Pflicht, nicht optional** — ohne `mcp-session-id` wird jeder Aufruf mit
-   `Bad Request: Missing session ID` abgewiesen, auch mit gültigem Bearer-Token.
-4. `activate` braucht kein Vorab-Login.
-5. `register` hat **zwei Formen**: **Agent** → `agent=true` + `accept_terms=true` (optional
-   `invite_code`; Adresse und Passwort kommen einmalig zurück, Konto sofort aktiv, **kein**
-   Startguthaben) ; **Mensch** → `username` (E-Mail) + `password` + `password_confirm` +
-   `accept_terms=true`. Ohne `accept_terms` HTTP 400
+1. `?format=json` in the URL for JSON mode.
+2. **Before login only these 6 tools** (`register`, `activate`, `login`, `refresh_access_token`,
+   `auth_status`, `onto_credit_pricing`). `tools/list` without a token returns **HTTP 401** instead
+   of a list — call the public tools by name.
+3. **`initialize` is mandatory, not optional** — without `mcp-session-id` every call is rejected
+   with `Bad Request: Missing session ID`, even with a valid bearer token.
+4. `activate` needs no prior login.
+5. `register` has **two forms**: **agent** → `agent=true` + `accept_terms=true` (optionally
+   `invite_code`; address and password come back once, the account is active immediately, **no**
+   starting credit); **human** → `username` (email) + `password` + `password_confirm` +
+   `accept_terms=true`. Without `accept_terms` HTTP 400
    ("Bitte bestaetigen Sie die Nutzungsbedingungen.").
-6. **E-Mail-Zugriff NICHT Pflicht** — der Mensch kann den Aktivierungscode vorlesen; beim
-   Einladungscode-Weg entfällt die Mail ganz. IMAP nur, wenn ohnehin vorhanden.
-7. Prepaid einmalig; Flat keine Abbuchung; 402 bei keinem Guthaben.
-8. `udid` (32-hex), nicht `id` — war lange uneinheitlich über Tools hinweg, wurde
-   schrittweise vereinheitlicht; im Zweifel `udid` zuerst probieren.
-9. RBAC-Sichtbarkeit ≠ Bug.
-10. **Ein Parameter kann serverseitig existieren, ohne im MCP-Tool-Schema zu stehen** — die
-    Response verrät es manchmal (z.B. ein Feld wie `"applied": false`, obwohl der Parameter
-    dafür gar nicht im Schema stand). Der Call läuft dann ohne Fehler durch, wirkt aber nicht
-    wie erwartet (stiller No-Op) oder wirft 400. Bei unerwartetem Verhalten zuerst `tools/list`
-    auf das konkrete Tool prüfen, bevor man den eigenen Request-Aufbau verdächtigt.
-11. **Der User-Agent beim REST-Login MUSS `Telesherpa-MCP/1.0` sein** — das Backend bindet den
-    Token daran. Ohne ihn: 403 „Not authorized" bei jedem ToolCall, obwohl der Token aussieht
-    wie ein gültiger.
-12. **In seltenen Fällen können Access- UND Refresh-Token gleichzeitig ungültig werden**
-    (nicht nur normales Ablaufen) — dann hilft nur ein frischer menschlicher `login`-Schritt,
-    siehe `references/features/auth-token-lifecycle.md`.
-13. **Bei einer leeren/kaputten Antwort auf einen Schreib-Call** nicht automatisch von einem
-    fehlgeschlagenen Schreibvorgang ausgehen — ein einfacher Retry der Leseabfrage klärt
-    zuverlässig, ob der Schreibvorgang trotzdem durchging (Credit-Log/`usage_30d` zeigt es,
-    auch wenn die direkte Antwort kaputt war).
-14. `onto_type_show`'s `total_items` ist **plattformweit**, nicht auf den eigenen Scope
-    gefiltert — für scope-genaue Zählung `onto_object_search` mit `type`+eigenem Scope nutzen.
-15. Schreibrecht auf einen Scope ≠ Recht, folgenreiche Actions wie `create_service_order`
-    auszuführen — kann separat RBAC-gegatet sein (siehe `service-order-dispatch.md`).
-16. **Formular-Tools (`prepare_form_answer`, `submit_form_answer`, `show_form_answer`,
-    `resolve_form_answer`) nehmen die Formular-udid als `form_udid`**, nicht `formdef_udid`
-    — auch wenn man z.B. „prepare_form_answer für Formular &lt;udid&gt;" liest, ohne dass
-    der genaue Parametername genannt wird. `submit_form_answer` UND `show_form_answer`
-    brauchen zusätzlich `answer_udid` (zweistellige Route). Details:
+6. **Email access is NOT mandatory** — the human can read the activation code out; on the
+   invite-code route the mail disappears entirely. IMAP only if it is there anyway.
+7. Prepaid is single use; flat means no charge; 402 when there is no balance.
+8. `udid` (32-hex), not `id` — was inconsistent across tools for a long time and has been unified
+   step by step; when in doubt try `udid` first.
+9. RBAC visibility ≠ bug.
+10. **A parameter can exist server-side without appearing in the MCP tool schema** — the response
+    sometimes gives it away (e.g. a field like `"applied": false` although the parameter was not in
+    the schema at all). The call then runs through without an error but does not work as expected
+    (silent no-op) or throws 400. On unexpected behaviour, check `tools/list` for that specific tool
+    first, before suspecting your own request construction.
+11. **The user agent on REST login MUST be `Telesherpa-MCP/1.0`** — the backend binds the token to
+    it. Without it: 403 "Not authorized" on every tool call, although the token looks like a valid
+    one.
+12. **In rare cases access AND refresh token can become invalid at the same time** (not just
+    normal expiry) — then only a fresh human `login` step helps, see
+    `references/features/auth-token-lifecycle.md`.
+13. **On an empty/broken response to a write call**, do not automatically assume the write failed —
+    a simple retry of the read query reliably establishes whether the write went through anyway
+    (the credit log/`usage_30d` shows it, even if the direct response was broken).
+14. `onto_type_show`'s `total_items` is **platform-wide**, not filtered to your own scope — for a
+    scope-accurate count use `onto_object_search` with `type`+your own scope.
+15. Write permission on a scope ≠ permission to run consequential actions such as
+    `create_service_order` — that can be gated separately by RBAC (see
+    `service-order-dispatch.md`).
+16. **Form tools (`prepare_form_answer`, `submit_form_answer`, `show_form_answer`,
+    `resolve_form_answer`) take the form UDID as `form_udid`**, not `formdef_udid`
+    — even when you read something like "prepare_form_answer for form &lt;udid&gt;" without the exact
+    parameter name being mentioned. `submit_form_answer` AND `show_form_answer`
+    additionally need `answer_udid` (two-part route). Details:
     `references/features/form-engine.md`.
-17. **Listengröße pro Seite**: Die Anzahl Einträge pro Seite ist eine Nutzer-Einstellung und
-    wird pro Sitzung gemerkt. Ein ungültiger Wert kann eine Liste dauerhaft leer erscheinen
-    lassen, obwohl Daten vorhanden sind — bei unerwartet leeren Listen zuerst mit einem neuen
-    Aufruf ohne Paginierungsparameter gegenprüfen, bevor man ein Rechteproblem vermutet.
-18. **Automatik (Regeln/Functions) lässt sich über MCP anlegen** —
+17. **List size per page**: the number of entries per page is a user setting and is remembered per
+    session. An invalid value can make a list appear permanently empty although data exists — on
+    unexpectedly empty lists, first cross-check with a new call without pagination parameters
+    before suspecting a permission problem.
+18. **Automation (rules/functions) can be created via MCP** —
     `onto_trigger_create/_update/_delete`, `onto_function_create/_update/_delete`
-    (`roles=[member]`, echte Sperre ist `can_manage_scope` im Ziel-Scope). Die Namen enden
-    auf `_create`/`_update`/`_delete`, **nicht `_save`** — wer nach `_save` sucht, meldet
-    fälschlich „Tool fehlt". Lesen: `onto_trigger_index`/`onto_function_index`, Ausführen:
-    `onto_function_run`. `body.object_types` ist beim Anlegen **Pflicht und nicht leer**
-    (sonst 400: „ohne Objekttyp wirkt die Regel nie"). Details:
+    (`roles=[member]`, the real lock is `can_manage_scope` in the target scope). The names end in
+    `_create`/`_update`/`_delete`, **not `_save`** — whoever looks for `_save` wrongly reports
+    "tool missing". Reading: `onto_trigger_index`/`onto_function_index`, running:
+    `onto_function_run`. `body.object_types` is **mandatory and must not be empty** on creation
+    (otherwise 400: "ohne Objekttyp wirkt die Regel nie"). Details:
     `references/features/automation-and-functions.md`.
-19. **Ein Tool, das plötzlich fehlt, ist meist ein Rechteproblem — kein Bug.** Sichtbarkeit
-    wird pro Anfrage gegen die Rollen des Kontos gefiltert. Erscheint ein erwartetes Tool nicht,
-    zuerst `auth_status` aufrufen: die Antwort nennt die Rollen im Klartext und die Zahl der
-    sichtbaren Werkzeuge. Fehlt es auch dort, ist die Rollenzuordnung auf der Plattform zu prüfen.
-20. **PWA und 30-Minuten-Session**: Die Web-Sitzung läuft absichtlich 30 Minuten; in der
-    installierten Web-App (Home-Bildschirm) gilt zusätzlich eine Dauer-Anmeldung bis 14 Tage.
-    „Ich muss mich am Handy ständig neu anmelden" ist deshalb zuerst eine Frage, ob die Seite
-    wirklich installiert läuft — und ein Logout räumt die Dauer-Anmeldung bewusst mit weg.
-    Web Push auf iOS gibt es **nur** vom Home-Bildschirm, nicht im Safari-Tab:
+19. **A tool that suddenly disappears is usually a permission problem — not a bug.** Visibility is
+    filtered per request against the account's roles. If an expected tool does not appear, call
+    `auth_status` first: the response names the roles in plain text and the number of visible tools.
+    If it is missing there too, the role assignment on the platform has to be checked.
+20. **PWA and the 30-minute session**: the web session deliberately runs for 30 minutes; in the
+    installed web app (home screen) a persistent sign-in of up to 14 days applies in addition.
+    "I have to sign in again all the time on my phone" is therefore first of all a question of
+    whether the page really runs installed — and a logout deliberately clears the persistent
+    sign-in as well. Web push on iOS exists **only** from the home screen, not in a Safari tab:
     `references/features/pwa-and-session.md`.
 
-21. **Agentenkonto — selbst registriert, ohne Code.** `register` mit `agent=true` (statt
-    `username`/`password`) legt das Konto **sofort aktiv** an (Rollen `login`, `public`,
-    `member`, kein `activate`). Adresse (`agent-…@agents.telesherpa.com`) und Passwort kommen
-    **einmalig** zurück. Ohne Einladungscode ist das Konto **isoliert** — keine Mitgliedschaft,
-    kein Zugriff auf fremde Scopes. Ein optionaler `invite_code` vergibt beim Anlegen dessen
-    Scope-Rechte; Bundle-Codes (Scope-Vorlage) → HTTP 403, die erst nach dem Login einlösen
-    (`redeem_invite_code`). **Kein Startguthaben:** das Konto startet mit 0 Credits (Antwort
-    `credits.start_credits`) und bezahlt sich selbst — `onto_credit_checkout` (Karte) oder
-    `onto_credit_chargeup` (prepaid-Code). Reicht es nicht, hilft ein Service Request
-    (`ontouser_service_request` — Ablauf unter Punkt 1).
-22. **Konto löschen räumt alles weg — in EINEM Aufruf.** `onto_user_delete` nimmt die Konto-ID,
-    die Profil-ID **oder** die `email`; `onto_user_delete_profile` ist derselbe Weg (Altname,
-    räumt nicht weniger weg). Entfernt Token, Passkeys, Sitzungen, Trackings, Rollen,
-    Scope-Zuordnungen, Favoriten, Merkzeilen, eigene Benachrichtigungen,
-    Profil und Konto — und zählt danach nach. Die Antwort nennt `entfernt` und `behalten`
-    (Buchhaltung, Protokoll, Daten anderer); Scopes mit weiteren Verwaltern blockieren (409).
-    Nicht gefunden = HTTP 404 mit „es wurde nichts geloescht". Vorher tat ein Aufruf mit der
-    Profil-ID still nichts und meldete trotzdem Erfolg — deshalb die Gegenprobe.
-23. **Werkzeugliste kann clientseitig veralten** — manche MCP-Clients cachen die Werkzeugliste je
-    Sitzung; dann fehlt z.B. `invite_code` im `register`-Schema, obwohl der Server es kann.
-    Erst neu verbinden, dann erneut prüfen — nicht den Server verdächtigen.
+21. **Agent account — registered itself, without a code.** `register` with `agent=true` (instead of
+    `username`/`password`) creates the account **active immediately** (roles `login`, `public`,
+    `member`, no `activate`). Address (`agent-…@agents.telesherpa.com`) and password come back
+    **once**. Without an invite code the account is **isolated** — no membership, no access to
+    foreign scopes. An optional `invite_code` grants its scope rights on creation; bundle codes
+    (scope template) → HTTP 403, redeem those only after login (`redeem_invite_code`). **No starting
+    credit:** the account starts with 0 credits (response `credits.start_credits`) and pays for
+    itself — `onto_credit_checkout` (card) or `onto_credit_chargeup` (prepaid code). If that is not
+    enough, a service request helps (`ontouser_service_request` — procedure under point 1).
+22. **Deleting an account clears everything — in ONE call.** `onto_user_delete` takes the account
+    ID, the profile ID **or** the `email`; `onto_user_delete_profile` is the same route (old name,
+    clears no less). Removes tokens, passkeys, sessions, trackings, roles, scope assignments,
+    favourites, memo lines, own notifications, profile and account — and counts afterwards. The
+    response names `entfernt` and `behalten` (billing, protocol, other people's data); scopes with
+    further managers block (409). Not found = HTTP 404 with "es wurde nichts geloescht". Previously
+    a call with the profile ID silently did nothing and still reported success — hence the
+    cross-check.
+23. **The tool list can go stale on the client side** — some MCP clients cache the tool list per
+    session; then for instance `invite_code` is missing from the `register` schema although the
+    server supports it. Reconnect first, then check again — do not suspect the server.
 
-24. **Kommentare: anfügen ja, ändern nein.** `addcomment` legt ein eigenes Objekt vom Typ
-    `comment` an (per `hascomment`-Link am Zielobjekt). Einen falschen Kommentar kannst du
-    **löschen** — `onto_object_delete` mit seiner udid, danach ist er aus dem Panel verschwunden —
-    aber **nicht ändern**. Also löschen und neu schreiben.
-25. **Eigene Objekttypen sind Plattform-Schema:** `onto_type_create` ist Administratoren
-    vorbehalten. Für eigene Zwecke nimm die Typen aus dem Preset (`onto_catalog_apply`) und lege
-    darin Objekte an — `serviceOrder` lässt sich als generische Aufgabe nutzen.
-26. **Status ist pro Objekttyp ein eigenes Property — das Objekt-`status` ist etwas anderes.**
-    - **Lebenszyklus der Zeile:** `active`/`inactive`/`deleted` steht im Objekt selbst, nicht in
-      einem Property. Das setzt die Plattform (Sichtbarkeit, Soft-Delete), nicht der Agent.
-    - **Fachzustand:** je Objekttyp ein eigenes Property mit eigener Optionsliste —
+24. **Comments: append yes, change no.** `addcomment` creates an object of its own of type
+    `comment` (via a `hascomment` link on the target object). You can **delete** a wrong comment —
+    `onto_object_delete` with its udid, after which it is gone from the panel — but **not change**
+    it. So delete and write again.
+25. **Own object types are platform schema:** `onto_type_create` is reserved for administrators.
+    For your own purposes take the types from the preset (`onto_catalog_apply`) and create objects
+    within them — `serviceOrder` can be used as a generic task.
+26. **Status is a separate property per object type — the object's `status` is something else.**
+    - **Lifecycle of the row:** `active`/`inactive`/`deleted` sits in the object itself, not in a
+      property. The platform sets it (visibility, soft delete), not the agent.
+    - **Business state:** one property per object type with its own option list —
       `orderStatus` (`serviceOrder`: `open`/`inProgress`/`done`),
       `visitStatus` (`serviceVisit`: `checkedIn`/`checkedOut`),
       `inspectionStatus` (`inspection`: `draft`/`sent`),
       `damageStatus` (`damageReport`: `draft`/`sent`),
       `changeStatus` (`changeRequest`: `proposed`/`accepted`/`rejected`),
-      `inspectionResult` (`car`/`machine`: freier Text).
-    - Ein generisches Property `status` gibt es **nicht mehr**. Bis 2026-10-13 hing eines an vier
-      Typen gleichzeitig, mit der Werteliste von `serviceVisit` — daher die widersprüchlichen Werte.
-      Wer weiter `status` schreibt (z.B. über `onto_object_set_property`), erzeugt ein verwaistes
-      Property ohne Definition; es erscheint dann als roher Schlüssel in der Oberfläche.
-    - Die Service-Actions nennen den Key im Klartext (`condition.props` und `action.props`):
-      `claim_service_order`, `start_service_order`, `complete_service_order` lesen und schreiben
+      `inspectionResult` (`car`/`machine`: free text).
+    - A generic property `status` **no longer exists**. Until 2026-10-13 one hung on four types at
+      the same time, with the value list of `serviceVisit` — hence the contradictory values.
+      Whoever keeps writing `status` (e.g. via `onto_object_set_property`) creates an orphaned
+      property without a definition; it then appears as a raw key in the interface.
+    - The service actions name the key in plain text (`condition.props` and `action.props`):
+      `claim_service_order`, `start_service_order`, `complete_service_order` read and write
       `orderStatus`; `checkin`/`checkout`/`checkout_other` `visitStatus`;
-      `suggestChange`/`reviewChange` `changeStatus`. Richte dich nach der Action.
-27. **Prompt-Typen in Actiondefs** (gilt für `prompts[]` in `onto_actiondef_save`): erlaubt sind
+      `suggestChange`/`reviewChange` `changeStatus`. Follow the action.
+27. **Prompt types in actiondefs** (applies to `prompts[]` in `onto_actiondef_save`): allowed are
     `text`, `textarea`, `int`, `float`, `select`, `picker`, `switch`, `slider`, `datepicker`,
-    `file`, `label`, `subform`, `images`, `documents`, `signature`. `datetime` gibt es **nicht** —
-    eine Definition damit lässt sich gar nicht mehr speichern (`prompts[0].type "datetime" ist
-    unbekannt`, HTTP 400), auch nicht mit unverändertem Body. Für Datum und Uhrzeit `datepicker`
-    verwenden.
-28. **Actions sind Schema, nicht Daten.** `onto_actiondef_save` verlangt Verwaltungsrecht
-    (`can_manage_scope`) am Ziel-Scope — Schreibrecht genügt nicht: „Kein Recht auf Scope X: eine
-    Actiondef ist eine Definition (Schema) und darf nur von einem Verwalter geändert werden".
-    Denselben Schutz gibt es für `actiondef`-Werte: direktes Schreiben ins Objekt oder per
-    `set_property` wird abgewiesen.
-29. **Felder und Aktionsschlüssel umbenennen ist ein Eingriff an sieben Stellen.** Betroffen sind
-    Property-Defs, Property-Sets, Objekttypen, die **Datenwerte** (`onto_properties.key`), die
-    Actiondefs (Name, Feld `key` **und der Wert** der Property `key` — daran löst die Engine die
-    Aktion auf), die Historie in `onto_action_logs` (`action` **und** das JSON in `payload`), das
-    Report-SQL, Interfaces und Presets. Wer nur die Definition ändert, bekommt einen Report mit
-    null Zeilen und einen Scanner, der die Aktion nicht mehr findet. Vorher prüfen, ob der
-    Zielschlüssel frei ist — der Schlüssel ist je Scope eindeutig, und `area`, `code`, `title`,
-    `description` sind oft schon vergeben; sonst bricht die Änderung mittendrin ab. Beschriftungen
-    werden dabei zu Sprachschlüsseln (`mo.<Key>`), nicht zu Klartext.
-30. **Die Scan-Wege sind kein MCP-Werkzeug.** `POST /onto/object/match_actions`,
-    `POST /onto/object/execute_action`, `POST /onto/object/counter` und die Seite
-    `GET /ontouser/scan` laufen über HTTP mit Session/Bearer (Rolle `member`); in `tools/list`
-    stehen sie nicht. Beschreibt man sie, muss der HTTP-Weg mitgeliefert werden — und die
-    Oberfläche ist Beispiel, nicht Vertrag.
-## Versionierung
+    `file`, `label`, `subform`, `images`, `documents`, `signature`. `datetime` does **not** exist —
+    a definition containing it can no longer be saved at all (`prompts[0].type "datetime" ist
+    unbekannt`, HTTP 400), not even with an unchanged body. Use `datepicker` for date and time.
+28. **Actions are schema, not data.** `onto_actiondef_save` requires administrative rights
+    (`can_manage_scope`) on the target scope — write permission is not enough: "Kein Recht auf
+    Scope X: eine Actiondef ist eine Definition (Schema) und darf nur von einem Verwalter geändert
+    werden". The same protection applies to `actiondef` values: writing directly into the object or
+    via `set_property` is rejected.
+29. **Renaming fields and action keys is an intervention at seven places.** Affected are
+    property defs, property sets, object types, the **data values** (`onto_properties.key`), the
+    actiondefs (name, field `key` **and the value** of the property `key` — that is how the engine
+    resolves the action), the history in `onto_action_logs` (`action` **and** the JSON in
+    `payload`), the report SQL, interfaces and presets. Whoever changes only the definition gets a
+    report with zero rows and a scanner that no longer finds the action. Check beforehand whether
+    the target key is free — the key is unique per scope, and `area`, `code`, `title`,
+    `description` are often already taken; otherwise the change aborts halfway through. Labels
+    thereby become language keys (`mo.<Key>`), not plain text.
+30. **The scan routes are not an MCP tool.** `POST /onto/object/match_actions`,
+    `POST /onto/object/execute_action`, `POST /onto/object/counter` and the page
+    `GET /ontouser/scan` run over HTTP with session/bearer (role `member`); they are not in
+    `tools/list`. If you describe them, the HTTP route has to be supplied — and the interface is an
+    example, not a contract.
+## Versioning
 
-Aktuelle Version siehe Frontmatter. Bei Fragen zu einer bestimmten Fähigkeit gilt: dieser
-Skill spiegelt den aktuellen Stand der Plattform wider.
+For the current version see the frontmatter. For questions about a particular capability the rule
+is: this skill reflects the current state of the platform.
 
-Die Version im Frontmatter gilt für den hier veröffentlichten Stand.
+The version in the frontmatter applies to the state published here.

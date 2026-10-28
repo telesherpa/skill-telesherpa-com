@@ -1,90 +1,90 @@
-# Tool-Katalog
+# Tool Catalog
 
-Diese Übersicht ist aus der Werkzeugliste des Dienstes erzeugt: **177 Tools** (Server 2.3.0), davon
-**110** sichtbar für ein Konto mit
-`login`+`public`+`member`, **112** mit `login`+`public`+`admin`, **6** ohne Token. Ein Konto mit
-`admin` **und** `member` sieht alle **177**.
+This overview is generated from the service's tool list: **177 tools** (server 2.3.0), of which
+**110** are visible to an account with
+`login`+`public`+`member`, **112** with `login`+`public`+`admin`, **6** without a token. An account with
+`admin` **and** `member` sees all **177**.
 
-**Stand 2026-10-24.** Für das eigene Konto zählt `auth_status` (`tools_visible`) — das ist die
-Zahl, die dort gilt.
+**As of 2026-10-24.** For your own account, `auth_status` (`tools_visible`) is what counts — that is the
+number that applies there.
 
-**Die Rollen-Spalte sagt, wer das Tool SIEHT.** Sie schützt nicht die Ausführung — die
-eigentliche Absicherung ist das Schreibrecht am Scope (`can_write`, `can_manage_scope`).
-Maßgeblich für das eigene Konto bleibt `tools/list` mit dem eigenen Token; der Dienst prüft
-das Recht bei jedem Aufruf nach.
+**The roles column says who SEES the tool.** It does not protect execution — the
+actual safeguard is the write permission on the scope (`can_write`, `can_manage_scope`).
+What is authoritative for your own account remains `tools/list` with your own token; the service verifies
+the permission on every call.
 
-**Achtung: `admin` ist KEINE Obermenge von `member`.** Ein Teil der Tools ist **nur** für
-`member` sichtbar, ein anderer **nur** für `admin`; nur ein Teil trägt beide Rollen. Ein
-Admin-Konto sieht also `change_password`, `onto_catalog_apply` oder `onto_actiondef_save`
-**nicht**, weil dort ausschließlich `member` steht. Wer nach einer Rollenänderung „mir fehlen
-Tools" meldet, muss **beide** Zahlen prüfen — nicht annehmen, admin sehe alles.
+**Careful: `admin` is NOT a superset of `member`.** Some of the tools are visible **only** to
+`member`, others **only** to `admin`; only some carry both roles. An
+admin account therefore does **not** see `change_password`, `onto_catalog_apply` or `onto_actiondef_save`,
+because only `member` is listed there. Anyone reporting „mir fehlen Tools" after a role change
+must check **both** numbers — not assume that admin sees everything.
 
-## Ohne Token (öffentlich, 6 Tools)
+## Without a token (public, 6 tools)
 
 `register`, `activate`, `login`, `refresh_access_token`, `auth_status`, `onto_credit_pricing`
 
-`tools/list` ohne Token liefert **HTTP 401** statt einer Liste — die sechs sind über den
-**Namen** aufrufbar (der `www-authenticate`-Header nennt sie). Ohne Token sind diese sechs auch
-**ausführbar**; alle anderen antworten ohne Token mit 401, auch wenn sie sichtbar wären.
+`tools/list` without a token returns **HTTP 401** instead of a list — the six can be invoked by
+**name** (the `www-authenticate` header names them). Without a token these six are also
+**executable**; all others answer without a token with 401, even if they would be visible.
 
-**Was das für den Client heißt:** Ein Client, der erst `initialize` und `tools/list` erfolgreich
-abschließen muss — die üblichen SDKs, Desktop-Clients, auch Hermes — bekommt ohne Token **gar
-keinen** Werkzeugkatalog. Der erste Aufruf muss die sechs Namen also kennen. Ein Werkzeug, das
-nicht im Katalog steht, existiert für den Agenten nicht, auch wenn der Server es ausführen würde.
+**What this means for the client:** a client that must first complete `initialize` and `tools/list`
+successfully — the usual SDKs, desktop clients, Hermes too — gets **no**
+tool catalog at all without a token. The first call must therefore know the six names. A tool that
+is not in the catalog does not exist for the agent, even if the server would execute it.
 
-### Eine Rollenliste ist stumm — in beide Richtungen
+### A role list is silent — in both directions
 
-Zwei Fälle, die **keine** Fehlermeldung erzeugen und deshalb leicht übersehen werden:
+Two cases that produce **no** error message and are therefore easily overlooked:
 
-- Eine **leere** Rollenliste bedeutet **nicht** „niemand", sondern „alle": ein Werkzeug, das
-  beschränkt sein sollte, wird für jedes Konto mit gültigem Token sichtbar.
-- Eine Rollenliste mit **ausschließlich ungültigen** Namen macht ein Tool für **niemanden**
-  sichtbar — ebenfalls lautlos.
+- An **empty** role list does **not** mean „nobody", but „everyone": a tool that
+  should be restricted becomes visible to every account with a valid token.
+- A role list with **exclusively invalid** names makes a tool visible to **nobody**
+  — likewise silently.
 
-In beiden Fällen sieht die Tool-**Liste** für ein berechtigtes Konto unauffällig aus, und der
-Code liest sich korrekt. Ausführbar bleibt ein Tool trotzdem nur mit den Schreibrechten am
-Scope — die eigentliche Sperre liegt dort, nicht in der Rollenliste.
+In both cases the tool **list** looks unremarkable for an authorized account, and the
+code reads correctly. A tool nevertheless remains executable only with the write permissions on the
+scope — the actual lock is there, not in the role list.
 
-**Die Lehre für jede Rollenänderung:** `auth_status` aufrufen und `tools_visible` gegen die
-erwartete **Anzahl** stellen. Eine Zahl deckt beide stillen Fälle auf.
+**The lesson for every role change:** call `auth_status` and compare `tools_visible` against the
+expected **count**. One number exposes both silent cases.
 
-### Altweg-Tools mit toten Zielen
+### Legacy tools with dead targets
 
-Drei Report-Tools der ersten Welt zeigten auf **gelöschte Pfade** (alle 404) und trugen
-**ausschließlich** einen Rollennamen, den es nicht gibt — also für niemanden sichtbar. Sie sind
-entfernt; die Funktion ist vollständig durch die `onto_report_*`-Tools abgedeckt (9 Tools:
-6 lesend für `admin`+`member`, 3 schreibend nur `admin`).
+Three report tools of the first world pointed at **deleted paths** (all 404) and carried
+**exclusively** a role name that does not exist — i.e. visible to nobody. They have been
+removed; the functionality is fully covered by the `onto_report_*` tools (9 tools:
+6 read-only for `admin`+`member`, 3 write for `admin` only).
 
-**Die Lehre:** ein Tool, das auf einen 404-Pfad zeigt UND für niemanden erreichbar ist, ist
-toter Ballast — es bläht den Katalog auf und kostet in der Tool-Qualitätsbewertung (Tool-Anzahl).
-Beides zusammen prüfen, nicht nur die Sichtbarkeit.
+**The lesson:** a tool that points at a 404 path AND is unreachable for anyone is
+dead weight — it bloats the catalog and costs in the tool quality rating (tool count).
+Check both together, not just visibility.
 
-## Basis-Tools
+## Base tools
 
-| Tool | Rollen | Zweck |
+| Tool | Roles | Purpose |
 |---|---|---|
-| `auth_status` | öffentlich | Diagnose: Token gültig? welche Rollen? was tun? |
-| `login` | öffentlich | client_id + client_secret → Bearer-Token |
-| `refresh_access_token` | öffentlich | Token erneuern (kein Passwort) |
-| `register` | öffentlich | Account anlegen (Mensch: `username`+Voucher · Agent: `invite_code`) |
-| `activate` | öffentlich | Voucher einlösen (nur E-Mail-Weg; beim Einladungscode entfällt es) |
-| `onto_credit_pricing` | öffentlich | Preise lesen |
-| `get_image` | `member` | Bild/Datei herunterladen |
-| `get_document` | `member` | Dokument herunterladen |
-| `upload_file_to_object` | `member` | Datei/Bild an ein Objekt (auch `structuredimage`) |
-| `upload_staging_csv` | `member` | CSV in die Import-Staging-Ablage |
-| `upload_code_allowlist` | `member`, `admin` | XLSX/XLS-Bulk der E-Mail-Allowlist eines Invite-Codes |
-| `change_password` | `member` | Passwort ändern |
-| `change_profile` | `member` | Profil ändern (ohne Argumente: Profil **lesen**) |
-| `get_profile` | `member` | Eigenes Profil rein lesend abrufen — kein Schreibpfad |
-| `renew_account` | `member` | Konto verlängern |
-| `get_notifications` | `member` | Benachrichtigungen |
+| `auth_status` | public | Diagnosis: token valid? which roles? what to do? |
+| `login` | public | client_id + client_secret → bearer token |
+| `refresh_access_token` | public | Renew token (no password) |
+| `register` | public | Create account (human: `username`+voucher · agent: `invite_code`) |
+| `activate` | public | Redeem voucher (e-mail path only; omitted for an invitation code) |
+| `onto_credit_pricing` | public | Read prices |
+| `get_image` | `member` | Download image/file |
+| `get_document` | `member` | Download document |
+| `upload_file_to_object` | `member` | File/image to an object (also `structuredimage`) |
+| `upload_staging_csv` | `member` | CSV into the import staging store |
+| `upload_code_allowlist` | `member`, `admin` | XLSX/XLS bulk of the e-mail allowlist of an invite code |
+| `change_password` | `member` | Change password |
+| `change_profile` | `member` | Change profile (without arguments: **read** profile) |
+| `get_profile` | `member` | Fetch own profile purely read-only — no write path |
+| `renew_account` | `member` | Renew account |
+| `get_notifications` | `member` | Notifications |
 
-## Tool-Katalog der Ontologie-Endpunkte
+## Tool catalog of the ontology endpoints
 
 ### `onto_object_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_object_addcomment` | `member` |
 | `onto_object_bulk_action` | `member` |
@@ -106,7 +106,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 ### `onto_type_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_type_create` | `admin` |
 | `onto_type_delete` | `admin` |
@@ -116,7 +116,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 ### `onto_link_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_link_create_def` | `admin` |
 | `onto_link_delete_def` | `admin` |
@@ -125,7 +125,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 ### `onto_property_def_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_property_def_create` | `admin`, `member` |
 | `onto_property_def_delete` | `admin` |
@@ -135,7 +135,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 ### `onto_property_set_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_property_set_create` | `admin`, `member` |
 | `onto_property_set_delete` | `admin` |
@@ -144,7 +144,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 ### `onto_interface_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_interface_create_def` | `admin` |
 | `onto_interface_delete_def` | `admin` |
@@ -155,7 +155,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 ### `onto_actiondef_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_actiondef_delete` | `member` |
 | `onto_actiondef_index` | `admin` |
@@ -164,7 +164,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 ### `onto_scope_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_scope_assign_profile` | `admin` |
 | `onto_scope_create` | `admin` |
@@ -180,7 +180,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 ### `onto_settings_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_settings_create` | `admin` |
 | `onto_settings_delete` | `admin` |
@@ -190,7 +190,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 ### `onto_user_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_user_delete` | `admin` |
 | `onto_user_delete_profile` | `admin` |
@@ -200,16 +200,16 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 | `onto_user_update` | `admin` |
 | `onto_user_update_profile` | `admin` |
 
-> **`onto_user_delete`** räumt in EINEM Aufruf alles zum Konto weg: Token, Passkeys, Sitzungen,
-> Trackings, Rollen, Scope-Zuordnungen, Favoriten, Merkzeilen, eigene Benachrichtigungen,
-> Profil und Konto — und zählt danach nach. `id` darf die Konto-ID, die Profil-ID **oder** die
-> `email` sein. Die Antwort nennt `entfernt` und `behalten`
-> (Buchhaltung, Protokoll, Daten anderer). `onto_user_delete_profile` ist derselbe Weg
-> (Altname). Nicht gefunden = HTTP 404, kein stiller Erfolg.
+> **`onto_user_delete`** clears everything for the account in ONE call: tokens, passkeys, sessions,
+> trackings, roles, scope assignments, favorites, memo lines, own notifications,
+> profile and account — and then counts up afterwards. `id` may be the account ID, the profile ID **or** the
+> `email`. The response names `entfernt` and `behalten`
+> (accounting, log, other people's data). `onto_user_delete_profile` is the same path
+> (legacy name). Not found = HTTP 404, no silent success.
 
 ### `onto_report_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_report_aggregate` | `admin`, `member` |
 | `onto_report_copy` | `admin` |
@@ -223,7 +223,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 ### `onto_catalog_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_catalog_apply` | `member` |
 | `onto_catalog_clear` | `member` |
@@ -232,7 +232,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 ### `onto_i18n_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_i18n_create` | `admin` |
 | `onto_i18n_delete` | `admin` |
@@ -246,7 +246,7 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 ### `onto_favorite_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_favorite_add` | `member` |
 | `onto_favorite_delete` | `member` |
@@ -255,34 +255,34 @@ Beides zusammen prüfen, nicht nur die Sichtbarkeit.
 
 ### `onto_file_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_file_delete` | `member` |
 | `onto_file_structured` | `member` |
 
-### `onto_series_*` (Sensor-Zeitreihen)
+### `onto_series_*` (sensor time series)
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_series_range` | `member` |
 | `onto_series_last` | `member` |
 
-Eine Reihe hat **keine eigene udid** — ihre Identität ist das Paar
-`(object_udid, series_key)`. Der `series_key` ist derselbe String wie der Key des zugehörigen
-Property; das Property ist der **Zeiger** auf die Reihe (Def-Feld `computed = {"series": true}`),
-sein Wert trägt es nicht. Welche Reihen ein Objekt hat, nennt `onto_object_show` im Feld
+A series has **no udid of its own** — its identity is the pair
+`(object_udid, series_key)`. The `series_key` is the same string as the key of the associated
+property; the property is the **pointer** to the series (def field `computed = {"series": true}`),
+its value does not carry it. Which series an object has is named by `onto_object_show` in the field
 `series_keys`.
 
-Sichtbarkeit richtet sich nach dem **Scope des Property**, nicht des Objekts (fail-closed) —
-ein fremder Scope liefert 403, obwohl das Tool sichtbar ist.
+Visibility follows the **scope of the property**, not of the object (fail-closed) —
+a foreign scope returns 403 even though the tool is visible.
 
-**Alle Zeitangaben sind UTC** (ISO 8601 mit `Z`, z. B. `2026-10-06T23:09:00Z`); das gilt für
-`points[].ts`, `series_ts` **und** für die Parameter `from`/`to`. Details und Use-Cases:
+**All timestamps are UTC** (ISO 8601 with `Z`, e.g. `2026-10-06T23:09:00Z`); this applies to
+`points[].ts`, `series_ts` **and** to the `from`/`to` parameters. Details and use cases:
 `references/features/sensor-zeitreihen.md`.
 
 ### `onto_import_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_import_analyze` | `admin` |
 | `onto_import_analyze_step` | `admin` |
@@ -301,7 +301,7 @@ ein fremder Scope liefert 403, obwohl das Tool sichtbar ist.
 
 ### `onto_trigger_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_trigger_create` | `member` |
 | `onto_trigger_delete` | `member` |
@@ -310,7 +310,7 @@ ein fremder Scope liefert 403, obwohl das Tool sichtbar ist.
 
 ### `onto_function_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_function_create` | `member` |
 | `onto_function_delete` | `member` |
@@ -320,7 +320,7 @@ ein fremder Scope liefert 403, obwohl das Tool sichtbar ist.
 
 ### `onto_credit_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_credit_balance` | `admin`, `member` |
 | `onto_credit_chargeup` | `admin`, `member` |
@@ -330,20 +330,20 @@ ein fremder Scope liefert 403, obwohl das Tool sichtbar ist.
 
 ### `onto_watch_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_watch_changes` | `member` |
 | `onto_watch_cursor` | `member` |
 
 ### `onto_action_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `onto_action_logs` | `admin` |
 
 ### `ontouser_scope_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `ontouser_scope_assign_public` | `member`, `admin` |
 | `ontouser_scope_create` | `member`, `admin` |
@@ -354,41 +354,41 @@ ein fremder Scope liefert 403, obwohl das Tool sichtbar ist.
 
 ### `ontouser_interface_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `ontouser_interface_map_markers` | `member` |
 | `ontouser_interface_show` | `member` |
 
 ### `ontouser_notification_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `ontouser_notification_index` | `member`, `admin` |
 | `ontouser_notification_read` | `member`, `admin` |
 | `ontouser_notification_send` | `member`, `admin` |
 
-`ontouser_notification_send` schreibt einem **anderen** Konto ins Postfach: `to` ist die E-Mail
-eines existierenden Kontos (eigene Adresse erlaubt), `text` die Nachricht (über 4000 Zeichen wird
-abgeschnitten). Antwort `{sent: true, to: …}`. Die Meldung läuft durch dasselbe System wie
-Service-Request-Antworten (`type=user_message`) — Plattform-Postfach plus E-Mail/Push, **soweit der
-Empfänger sie empfängt**: an Agentenadressen unterbindet der Postriegel den Mailversand, dort bleibt
-es bei der Meldung im Postfach (`ontouser_notification_index`).
+`ontouser_notification_send` writes into the inbox of a **different** account: `to` is the e-mail
+of an existing account (own address allowed), `text` the message (over 4000 characters is
+truncated). Response `{sent: true, to: …}`. The message runs through the same system as
+service request replies (`type=user_message`) — platform inbox plus e-mail/push, **as far as the
+recipient receives it**: at agent addresses the mail barrier prevents mail delivery, there it stays
+with the message in the inbox (`ontouser_notification_index`).
 
 ### `ontouser_object_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `ontouser_object_show` | `member` |
 
 ### `ontouser_service_*`
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `ontouser_service_request` | `member`, `admin` |
 
-### Formular & Invite/Mitglieder (ohne Namenspräfix)
+### Forms & invite/members (without name prefix)
 
-| Tool | Rollen |
+| Tool | Roles |
 |---|---|
 | `add_code_allowlist_entry` | `member`, `admin` |
 | `create_invite_code` | `member`, `admin` |
@@ -410,55 +410,55 @@ es bei der Meldung im Postfach (`ontouser_notification_index`).
 | `submit_form_answer` | `member` |
 | `toggle_member_flag` | `member`, `admin` |
 
-## Zeitangaben — immer UTC
+## Timestamps — always UTC
 
-**Jeder Zeitstempel, den dieser Dienst zurückgibt, ist UTC in ISO 8601 mit `Z`** — z. B.
-`2026-10-06T23:09:00Z`. Der Wert trägt seine Zone selbst; du brauchst keine Umrechnung und
-darfst keine annehmen.
+**Every timestamp this service returns is UTC in ISO 8601 with `Z`** — e.g.
+`2026-10-06T23:09:00Z`. The value carries its zone itself; you need no conversion and
+must not assume one.
 
-- **Nicht selbst umrechnen.** Wer UTC in eine Ortszeit umrechnet, um zwei Werte zu
-  vergleichen, baut den Fehler ein, den die Umrechnung vermeiden sollte. Vergleiche UTC mit UTC.
-- **Was du sendest, ist ebenfalls UTC.** `from`/`to` bei `onto_series_range` werden als UTC
-  gelesen — als `2026-10-06T23:09:00Z` oder `2026-10-06 23:09:00`. Ein angehängter Offset
-  (`+02:00`) gilt und wird umgerechnet.
-- **Die Web-Ansicht zeigt dagegen Betrachterzeit.** Zeigt die Oberfläche `01:09` und die API
-  `23:09`, sind beide richtig — das sind 2 Stunden Zonenunterschied, kein Fehler.
-- **Eine Dauer** immer aus zwei UTC-Werten **derselben** Quelle rechnen.
+- **Do not convert yourself.** Anyone converting UTC to a local time in order to compare two values
+  builds in the very error the conversion was supposed to avoid. Compare UTC with UTC.
+- **What you send is also UTC.** `from`/`to` on `onto_series_range` are read as UTC
+  — as `2026-10-06T23:09:00Z` or `2026-10-06 23:09:00`. An appended offset
+  (`+02:00`) is valid and is converted.
+- **The web view, by contrast, shows viewer time.** If the interface shows `01:09` and the API
+  `23:09`, both are correct — that is a 2-hour zone difference, not an error.
+- **Compute a duration** always from two UTC values from **the same** source.
 
 ## Pitfalls
 
-1. **Ein fehlendes Tool ist meist ein Rechteproblem, kein Bug.** Sichtbarkeit wird pro Anfrage
-   gegen die Rollen gefiltert. Erst `auth_status` aufrufen — die Antwort nennt die Rollen im
-   Klartext.
-2. **Tool-Namen enden auf `_create`/`_update`/`_delete`, NICHT `_save`** (`onto_trigger_*`,
-   `onto_function_*`). Wer nach `_save` sucht, meldet fälschlich „Tool fehlt".
-3. **Zwei Namensfamilien für dieselbe Sache**: `onto_scope_*` ist die Admin-Sicht
-   (`onto_scope_create` ist `admin`), `ontouser_scope_*` die Selbstverwaltung. Für eigene
-   Scopes die `ontouser_*`-Familie verwenden — beide Wege rechnen ab und zählen gegen
+1. **A missing tool is usually a permission problem, not a bug.** Visibility is filtered per request
+   against the roles. Call `auth_status` first — the response names the roles in
+   plain text.
+2. **Tool names end in `_create`/`_update`/`_delete`, NOT `_save`** (`onto_trigger_*`,
+   `onto_function_*`). Anyone searching for `_save` falsely reports „Tool fehlt".
+3. **Two name families for the same thing**: `onto_scope_*` is the admin view
+   (`onto_scope_create` is `admin`), `ontouser_scope_*` the self-service one. For your own
+   scopes use the `ontouser_*` family — both paths bill and count against
    `profiles.max_scopes`.
-4. **Reihenfolge der Tools im Katalog ist keine Priorität.** Die Liste ist nach Ressourcen
-   gruppiert; die Wahl des richtigen Wegs steht in `references/features/`.
-5. **Eine falsche Rollenzuordnung ist stumm.** Wird ein Werkzeug für mehr Konten sichtbar als
-   beabsichtigt oder für alle unsichtbar, gibt es keine Fehlermeldung und keinen Log-Eintrag.
-   Prüfmittel ist die Zahl aus `auth_status` (`tools_visible`) — nach jeder Rechteänderung
-   gegen den Sollwert stellen.
-6. **Parameter sind in den Tool-Schemata dokumentiert, nicht hier.** Bei Unsicherheit
-   `tools/list` auf das konkrete Tool ansehen — die `description` enthält das verifizierte
-   Body-Format und die Pflichtfelder.
-7. **Die eigene Zahl kommt aus `auth_status`.** `tools_visible` gilt für das angemeldete
-   Konto; nach jeder Rechteänderung neu stellen statt aus diesem Katalog ableiten.
-8. **`admin` sieht NICHT alles.** Ein Teil der Tools trägt ausschließlich `member`, ein
-   anderer ausschließlich `admin`; nur ein Teil beide. Ein Admin-Konto, das `change_password`
-   oder `onto_catalog_apply` vermisst, hat keinen Fehler — die Rollenliste nennt dort nur
-   `member`. Beim Prüfen immer **beide** Zahlen stellen (`auth_status` mit dem
-   jeweiligen Konto).
+4. **The order of tools in the catalog is not a priority.** The list is grouped by resource;
+   choosing the right path is described in `references/features/`.
+5. **A wrong role assignment is silent.** If a tool becomes visible to more accounts than
+   intended or invisible to all, there is no error message and no log entry.
+   The check is the number from `auth_status` (`tools_visible`) — after every permission change
+   compare it against the target value.
+6. **Parameters are documented in the tool schemas, not here.** When unsure,
+   look at `tools/list` for the specific tool — the `description` contains the verified
+   body format and the required fields.
+7. **Your own number comes from `auth_status`.** `tools_visible` applies to the logged-in
+   account; after every permission change compare it anew instead of deriving it from this catalog.
+8. **`admin` does NOT see everything.** Some tools carry exclusively `member`, others
+   exclusively `admin`; only some both. An admin account that misses `change_password`
+   or `onto_catalog_apply` has no error — the role list there names only
+   `member`. When checking, always compare **both** numbers (`auth_status` with the
+   respective account).
 
-## Tool-Beschreibungen und Annotations
+## Tool descriptions and annotations
 
-Jedes Tool hat eine **sprechende Beschreibung** (Verb + Ressource + wann/wann nicht + genannte
-Alternative) und **MCP-Annotations** (`readOnlyHint`, `destructiveHint`, `idempotentHint`,
-`openWorldHint`). Ein Tool ohne Beschreibung und ohne Annotations ist für ein Modell kaum
-auswählbar — beides gehört dazu.
+Every tool has a **descriptive description** (verb + resource + when/when not + named
+alternative) and **MCP annotations** (`readOnlyHint`, `destructiveHint`, `idempotentHint`,
+`openWorldHint`). A tool without a description and without annotations is hardly
+selectable for a model — both are part of it.
 
-Die Beschreibungen sind zentral gepflegt und werden beim Start eingelesen. Sie lassen sich
-damit ändern, ohne die Tool-Definitionen anzufassen.
+The descriptions are maintained centrally and are read in at startup. They can therefore be
+changed without touching the tool definitions.

@@ -1,154 +1,153 @@
-# Die ersten 30 Minuten — von Null zu einem System, das im Betrieb arbeitet
+# The first 30 minutes — from zero to a system that works in operation
 
-**Für wen:** Ein Agent, der die Plattform für ein Unternehmen aufsetzt und innerhalb einer
-halben Stunde ein Ergebnis vorzeigen will — nicht eine Demo, sondern etwas, das am nächsten
-Morgen tatsächlich benutzt wird.
+**Who this is for:** An agent that sets up the platform for a company and wants to show a result
+within half an hour — not a demo, but something that is actually used the next morning.
 
-**Das Versprechen in einem Satz:** In 30 Minuten steht ein Ablauf, für den andere Firmen eine
-komplette Software kaufen, monatelang einführen und dann doch wieder Excel daneben betreiben.
-
----
-
-## Warum das in 30 Minuten geht
-
-Weil du nichts installierst, nichts konfigurierst und niemanden um Freigabe bitten musst.
-Jeder Schritt unten ist ein einziger Tool-Aufruf. Es gibt keine Migration, keinen Server,
-kein Rollen-Konzept zum Ausdenken — die Plattform bringt die Struktur mit, du füllst sie.
-
-Und der wichtigste Punkt: **du bezahlst nur, was tatsächlich passiert.** Kein Setup-Preis,
-keine Monatsgebühr für ungenutzte Lizenzen. Wenn nach zwei Wochen niemand damit arbeitet,
-kostet es auch fast nichts. Das ist der Grund, warum man es einfach ausprobieren kann.
+**The promise in one sentence:** In 30 minutes there is a workflow for which other companies buy
+a complete piece of software, spend months rolling it out, and then run Excel alongside it anyway.
 
 ---
 
-## Minute 0–5 · Registrieren und aktivieren
+## Why this works in 30 minutes
+
+Because you install nothing, configure nothing and don't have to ask anyone for approval.
+Every step below is a single tool call. There is no migration, no server, no role concept to
+invent — the platform brings the structure along, you fill it.
+
+And the most important point: **you only pay for what actually happens.** No setup price,
+no monthly fee for unused licences. If nobody works with it after two weeks, it costs almost
+nothing either. That is the reason why you can simply try it out.
+
+---
+
+## Minute 0–5 · Register and activate
 
 ```
-register   username=E-Mail des Kunden, password, password_confirm,
-           accept_terms=true   <- PFLICHT (AGB-Zustimmung, sonst HTTP 400)
+register   username=customer's e-mail, password, password_confirm,
+           accept_terms=true   <- REQUIRED (accepting the terms, otherwise HTTP 400)
            AGB: https://www.telesherpa.com/agb
 ```
 
-Dann kommt der Aktivierungscode per Mail. **Kein IMAP-Zugriff nötig:**
+Then the activation code arrives by e-mail. **No IMAP access needed:**
 
-> **An den Menschen weitergeben:** „Ich habe uns einen Zugang angelegt. In einer Minute kommt
-> eine E-Mail mit einem Aktivierungscode. Gib mir den Code, dann schalte ich den Zugang frei."
+> **Pass this on to the human:** "I have created an account for us. In a minute an e-mail with an
+> activation code will arrive. Give me the code and I will unlock the account."
 
-Der Mensch liest den Code aus seinem Postfach vor — fertig. Danach:
+The human reads the code out of their mailbox — done. After that:
 
 ```
 activate            loginusername, loginpassword, voucher
-login               → Bearer-Token + refresh_token
+login               → Bearer token + refresh_token
 ```
 
-Ab hier nie wieder ein Passwort. `refresh_access_token` hält die Verbindung selbstständig
-aufrecht — auch über Wochen.
+From here on, never a password again. `refresh_access_token` keeps the connection alive on its
+own — even over weeks.
 
-**Was in diesen 5 Minuten entsteht:** ein eigener, abgeschlossener Datenraum für dieses
-Unternehmen. Nicht „ein Account auf einer Plattform, wo alle drin sind", sondern ein
-eigener Bereich, den andere nicht sehen.
+**What these 5 minutes produce:** a separate, self-contained data space for this
+company. Not "an account on a platform where everyone is in the same place", but a
+separate area that others cannot see.
 
 ---
 
-## Minute 5–10 · Die zwei Scopes, die alles tragen
+## Minute 5–10 · The two scopes that carry everything
 
 ```
-ontouser_scope_create   name="<firma>_arbeit"    → hier wird gearbeitet
-ontouser_scope_create   name="<firma>_archiv"    → hier liegen die Ergebnisse
+ontouser_scope_create   name="<firma>_arbeit"    → this is where the work happens
+ontouser_scope_create   name="<firma>_archiv"    → this is where the results live
 ```
 
-Nur zwei Stück — mehr braucht es am ersten Tag nicht. Der eine ist der Werkraum, der andere
-das Archiv. Die Trennung ist der ganze Trick: der Mitarbeiter schreibt im Werkraum und kann
-im Archiv nichts kaputt machen.
+Just two of them — you don't need more on the first day. One is the workshop, the other
+the archive. The separation is the whole trick: the employee writes in the workshop and cannot
+break anything in the archive.
 
-Später, wenn mehrere Teams dazukommen, wächst das nach Bedarf (mehr dazu in
+Later, when several teams are added, this grows as needed (more on that in
 `references/best_practices/scope-organization-per-company.md`).
 
-**Gleich mitnehmen (2 Aufrufe): die Bildmotive festlegen.** Die strukturierte Bildablage sagt
-dem Mitarbeiter in der App, WAS er fotografieren soll:
+**Take this along right away (2 calls): define the image motifs.** The structured image storage tells
+the employee in the app WHAT to photograph:
 
 ```
-onto_scope_structuredimage_categories       scope_id=<arbeit>   → was gibt es schon?
+onto_scope_structuredimage_categories       scope_id=<arbeit>   → what already exists?
 onto_scope_save_structuredimage_categories  scope_id=<arbeit>, categories=[...]
 ```
 
-Vier bis sechs Motive reichen (`01_<Motiv>.jpg`, `02_<Motiv>.jpg`, `03_<Motiv>.jpg` …),
-je einmal `de` und `en` als Sprachvariante desselben `imagename`, genau eines mit
-`thumbnail: true`. **Der Dateiname ist später der Schlüssel** — passt er nicht exakt zum
-`imagename`, erscheint nur der Platzhalter. Beispiel:
+Four to six motifs are enough (`01_<Motiv>.jpg`, `02_<Motiv>.jpg`, `03_<Motiv>.jpg` …),
+one each in `de` and `en` as the language variant of the same `imagename`, exactly one with
+`thumbnail: true`. **The filename is the key later on** — if it does not match the
+`imagename` exactly, only the placeholder appears. Example:
 `references/features/structured-image-ablage.md`.
 
-**Was in diesen 5 Minuten entsteht:** die Rechte-Struktur. Ab jetzt ist „darf schreiben" und
-„darf nur lesen" keine Frage von Vertrauen mehr, sondern von Technik.
+**What these 5 minutes produce:** the permission structure. From now on, "may write" and
+"may only read" are no longer a question of trust, but of technology.
 
 ---
 
-## Minute 10–18 · Der Feldbesuch als Formular
+## Minute 10–18 · The field visit as a form
 
-Jetzt der Schritt, der aus einer Datenbank ein Arbeitswerkzeug macht: eine Aktion, die ein
-Mitarbeiter vor Ort ausführt.
+Now the step that turns a database into a work tool: an action that an
+employee performs on site.
 
 ```
-onto_type_show         → welches Formular, welche Felder gibt es?
+onto_type_show         → which form, which fields exist?
 prepare_form_answer    form_udid=<Formular>, scope_id=<arbeit>
-submit_form_answer     form_udid, answer_udid, Feldwerte
+submit_form_answer     form_udid, answer_udid, field values
 ```
 
-Beim Absenden passiert der entscheidende Wechsel: **die Antwort wandert automatisch vom
-Arbeits-Scope in den Archiv-Scope.** Der Mitarbeiter hat sie erstellt — und kann sie danach
-nicht mehr ändern, weil er im Archiv kein Schreibrecht hat. Ohne eine einzige Objekt-Regel,
-allein über die Scope-Grenze.
+On submission the decisive switch happens: **the answer moves automatically from the
+work scope into the archive scope.** The employee created it — and can no longer change it
+afterwards, because they have no write permission in the archive. Without a single object rule,
+purely via the scope boundary.
 
-**Was in diesen 8 Minuten entsteht:** der Zettel ist weg. Die Unterschrift, das Foto, die
-abgehakten Positionen liegen sofort dort, wo die Disposition sie sieht — nicht im Auto, nicht
-im Postfach, nicht „bring ich morgen mit".
+**What these 8 minutes produce:** the paper slip is gone. The signature, the photo, the
+ticked-off items are immediately where scheduling sees them — not in the car, not
+in the mailbox, not "I'll bring it tomorrow".
 
 ---
 
-## Minute 18–25 · Die Mitarbeiter hereinlassen
+## Minute 18–25 · Letting the employees in
 
 ```
 create_invite_code   scope_id, can_read, can_write, allowlist, max_uses, expires_at
 ```
 
-Für den Außendienst: **`can_write` im Arbeits-Scope, `can_read` im Archiv.** Genau das ist
-die Rolle, die er braucht — nicht mehr und nicht weniger.
+For the field staff: **`can_write` in the work scope, `can_read` in the archive.** Exactly the
+role they need — no more and no less.
 
-**Der praktische Trick:** Allowlist als Domain eintragen („alle mit @firma.de") — dann muss
-niemand einzelne Adressen tippen. Bei wechselnden Subunternehmern geht auch der
-XLSX-Bulk-Upload über `upload_code_allowlist`.
+**The practical trick:** enter the allowlist as a domain ("everyone with @firma.de") — then nobody
+has to type individual addresses. With changing subcontractors, the
+XLSX bulk upload via `upload_code_allowlist` also works.
 
-Der Code ist zum Weitergeben gedacht (`XXXX-XXXX`, ohne verwechselbare Zeichen) — **er ist
-kein Geheimnis.** Der Mitarbeiter löst ihn ein und hat seine Rechte. Fertig.
+The code is meant to be passed on (`XXXX-XXXX`, without easily confused characters) — **it is
+not a secret.** The employee redeems it and has their permissions. Done.
 
-**Was in diesen 7 Minuten entsteht:** Einarbeitung, die keine Einarbeitung ist. Kein
-„wer kriegt welchen Zugang", kein Passwort-Zettel, kein Anruf beim Chef.
+**What these 7 minutes produce:** onboarding that is not onboarding. No
+"who gets which access", no password slip, no call to the boss.
 
 ---
 
-## Minute 25–30 · Beweisen, dass es läuft
+## Minute 25–30 · Proving that it runs
 
 ```
-onto_object_create     → einen Testbesuch anlegen
-onto_object_execute_action  → Aktion ausführen
-onto_object_search     → prüfen: liegt es im Archiv?
-onto_credit_balance    → was hat es gekostet?
+onto_object_create     → create a test visit
+onto_object_execute_action  → execute action
+onto_object_search     → check: is it in the archive?
+onto_credit_balance    → what did it cost?
 ```
 
-Dann der Moment, der überzeugt: **schick dem Menschen einen Auftrag, den er auf dem Handy
-sieht.** Über `create_service_order` wird daraus eine echte Aufgabe für einen echten Menschen —
-mit Lifecycle offen → angenommen → erledigt. Wenn er sie abschließt, steht das Ergebnis in der
-Plattform.
+Then the moment that convinces: **send the human a job that they see on their mobile
+phone.** Via `create_service_order` it becomes a real task for a real human —
+with the lifecycle open → accepted → done. When they close it, the result is in the
+platform.
 
-Das ist keine Simulation. Das ist ein digitaler Auftrag, der einen Menschen erreicht hat.
+That is not a simulation. That is a digital job that reached a human.
 
-### Und die Rückfrage automatisch beantworten (Regel)
+### And answer the follow-up question automatically (rule)
 
-Der letzte Schritt, der Betrieb spart: eine **Regel** (Trigger) auf den kritischen Befund.
-Sie braucht keinen Menschen und kostet keine Credits:
+The last step that saves operation: a **rule** (trigger) on the critical finding.
+It needs no human and costs no credits:
 
 ```
-onto_function_index  → gibt es die Rechnung schon?
+onto_function_index  → does the invoice already exist?
 onto_trigger_create  name="eskalation_kritisch", scope_id=<arbeit>, body={...}
 ```
 
@@ -161,183 +160,182 @@ onto_trigger_create  name="eskalation_kritisch", scope_id=<arbeit>, body={...}
              "links":[{"linktype":"proposesChange","to":"{object_udid}"}]}]}
 ```
 
-Ab jetzt wird aus einem kritischen Standort-Check **automatisch** ein Vorgang — sichtbar für
-das Backoffice, ohne Telefonat. **`condition.changed` dabei nicht vergessen**, sonst feuert die
-Regel pro geschriebenem Feld. Details: `references/features/automation-and-functions.md`.
+From now on a critical site check **automatically** becomes a case — visible to
+the back office, without a phone call. **Don't forget `condition.changed` here**, otherwise the
+rule fires for every field written. Details: `references/features/automation-and-functions.md`.
 
-### Den Menschen am Handy abholen (PWA)
+### Pick the human up on their mobile phone (PWA)
 
-Die Plattform lässt sich auf dem Home-Bildschirm installieren. Zwei Dinge, die der Mensch
-sofort merkt:
+The platform can be installed on the home screen. Two things the human
+notices immediately:
 
-- **Er bleibt länger angemeldet.** Die Web-Session läuft 30 Minuten; in der installierten
-  Web-App kommt eine Dauer-Anmeldung bis 14 Tage dazu — er muss also nicht bei jedem Zugriff
-  Passwort und 2FA tippen.
-- **Push-Nachrichten gibt es auf iOS nur von dort.** Im Safari-Tab zeigt der Schalter nur einen
-  Hinweis. Installiert = benachrichtigbar.
+- **They stay signed in longer.** The web session runs for 30 minutes; in the installed
+  web app a persistent login of up to 14 days is added — so they don't have to type password
+  and 2FA on every visit.
+- **Push notifications on iOS only come from there.** In the Safari tab the toggle only shows a
+  hint. Installed = notifiable.
 
 Details: `references/features/pwa-and-session.md`.
 
 ---
 
-## Was danach kommt — wenn es trägt
+## What comes after — if it carries
 
-### Der Marktplatz: aus Daten wird ein Geschäft
+### The marketplace: data becomes a business
 
-Das Unternehmen muss Daten nicht nur benutzen, es kann sie **anbieten**. Ein kuratierter
-Bestand — Kundenstandorte, Anlagen, Regionen — wird öffentlich gestellt:
+The company does not only have to use data, it can **offer** it. A curated
+stock — customer sites, assets, regions — is made public:
 
 ```
 ontouser_scope_set_visibility   read_allowed_for=["PUBLIC"]
 ```
 
-Andere Nutzer arbeiten darin, und **jede Fremdnutzung schreibt automatisch Credits gut** —
-sichtbar als `earnings_total` im Kontostand, direkt mit dem Guthaben verrechnet. Kein
-separater Auszahlungsweg, keine Rechnungsstellung.
+Other users work in it, and **every external use automatically credits credits** —
+visible as `earnings_total` in the balance, offset directly against the credit. No
+separate payout channel, no invoicing.
 
-**Warum das strategisch interessant ist:** Die Firma sammelt diese Daten sowieso im Betrieb.
-Bisher lagen sie in Ordnern. Jetzt sind sie ein Bestand mit Preis — und die Konkurrenz zahlt
-dafür, sie nutzen zu dürfen.
+**Why this is strategically interesting:** The company collects this data in operation anyway.
+Until now it lay in folders. Now it is a stock with a price — and the competition pays
+to be allowed to use it.
 
-### Feldarbeit auslagern
+### Outsourcing field work
 
-Über ServiceOrders lassen sich Aufgaben an externe Felddienstleister ausgeben
-(`complete_service_order` = 50 Credits). Was man selbst nicht hinfahren will, wird zu einem
-Auftrag, den jemand anders erledigt — mit Foto-Beweis im eigenen Archiv.
+Via ServiceOrders, tasks can be issued to external field service providers
+(`complete_service_order` = 50 credits). What you don't want to drive to yourself becomes a
+job that someone else completes — with photo proof in your own archive.
 
 ---
 
-## Was kostet das? (ehrlich gerechnet)
+## What does this cost? (honestly calculated)
 
-Die Preise stehen öffentlich in `onto_credit_pricing`, abrufbar ohne Login:
+The prices are publicly listed in `onto_credit_pricing`, retrievable without login:
 
-| Vorgang | Credits | EUR |
+| Operation | Credits | EUR |
 |---|---|---|
-| Lesen (`graph`) | 1 | 0,01 € |
-| Objekt anlegen (`create_object`) | 10 | 0,10 € |
-| Aktion ausführen (`execute_action`) | 10 | 0,10 € |
-| Auftrag abschließen (`complete_service_order`) | 50 | 0,50 € |
+| Read (`graph`) | 1 | €0.01 |
+| Create object (`create_object`) | 10 | €0.10 |
+| Execute action (`execute_action`) | 10 | €0.10 |
+| Complete job (`complete_service_order`) | 50 | €0.50 |
 
-**Beispiel — eine Firma mit 3 Außendienstlern, je 10 Besuche im Monat:**
+**Example — a company with 3 field staff, 10 visits each per month:**
 
-Ein Besuch = Aktion ausführen + drei Objekte (Standort, Foto, Materialposten)
-= 10 + 3×10 = **40 Credits = 0,40 €**
-→ 3 Mitarbeiter × 10 Besuche × 0,40 € = **12 € im Monat.**
+One visit = execute action + three objects (site, photo, material item)
+= 10 + 3×10 = **40 credits = €0.40**
+→ 3 employees × 10 visits × €0.40 = **€12 per month.**
 
-**Was dafür wegfällt:** Telefonate für Rückfragen, Nachsortierung von Zetteln, das Suchen von
-Fotos in WhatsApp-Verläufen, Nachtragen von Tagesberichten. Wenn das eine Stunde Büroarbeit
-pro Tag spart, ist die Rechnung nicht knapp — sie ist absurd einseitig.
+**What drops away for that:** phone calls for follow-up questions, re-sorting paper slips,
+searching for photos in WhatsApp histories, writing up daily reports afterwards. If that saves
+one hour of office work per day, the calculation is not tight — it is absurdly one-sided.
 
-Dazu kommen einmalig Scope-Kosten, wenn mehr als das Standard-Kontingent gebraucht wird
-(z.B. 1 Scope = 50 Credits = 0,50 €). **Flat-Tarif verfügbar**, wenn ohne Abbuchung gerechnet
-werden soll.
-
----
-
-## Was ein Geschäftsführer davon hat — in seiner Sprache
-
-**Nicht:** „eine Ontologie-Plattform mit Objekten, Properties und gescopten Links."
-
-**Sondern:**
-
-1. **Der Außendienst dokumentiert vollständig und sofort.** Nicht weil er braver ist, sondern
-   weil es einfacher ist als der Zettel.
-2. **Chef und Backoffice sehen den Stand in Echtzeit.** Wer war wo, was wurde gemacht, was
-   fehlt noch.
-3. **Rechte ohne Zusatzsoftware.** Freie Mitarbeiter bekommen Schreibrecht dort, wo sie es
-   brauchen — und kein Datenzugriff darüber hinaus.
-4. **Kosten, die mit der Nutzung atmen.** Im ruhigen Monat fast nichts, im vollen Monat
-   proportional. Keine Lizenzrunde, die man erklären muss.
-5. **Und ein Bestand, der wachsen kann.** Die eigenen Daten werden zum Potenzial für den
-   Marktplatz — mit automatischer Vergütung.
-
-**Der ehrliche Haken:** Der Nutzen entsteht erst, wenn es die Mitarbeiter tatsächlich
-benutzen. Die ersten 30 Minuten bauen das System; die Überzeugungsarbeit im Betrieb kommt
-danach. Genau deshalb ist es so gebaut, dass die Nutzung **einfacher** ist als der bisherige
-Weg — sonst funktioniert keine Einführung, egal wie gut die Software ist.
+On top of that come one-off scope costs when more than the standard quota is needed
+(e.g. 1 scope = 50 credits = €0.50). **Flat rate available** if billing should happen without
+per-use deduction.
 
 ---
 
-## Entscheidungspunkte — was der Agent bewusst festlegen muss
+## What a managing director gets out of it — in their language
 
-Die Plattform kann dem Agenten nicht abnehmen, was eine **Geschäftsentscheidung** ist.
-Alles andere erschließt er sich selbst (`onto_type_show` liefert `schema.properties` +
-`schema.action_keys`). Diese vier Punkte muss er aktiv entscheiden — und die Entscheidung
-festhalten:
+**Not:** "an ontology platform with objects, properties and scoped links."
 
-**1. `target_scope` setzen oder weglassen.**
-Setzen, wenn Ersteller und Bearbeiter der fertigen Antwort verschiedene Personen sind
-(Außendienst schreibt, Backoffice wertet aus). Weglassen, wenn in einem kleinen Betrieb jeder
-alles bearbeiten darf. Beides ist gültig — der Fehler ist, es **aus Versehen** zu vergessen:
-ohne `target_scope` bleibt die Antwort im Schreib-Scope liegen und das Backoffice sieht sie nie.
-Details: `references/best_practices/scope-organization-per-company.md`, Abschnitt 8.
+**But:**
 
-**2. Anzahl der `arbeit`-Scopes.**
-Die Formel ist **1× `stammdaten` + 1× `archiv` + N× `arbeit`** — ein `arbeit`-Scope pro Team,
-das seine Entwürfe getrennt halten muss. Schreib-Granularität = Scope-Granularität; es gibt
-keine zweite Achse. Bei einem Team bleibt es bei zwei bis drei Scopes.
+1. **Field staff document completely and immediately.** Not because they are more diligent, but
+   because it is easier than the paper slip.
+2. **Boss and back office see the status in real time.** Who was where, what was done, what
+   is still missing.
+3. **Permissions without additional software.** Freelancers get write permission where they
+   need it — and no data access beyond that.
+4. **Costs that breathe with usage.** Almost nothing in a quiet month, in a full month
+   proportional. No license round that has to be explained.
+5. **And a stock that can grow.** Your own data becomes potential for the
+   marketplace — with automatic remuneration.
 
-**3. Marktplatz: Scope öffentlich stellen oder privat lassen.**
-`ontouser_scope_set_visibility` mit `read_allowed_for=["PUBLIC"]` bedeutet **nicht nur**
-Sichtbarkeit, sondern dass Fremdnutzung automatisch Credits gutschreibt
-(`earnings_total` im Kontostand). Das ist eine Geschäftsentscheidung über den eigenen
-Datenbestand — nicht ein Häkchen, das man beim Aufsetzen nebenbei setzt.
-
-**4. Billing-Modell.**
-`pay_per_use` (jede Aktion wird gebucht) oder `flat` (keine Abbuchung, kein Scope-Limit).
-Die Wahl entscheidet, ob der Kunde die Kostenrechnung unten überhaupt zu sehen bekommt.
-
-**Warum das wichtiger ist als es klingt:** Der Aufbau selbst geht in Minuten, und der Agent
-trifft diese vier Punkte in der Regel richtig. Aber nach dem Aufbau weiß niemand mehr, *warum*
-so entschieden wurde. Genau diese vier Fragen kommen drei Monate später vom Kunden — und dann
-ist niemand mehr da, der sie beantworten kann.
+**The honest catch:** The benefit only arises when the employees actually
+use it. The first 30 minutes build the system; the persuasion work in operation comes
+afterwards. That is exactly why it is built so that usage is **easier** than the previous
+way — otherwise no rollout works, no matter how good the software is.
 
 ---
 
-## Übergabe-Notiz — was der Mensch schriftlich bekommt
+## Decision points — what the agent must consciously decide
 
-Der Aufbau ist erst fertig, wenn der Mensch ihn **ohne den Agenten** erklären kann. Diese
-Notiz ist das Ergebnis, nicht ein netter Zusatz — ohne sie versteht niemand die Struktur,
-wenn der Agent nicht mehr im Kontext ist.
+The platform cannot take away from the agent what is a **business decision**.
+Everything else it works out itself (`onto_type_show` delivers `schema.properties` +
+`schema.action_keys`). These four points it must decide actively — and record the decision:
 
-**Inhalt (kurz halten, sieben Zeilen genügen):**
+**1. Set `target_scope` or leave it out.**
+Set it when creator and editor of the finished answer are different people
+(field staff writes, back office evaluates). Leave it out when in a small business everyone
+may edit everything. Both are valid — the mistake is forgetting it **by accident**:
+without `target_scope` the answer stays in the write scope and the back office never sees it.
+Details: `references/best_practices/scope-organization-per-company.md`, section 8.
 
-1. **Was gebaut wurde** — in der Sprache des Betriebs, nicht der Plattform. Nicht „drei Scopes
-   mit `target_scope`-Commit", sondern „der Außendienst schreibt seine Besuche, das Büro sieht
-   sie fertig und kann sie nicht mehr verändern".
-2. **Wer darf was** — welche Personengruppe in welchem Scope lesen/schreibt. Die Rechte-Matrix
-   aus `scope-organization-per-company.md` als Vorlage nehmen und auf die Firma kürzen.
-3. **Warum diese Entscheidungen** — die vier Punkte von oben, je ein Satz. Das ist der Teil,
-   der später die Diskussion abkürzt.
-4. **Erste drei Handgriffe für einen Mitarbeiter** — Home-Bildschirm, Invite-Code einlösen,
-   erster Besuch. Kein Handbuch, drei Zeilen.
-5. **Was der Agent als Nächstes tun würde** — offen benannte Optionen (Marktplatz, weitere
-   Teams/`arbeit`-Scopes, Regel für Eskalation), damit der Mensch entscheidet statt zu raten.
+**2. Number of `arbeit` scopes.**
+The formula is **1× `stammdaten` + 1× `archiv` + N× `arbeit`** — one `arbeit` scope per team
+that has to keep its drafts separate. Write granularity = scope granularity; there is
+no second axis. With one team it stays at two to three scopes.
 
-**Der ehrliche Teil, der in die Notiz gehört:** Was *nicht* eingerichtet wurde und warum.
-Ein bewusst weggelassenes `target_scope` ist eine gute Entscheidung — aber nur, wenn sie
-dokumentiert ist. Sonst liest sie sich später wie ein Fehler.
+**3. Marketplace: make the scope public or keep it private.**
+`ontouser_scope_set_visibility` with `read_allowed_for=["PUBLIC"]` means **not only**
+visibility, but that external use automatically credits credits
+(`earnings_total` in the balance). That is a business decision about your own
+data stock — not a checkbox that you tick on the side while setting up.
 
-**Prüfmaßstab für „gelungen":** Der Mensch kann einem Kollegen in zwei Minuten erklären, wer
-wo arbeitet — ohne die Plattform zu öffnen.
+**4. Billing model.**
+`pay_per_use` (every action is booked) or `flat` (no deduction, no scope limit).
+The choice decides whether the customer gets to see the cost calculation below at all.
+
+**Why this is more important than it sounds:** The setup itself takes minutes, and the agent
+usually gets these four points right. But after the setup nobody knows anymore *why*
+it was decided that way. Exactly these four questions come from the customer three months later — and then
+nobody is there anymore who can answer them.
 
 ---
 
-## Reihenfolge zum Abhaken
+## Handover note — what the human receives in writing
 
-1. `register` → **Agent:** `invite_code` (vom Auftraggeber) + `accept_terms` — Konto sofort aktiv,
-   Zugangsdaten kommen in der Antwort; **Mensch:** E-Mail des Kunden, Passwort
-2. Aktivierungscode vom Menschen erfragen → `activate` *(nur beim E-Mail-Weg; beim
-   Einladungscode entfällt der Schritt)*
-3. `login` → Token sichern (danach nur noch `refresh_access_token`)
+The setup is only finished when the human can explain it **without the agent**. This
+note is the result, not a nice extra — without it nobody understands the structure
+when the agent is no longer in context.
+
+**Content (keep it short, seven lines are enough):**
+
+1. **What was built** — in the language of the business, not of the platform. Not "three scopes
+   with `target_scope` commit", but "field staff write their visits, the office sees
+   them finished and can no longer change them".
+2. **Who may do what** — which group of people reads/writes in which scope. Take the permission matrix
+   from `scope-organization-per-company.md` as a template and cut it down to the company.
+3. **Why these decisions** — the four points from above, one sentence each. That is the part
+   that shortens the discussion later.
+4. **First three steps for an employee** — home screen, redeem invite code,
+   first visit. No manual, three lines.
+5. **What the agent would do next** — openly named options (marketplace, further
+   teams/`arbeit` scopes, rule for escalation), so that the human decides instead of guessing.
+
+**The honest part that belongs in the note:** What was *not* set up and why.
+A deliberately omitted `target_scope` is a good decision — but only if it is
+documented. Otherwise it reads like a mistake later.
+
+**Test standard for "successful":** The human can explain to a colleague in two minutes who
+works where — without opening the platform.
+
+---
+
+## Order of steps to tick off
+
+1. `register` → **agent:** `invite_code` (from the client) + `accept_terms` — account active immediately,
+   credentials come in the response; **human:** the customer's e-mail, password
+2. Ask the human for the activation code → `activate` *(only on the e-mail path; with the
+   invite code this step is dropped)*
+3. `login` → save the token (after that only `refresh_access_token`)
 4. `ontouser_scope_create` × 2 (arbeit, archiv)
-5. `onto_type_show` → verfügbares Formular prüfen
-6. Testweise `prepare_form_answer` + `submit_form_answer` → liegt es im Archiv?
-7. `create_invite_code` für den Außendienst (write=arbeit, read=archiv)
-8. `create_service_order` → ein echter Mensch bekommt einen echten Auftrag
-9. `onto_credit_balance` → Kunde zeigt Kosten
-10. `onto_scope_save_structuredimage_categories` → Bildmotive für die App festlegen
-11. `onto_trigger_create` → kritischer Befund eskaliert automatisch
-12. Bei Bedarf: `ontouser_scope_set_visibility` → Marktplatz
-13. Dem Menschen sagen: Seite auf den **Home-Bildschirm** legen (dann bleibt er angemeldet
-    und bekommt Push)
+5. `onto_type_show` → check the available form
+6. As a test `prepare_form_answer` + `submit_form_answer` → is it in the archive?
+7. `create_invite_code` for the field staff (write=arbeit, read=archiv)
+8. `create_service_order` → a real human gets a real job
+9. `onto_credit_balance` → show the customer the costs
+10. `onto_scope_save_structuredimage_categories` → define image motifs for the app
+11. `onto_trigger_create` → critical finding escalates automatically
+12. If needed: `ontouser_scope_set_visibility` → marketplace
+13. Tell the human: put the page on the **home screen** (then they stay signed in
+    and get push)
