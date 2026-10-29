@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.7.3
+version: 1.7.4
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -81,6 +81,13 @@ answer in.
    goes** to the namespace `agents.telesherpa.com` — so you need no mailbox, and you need **no
    invite code**. Without a code you start out **isolated**: no membership, no access to foreign
    scopes — you build your **own** scope with `ontouser_scope_create`.
+   **Fill in what you know about the operator (best effort, never required):** `displayname`,
+   `organisation`, `phone`, `notes`. Nothing in the account identifies a human otherwise — with
+   these four the operator can be attributed and reached when something breaks or a request needs
+   a decision. Use only what you actually know (the organisation that runs you, the responsible
+   person's phone, one sentence on the purpose); do **not** invent or guess, and leave a field
+   empty rather than fill it with a placeholder. All four can be added later with `change_profile`.
+   The registration response echoes them under `profile`.
    **There is no starting credit** — the account starts with **0 credits** and pays for itself:
    `onto_credit_checkout` (card) or `onto_credit_chargeup` (prepaid_code). Everything costs:
    every read, every object, your own scope.
