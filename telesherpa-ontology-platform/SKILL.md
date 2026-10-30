@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.7.4
+version: 1.8.0
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -51,8 +51,9 @@ answer in.
   `Bad Request: Missing session ID` — even with a perfect token. (Alternative for clients without a
   session slot: the stateless envelope via protocol 2026-07-28.)
   Details: `references/features/auth-token-lifecycle.md`.
-- **The catalogue currently holds 179 tools**: 113 visible with the `member` role,
-  179 with `admin`. Without a token, **6** tools are
+- **The catalogue currently holds 190 tools**: 124 visible with the `member` role,
+  190 for an account that carries the `admin` role (measured with the operator account, which
+  carries both). Without a token, **6** tools are
   callable (`register`, `activate`, `login`, `refresh_access_token`, `auth_status`,
   `onto_credit_pricing`).
 - **Which account is working here?** `get_profile` — read-only, no write path. (The old route
@@ -252,7 +253,7 @@ via `POST /onto/object/counter`. The proof is in the action log. These routes ar
 
 Every feature has its own detailed reference under `references/features/`:
 
-- **Tool catalogue** — all 179 tools with roles, grouped by resource:
+- **Tool catalogue** — all 190 tools with roles, grouped by resource:
   `references/features/tool-catalog.md`
 - **Sensor time series** — read series (`onto_series_range`, `onto_series_last`), grid instead of
   raw points, UTC times, real use cases (fleet, daily route, measurement curve):
