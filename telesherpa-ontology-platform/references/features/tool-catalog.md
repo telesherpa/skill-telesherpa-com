@@ -1,11 +1,11 @@
 # Tool Catalog
 
-This overview is generated from the service's tool list: **177 tools** (server 2.3.0), of which
-**110** are visible to an account with
-`login`+`public`+`member`, **112** with `login`+`public`+`admin`, **6** without a token. An account with
-`admin` **and** `member` sees all **177**.
+This overview is generated from the service's tool list: **192 tools** (server 2.3.0), of which
+**124** are visible to an account with
+`login`+`public`+`member`, **192** with `login`+`public`+`admin`, **6** without a token. An account with
+`admin` **and** `member` sees all **192**.
 
-**As of 2026-10-24.** For your own account, `auth_status` (`tools_visible`) is what counts — that is the
+**As of 2026-10-30.** For your own account, `auth_status` (`tools_visible`) is what counts — that is the
 number that applies there.
 
 **The roles column says who SEES the tool.** It does not protect execution — the
@@ -187,6 +187,18 @@ Check both together, not just visibility.
 | `onto_settings_index` | `admin` |
 | `onto_settings_list` | `admin` |
 | `onto_settings_update` | `admin` |
+
+### `onto_invite_code_*`
+
+| Tool | Roles |
+|---|---|
+| `onto_invite_code_index` | `admin` |
+| `onto_invite_code_show` | `admin` |
+
+> Read-only oversight across **all** scopes: code, scope, template, kind, R/W/M, issuer, status,
+> expiry, usage, redemptions. Filters travel in the JSON body (`q`, `scope_id`, `status`, `kind`,
+> `sort`, `dir`, `page`) — never in the query string. Creating and revoking a code stays with the
+> scope manager in `/ontouser/scope`; this view only looks.
 
 ### `onto_user_*`
 
