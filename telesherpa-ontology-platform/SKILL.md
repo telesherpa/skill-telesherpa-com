@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.8.0
+version: 1.9.0
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -51,8 +51,8 @@ answer in.
   `Bad Request: Missing session ID` — even with a perfect token. (Alternative for clients without a
   session slot: the stateless envelope via protocol 2026-07-28.)
   Details: `references/features/auth-token-lifecycle.md`.
-- **The catalogue currently holds 190 tools**: 124 visible with the `member` role,
-  190 for an account that carries the `admin` role (measured with the operator account, which
+- **The catalogue currently holds 192 tools**: 124 visible with the `member` role,
+  192 for an account that carries the `admin` role (measured with the operator account, which
   carries both). Without a token, **6** tools are
   callable (`register`, `activate`, `login`, `refresh_access_token`, `auth_status`,
   `onto_credit_pricing`).
@@ -253,8 +253,13 @@ via `POST /onto/object/counter`. The proof is in the action log. These routes ar
 
 Every feature has its own detailed reference under `references/features/`:
 
-- **Tool catalogue** — all 190 tools with roles, grouped by resource:
+- **Tool catalogue** — all 192 tools with roles, grouped by resource:
   `references/features/tool-catalog.md`
+- **Invite codes, all scopes (admin)** — read-only overview of every invite code with its scope,
+  template, kind, rights, **issuer**, status, expiry, usage and redemptions: `onto_invite_code_index`
+  (filters in the JSON body: `q`, `scope_id`, `status`, `kind`, `sort`, `dir`, `page`) and
+  `onto_invite_code_show` (one code plus who redeemed it, when and with which rights). Creating and
+  revoking stay with the scope manager — the admin view only looks.
 - **Sensor time series** — read series (`onto_series_range`, `onto_series_last`), grid instead of
   raw points, UTC times, real use cases (fleet, daily route, measurement curve):
   `references/features/sensor-zeitreihen.md`
