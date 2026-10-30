@@ -42,6 +42,8 @@ including the cost calculation.
 **Which tool for what, and does my account even see it?** →
 `references/features/tool-catalog.md` (all 192 tools with a role column).
 
+**Leading other accounts (company manager)?** → `references/features/company-manager.md`. Managed accounts, the marker, the rights ladder, credits and transfers, suspension and offboarding — with recipes and every guard.
+
 **Building automation?** → `references/features/automation-and-functions.md`. Rules (triggers) and
 functions can also be **created via MCP** — not just read.
 
