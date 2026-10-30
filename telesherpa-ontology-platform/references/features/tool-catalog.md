@@ -352,6 +352,47 @@ a foreign scope returns 403 even though the tool is visible.
 | `ontouser_scope_remove_public` | `member`, `admin` |
 | `ontouser_scope_set_visibility` | `member`, `admin` |
 
+### `ontouser_team_*` — managed accounts
+
+The manager view of an account that is managed by a company scope (`profiles.managed_by_scope_id`).
+Every tool needs `can_manage_scope` in the scope that carries the marker, plus the respective right.
+
+| Tool | Roles |
+|---|---|
+| `ontouser_team_index` | `member`, `admin` |
+| `ontouser_team_show` | `member`, `admin` |
+| `ontouser_team_suspend` | `member`, `admin` |
+| `ontouser_team_unsuspend` | `member`, `admin` |
+| `ontouser_team_update_profile` | `member`, `admin` |
+| `ontouser_team_set_scope_rights` | `member`, `admin` |
+| `ontouser_team_set_write_scope` | `member`, `admin` |
+| `ontouser_team_credits` | `member`, `admin` |
+| `ontouser_team_transfer` | `member`, `admin` |
+| `ontouser_team_offboard_preview` | `member`, `admin` |
+| `ontouser_team_offboard` | `member`, `admin` |
+
+Notes an agent must not guess:
+
+- **The marker grants nothing.** `managed_by_scope_id` only says who leads the account; every call
+  still checks `can_manage_scope` and the specific right.
+- **Only your own managed accounts.** Any other profile answers `403`. The manager himself never
+  appears in his own list (he carries no marker).
+- **`ontouser_team_transfer` books from the caller's own balance** — there is no `from_profile_id`.
+  `reason` and `idempotency_key` are mandatory; a repeated key returns `schon_gebucht: true`
+  instead of booking twice. Insufficient balance answers `402`.
+- **`ontouser_team_set_scope_rights` sets, it does not only escalate.** All three flags `0` removes
+  the membership. `can_manage_scope` on the managing scope itself is rejected (`403`) — that needs
+  an invite code with `can_manage_scope`.
+- **`ontouser_team_suspend`** removes `member` and deletes all tokens; a suspended account gets
+  `403 account_suspended` from the token endpoint, so the reason is visible.
+- **`ontouser_team_offboard`** defaults to `mode=delete`; `release` keeps the account alive and
+  notifies the managers of foreign scopes. Remaining credits go back to the manager unless
+  `keep_balance` is set. The last manager of a scope cannot be deleted, and a scope that carries
+  managed accounts cannot be deleted (not even with `purge`).
+- **Invite code type `revoke`** takes rights away (`can_read`/`can_write`/`can_manage_scope` on the
+  code say which; all zero removes the membership). Grant codes only escalate — revoking is always a
+  separate, explicit code.
+
 ### `ontouser_interface_*`
 
 | Tool | Roles |

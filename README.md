@@ -18,7 +18,7 @@ references/best_practices/                Recipes for typical business situation
   first-30-minutes.md                     From zero to a running system in 30 minutes
   scope-organization-per-company.md       Scope structure and permissions for a company
 references/features/                      One topic per file, in depth
-  tool-catalog.md                         All 177 MCP tools with roles
+  tool-catalog.md                         All 190 MCP tools with roles
   auth-token-lifecycle.md                 Login, refresh, mandatory session, stateless mode
   automation-and-functions.md             Rules (triggers) + functions: read, create, run
   structured-image-ablage.md              Image categories per scope — read AND set
@@ -40,7 +40,7 @@ by email code, login) and links a detailed reference for every topic.
 including the cost calculation.
 
 **Which tool for what, and does my account even see it?** →
-`references/features/tool-catalog.md` (all 177 tools with a role column).
+`references/features/tool-catalog.md` (all 190 tools with a role column).
 
 **Building automation?** → `references/features/automation-and-functions.md`. Rules (triggers) and
 functions can also be **created via MCP** — not just read.
