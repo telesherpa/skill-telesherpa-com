@@ -20,12 +20,10 @@ you do not hold answers `403` as well.
 The manager himself never appears in his own team list: he carries no marker. Only accounts that
 were handed to him show up.
 
-Two ways an account becomes managed:
-
-| Way | Who acts | Tool |
-|---|---|---|
-| A person or agent redeems a **management code** | the account itself, with its own consent | `redeem_invite_code` with a code of `kind=management` |
-| An existing account is handed over | the account, by redeeming the code | same |
+There is exactly **one** way to become managed: the account itself redeems a **management code**
+(`kind=management`) through `redeem_invite_code`. It works for a freshly registered agent (code in
+the registration call) and for an existing account alike. The code sets the marker and nothing else —
+no rights, no membership, no membership in your scope. Grant those separately once the account is in.
 
 There is no “adopt this account” button and no way to pull a stranger into a team. Consent is the
 redemption, always.
@@ -87,9 +85,10 @@ Codes are created and revoked in the **scope** context, not here:
 
 ### 4.1 Onboard a sub-agent
 
-1. `create_invite_code` in your scope with `kind="management"`, `can_read=1`, `can_write=1`
-   (whatever the new account may do **in your scope**), `max_uses=1`, an expiry date and a `label`
-   such as “onboarding support-agent-7”.
+1. `create_invite_code` in your scope with `kind="management"`, `max_uses=1`, an expiry date and
+   a `label` such as “onboarding support-agent-7”. A management code carries **no rights**: it only
+   sets the marker. `can_read`/`can_write` on such a code are ignored — grant rights afterwards with
+   `ontouser_team_set_scope_rights` (or hand out a separate `kind=scope` code).
 2. Hand the code over. The new account registers, then calls `redeem_invite_code` with it.
 3. `ontouser_team_index` now lists it — with `managed_by_scope_id` pointing at your scope.
 4. `ontouser_team_show` shows profile, web user, memberships and the default write scope.
@@ -122,8 +121,9 @@ ontouser_team_set_scope_rights {"profile_id": 342922, "scope_id": 61,
 - **Setting, not only escalating.** All three flags `0` removes the membership entirely — the
   account leaves the scope.
 - `can_manage_scope` **on the managing scope itself** is refused (`403`). Otherwise a manager could
-  climb the chain above himself. Hand that out with a code of `kind=management` instead, or not at
-  all.
+  climb the chain above himself. Two ways remain, and they mean different things:
+  a `kind=scope` invite code carrying `can_manage_scope=1` **grants** manage rights in that scope;
+  a `kind=management` code only marks the redeemer as *managed by* your scope and grants nothing.
 - When you withdraw `can_write`, the account's `default_write_scope` is cleared with it — no
   silent write target on a scope it may only read.
 - `ontouser_team_set_write_scope` only accepts a scope the account may write to (`400` otherwise).
@@ -137,8 +137,12 @@ revocation has to be verifiable on both sides: the account redeems it, the log s
 ### 4.5 Suspend and unsuspend
 
 - `ontouser_team_suspend` removes the `member` role and deletes every token. From then on the token
-  endpoint answers `403 {"error":"account_suspended"}`.
+  endpoint answers `403 {"error":"account_suspended"}`. The account gets **no mail** — the reason
+  appears only when it tries to log in. Tell the person yourself.
 - Admin accounts cannot be suspended through the marker, and nobody can suspend himself.
+- `offboard` with `mode=release` does mail: every manager of a **foreign** scope the account stays in
+  receives a notification (`scope_user_released`, “released from management, still a member of your
+  scope”), and the response lists them under `gemeldet`. Suspension is silent, release is not.
 - `ontouser_team_unsuspend` restores the role; the account logs in again with its existing password.
 - No message is sent automatically — say it yourself if the account should know.
 
@@ -162,12 +166,24 @@ keep lingering access.
 | Answer | Meaning | What to do |
 |---|---|---|
 | `403` on any team tool | you do not lead this account, or lack `can_manage_scope` | take the id from `ontouser_team_index`, do not guess |
-| `403` on `set_scope_rights` with `can_manage_scope=1` | climbing the chain is impossible by design | use a `management` invite code |
+| `403` on `set_scope_rights` with `can_manage_scope=1` | climbing the chain is impossible by design | grant manage with a `kind=scope` code (`can_manage_scope=1`); a `management` code grants nothing |
 | `400` on `set_write_scope` | the account has no `can_write` there | grant write first |
 | `400` on `offboard mode=delete` | the account is the **last manager** of a scope | name a successor first; the message names the scope |
+| `409` on `redeem_invite_code` with a management code | the account is already managed by **another** company | end that relation first (`offboard`, `mode=release` there); a direct switch is refused |
 | `402` on `transfer` | balance too low — nothing was booked | load credit, then repeat with the **same** key |
 | `409` when deleting a scope | the scope still leads accounts (`Verwaltete Nutzer`) | offboard or move them first, `purge=1` does not bypass it |
 | `403 account_suspended` from the token endpoint | the account is suspended | `ontouser_team_unsuspend` |
+
+Every team action is written to the action log as `manage_<action>` with `actor_profile_id` and
+`target_profile_id` — `manage_transfer`, `manage_suspend`, `manage_offboard` and so on. Object-level
+history per account is a different log (object events), not this one.
+
+Two limits to know before you promise traceability:
+
+- `onto_action_logs` requires the **`admin` role**. A plain manager (`member`) gets `403` — he cannot
+  read the log of his own team today. That is a gap, not a design decision.
+- There is **no filter** by profile, scope or action — only `page`/`limit`. Reading a specific
+  account's history means paging through and filtering yourself.
 
 ---
 
