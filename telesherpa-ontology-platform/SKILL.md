@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.9.0
+version: 1.10.0
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -195,6 +195,46 @@ Complete, runnable example (curl, step by step): `references/showcase-onboarding
   (`earnings_total` in `onto_credit_balance`). Full playbook:
   `references/features/marketplace-revenue-share.md`.
 
+## Leading accounts (company manager)
+
+A scope can **lead** accounts: a human or an agent becomes the manager of other accounts and runs
+their access, rights, budget and exit. The account carries a marker (`managed_by_scope_id`); the
+marker grants **nothing** on its own — every call also needs `can_manage_scope` in the leading
+scope.
+
+**Why this is good for you as an agent** (the short version):
+
+- **Build your own team without a human.** Create a code of `kind="management"`, hand it over, and
+  the account that redeems it lands in your team. No ticket, no browser, no admin.
+- **Control the money.** Credit loads onto *your* account; you transfer portions to the accounts
+  that need them. A transfer needs `reason` **and** `idempotency_key`, books nothing on shortage
+  (`402`) and never allows a minus.
+- **Hand out exactly the rights that are needed, and take them back.** Read / write / manage per
+  scope. All three flags `0` removes the membership. `can_manage_scope` on the leading scope itself
+  is refused (`403`) — nobody climbs the chain.
+- **Clean cut-offs.** `suspend` deletes the tokens at once; the token endpoint then says
+  `403 account_suspended`, so the account knows why.
+- **Clean exits.** `offboard_preview` first, then `release` (account lives on, balance returns) or
+  `delete` (default: profile, web user, memberships, tokens, passkeys — gone).
+
+Your entry point is `ontouser_team_index` (accounts you lead); everything else works on the
+`profile_id` from that list:
+
+| Need | Tool |
+|---|---|
+| list / read | `ontouser_team_index`, `ontouser_team_show`, `ontouser_team_credits` |
+| rights | `ontouser_team_set_scope_rights`, `ontouser_team_set_write_scope` |
+| money | `ontouser_team_transfer` (from your own balance) |
+| cut off / restore | `ontouser_team_suspend`, `ontouser_team_unsuspend` |
+| exit | `ontouser_team_offboard_preview`, `ontouser_team_offboard` |
+
+Full model, exact parameters, recipes (onboarding, funding, rights ladder, offboarding) and every
+guard with its status code: `references/features/company-manager.md`.
+
+Three rules that keep you out of trouble: take `profile_id` **from the list**, never guess it; use
+`kind="revoke"` codes to make a withdrawal visible to both sides; and never treat the marker as
+authorisation.
+
 ## Actions (buttons) in your own scope
 
 Actions are **scope data**, not global buttons. Two gates decide:
@@ -255,6 +295,9 @@ Every feature has its own detailed reference under `references/features/`:
 
 - **Tool catalogue** — all 192 tools with roles, grouped by resource:
   `references/features/tool-catalog.md`
+- **Leading accounts (company manager)** — managed accounts, the marker, the rights ladder,
+  credits and transfers, suspension and offboarding, with recipes and every guard:
+  `references/features/company-manager.md`
 - **Invite codes, all scopes (admin)** — read-only overview of every invite code with its scope,
   template, kind, rights, **issuer**, status, expiry, usage and redemptions: `onto_invite_code_index`
   (filters in the JSON body: `q`, `scope_id`, `status`, `kind`, `sort`, `dir`, `page`) and
