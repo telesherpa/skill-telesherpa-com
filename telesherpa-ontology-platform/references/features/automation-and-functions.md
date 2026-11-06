@@ -194,8 +194,8 @@ A typo in the link type is caught on save if the caller passes the valid link ty
   via a fingerprint. The **value** must be compared as well: otherwise genuine
   value changes are discarded.
 - **Role whitelist per definition** (default `member`).
-- **Automation costs NO credits** — `charge_credits` only runs on triggering by a user.
-- **The endpoint is not public:** it is not reachable from outside, invocation is internal.
+- **Automation costs NO credits.** Only a person or an agent triggering something pays the price
+  of that write; a rule that fires afterwards is free.
 
 ### An effect type outside the whitelist is rejected on save
 No silent no-op. Conversely: a `run_function` reference to a non-existent function
@@ -234,12 +234,11 @@ worker) shows what happened. Pattern for `create_object` with a link:
 
 ## Pitfalls
 
-1. **`on_change` needs the worker — and that is autonomous.** A rule is not
-   executed just because an object is written. If the worker is not running, events pile up
-   and nothing happens. With „my rule does nothing", check the status first.
-2. **Form answers produce events** (trigger source „Formular"). On a NEW
-   write path always produce a real event and verify that it arrives (not by
-   rebuilding it with a SQL INSERT — a self-built event only tests your own assumption).
+1. **A rule never fires inside the call.** Writing an object only queues the event; the effect
+   follows within minutes. If „my rule does nothing", wait one interval before anything else —
+   and do not write the object a second time.
+2. **Form answers produce events** (trigger source „Formular"). Always test through the real path
+   and check that the event arrived — a hand-built event only proves your own assumption.
 3. **Multiple firing per operation (the „4x bug").** One submit writes N fields → N events.
    `condition.props` is checked against the CURRENT object state, not against the event — so
    each of the N events sees the finished object. The dedupe does not apply (different `key_name`

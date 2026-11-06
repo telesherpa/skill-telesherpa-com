@@ -60,9 +60,9 @@ automatically.* There are no exceptions, not even with `scan.ausfuehrung: "auto"
 - `action.links[]`: `{ "type", "from", "to", "replace", "remove", "require", "text" }` —
   `require: "absent"` / `"present"` checks the link, `text` is the plain-text message on
   violation, `replace: "source"` replaces an existing link (package from shelf A to B).
-- `counter`: `{ "label": "Kontrollen heute", "sql": "SELECT COUNT(*) … {scope_where}" }` — the
-  placeholder inserts the read scopes. If a counter fails, it is missing from the response; the scan
-  continues.
+- `counter`: `{ "label": "Controls today", "query": "…" }` — a counter is evaluated server-side and
+  only ever counts what the caller may see. If a counter fails, it is simply absent from the response;
+  the scan continues.
 - `scan`: `{ "ausfuehrung": "auto" | "bestaetigen" }` — default `auto`, `bestaetigen` forces buttons.
 - `feedback`: `{ "scan" | "success" | "error": {"sound","color","mode","haptic","ms"}, "silent":
   bool, "dedupe_ms": int }` — three-stage feedback. The client separates the stages in time
@@ -163,18 +163,12 @@ What follows from this:
 - The **assessment belongs in the report, not in the scan**: the interval to the previous control at the
   same checkpoint against `interval_min`, plus the travel time since the previous control at a **different**
   checkpoint of the same account — conspicuously short travel times expose ticking off without changing location.
-- Counters in the action definition (`counter`) and interface SQL accept **`{scope_where}`**; the
-  platform replaces the placeholder there with the scopes the caller may read — and closes hard when
-  there are none, so the result is empty rather than complete.
-- **In a report query the placeholder is NOT replaced.** A report that relies on it either fails or
-  runs without any scope narrowing. Whoever writes a report query therefore scopes it itself — and the
-  first thing to check when a report shows too much is exactly that missing condition.
-- Filter values are **third-party input**. For the built-in filters the platform handles them
-  correctly server-side; for **self-written** SQL (report query, interface SQL) that does
-  not apply automatically — there column names must come from the own definition and values must go through the
-  database's escape function.
-- The report header is a **comma-separated string** (`explode(',')`), not a JSON structure,
-  and must not contain a comma in a heading. Filters come in the order of the
+- **Reports never widen access.** A report shows what its reader may see — build the query so that it
+  filters by scope, and check with a second account that it does.
+- Filter values are **third-party input**. The built-in filters handle that; a self-written query
+  does not — take column names from your own definition and never paste a value from the URL into it.
+- The report header is a **comma-separated string**, not a JSON structure, and must not contain a
+  comma in a heading. Filters come in the order of the
   `search_cols` and take effect **only via POST**; the JSON/GET route ignores them.
 - A report may carry `candownload = 1`, then the CSV export is enabled.
 

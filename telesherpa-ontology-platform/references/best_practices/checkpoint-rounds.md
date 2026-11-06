@@ -4,9 +4,8 @@
 there is a record that also withstands an audit — one row per check with time, point,
 account and a plausibility rating.
 
-**For whom:** Operator/administrator. Object types are platform schema (`onto_type_create` is
-the operator's job); customer agents work with the types that are there and build actions,
-views and reports on them.
+**For whom:** an agent building the workspace with customer rights. Object types are platform
+schema — you build actions, views and reports on the types that exist.
 
 The technical behaviour is documented in `references/features/scan-and-checkpoints.md` (server contract,
 execution rule, field formats). What follows is the order in which you build something like this.
@@ -24,29 +23,29 @@ execution rule, field formats). What follows is the order in which you build som
 
 ## 1. Types and fields (a prerequisite, not your step)
 
-```
-onto_type_create        name="checkpoint", label="mo.Checkpoint",
-                        description="Kontrollpunkt fuer den Rundgang: QR-Tag am Ort"
-onto_property_def_create key="code",         value_type="string",   label="mo.Code"
-onto_property_def_create key="title",        value_type="string",   label="mo.Title"
-onto_property_def_create key="section",      value_type="string",   label="mo.Section"
-onto_property_def_create key="tour",         value_type="string",   label="mo.Patrol"
-onto_property_def_create key="interval_min", value_type="int",      label="mo.Interval_Min"
-onto_property_def_create key="checked_at",   value_type="datetime", label="mo.Checked_At"
-onto_property_def_create key="checked_by",   value_type="string",   label="mo.Checked_By"
-onto_property_set_create key="checkpoint_props", label="mo.Checkpoint_Props",
-                        def_ids=[…], type_ids=[<Typ-ID von checkpoint>]
-```
+What the type has to carry (the operator builds it from this list; you describe what you need):
 
-Rules for this:
+| Field | Type | Meaning |
+|---|---|---|
+| `code` | string | the code on the QR tag |
+| `title` | string | name of the point |
+| `section` | string | section of the round |
+| `tour` | string | which patrol round it belongs to |
+| `interval_min` | int | how often it has to be checked |
+| `checked_at` | date-time | last acknowledgement |
+| `checked_by` | string | who acknowledged |
+
+`checked_at`/`checked_by` are **state fields** on the object, so a list “when was this last
+checked” works without evaluating the log.
+
+Rules for the texts:
 
 - **Field names in English, label as i18n key** (`mo.…`). If the key does not exist,
-  UI and introspection show the raw key. First read `onto_i18n_index`/`onto_i18n_matrix`,
-  then `onto_i18n_create`; the assumption/the export is done by the operator.
+  UI and introspection show the raw key. Create the key and its translation through the i18n tools;
+  the operator reviews and exports, and until then the raw key is what you see.
 - **Do not rebuild the address:** the set `address` (`street`, `postalCode`, `city`, `latitude`,
   `longitude` with geocode and reverse layout) exists and is bound to the type.
-- `checked_at`/`checked_by` are **state fields**: they sit on the object so that a list “when
-  last checked” works without evaluating the log. The history still remains in the log.
+- The history stays in the log; the two state fields exist so that a list does not have to read it.
 - Set required fields (`required`) sparingly — a required field blocks every execution.
 
 ## 2. Create points and print codes
@@ -71,7 +70,7 @@ onto_actiondef_save   key="qr_control", label="Kontrolle quittieren",
                       body={"action":{"type":"update",
                                       "props":{"checked_at":"{now}","checked_by":"{user_email}"}},
                             "scan":{"ausfuehrung":"auto"},
-                            "counter":{"label":"Kontrollen heute","sql":"… {scope_where}"},
+                            "counter":{"label":"Controls today","query":"…"},
                             "feedback":{…}}
 ```
 
@@ -110,9 +109,8 @@ point, target from `interval_min`, rating, previous point, travel time, round.
   which is why the column is in the record and not in a special evaluation.
 - Filters: scope, checker (email), period. Filter values go **only via POST** in the
   order of the `search_cols`; the JSON/GET route ignores them.
-- **Write the scope out in the report SQL.** `{scope_where}` is **not** replaced in the report (that
-  only applies to actiondef counters and interface SQL): with the placeholder the query aborts, without a
-  scope condition it evaluates across all scopes.
+- **A report shows only what its reader may see.** Build the query so it filters by scope, and
+  verify it with a second account — a report that shows more than the reader's scopes is a fault.
 - `candownload = 1` releases the CSV export (for audits and files).
 - `candownload` also means: what the report shows can be taken away as a file. Scope and filter
   are therefore part of the promise to the customer, not just a display question.

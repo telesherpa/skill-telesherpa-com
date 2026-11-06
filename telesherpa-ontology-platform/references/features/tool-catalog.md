@@ -68,9 +68,6 @@ you can do yourself.
 |---|---|
 | `onto_type_show` | `member` |
 
-### `onto_link_*`
-
-
 ### `onto_property_def_*`
 
 | Tool | Roles |
@@ -108,27 +105,6 @@ you can do yourself.
 | `onto_scope_save_structuredimage_categories` | `member` |
 | `onto_scope_structuredimage_categories` | `member` |
 
-### `onto_settings_*`
-
-
-### `onto_invite_code_*`
-
-
-> Read-only oversight across **all** scopes: code, scope, template, kind, R/W/M, issuer, status,
-> expiry, usage, redemptions. Filters travel in the JSON body (`q`, `scope_id`, `status`, `kind`,
-> `sort`, `dir`, `page`) — never in the query string. Creating and revoking a code stays with the
-> scope manager in `/ontouser/scope`; this view only looks.
-
-### `onto_user_*`
-
-
-> **`onto_user_delete`** clears everything for the account in ONE call: tokens, passkeys, sessions,
-> trackings, roles, scope assignments, favorites, memo lines, own notifications,
-> profile and account — and then counts up afterwards. `id` may be the account ID, the profile ID **or** the
-> `email`. The response names `entfernt` and `behalten`
-> (accounting, log, other people's data). `onto_user_delete_profile` is the same path
-> (legacy name). Not found = HTTP 404, no silent success.
-
 ### `onto_report_*`
 
 | Tool | Roles |
@@ -150,7 +126,6 @@ you can do yourself.
 | `onto_catalog_presets` | `member` |
 
 ### `onto_i18n_*`
-
 
 ### `onto_favorite_*`
 
@@ -201,9 +176,6 @@ a foreign scope returns 403 even though the tool is visible.
 `points[].ts`, `series_ts` **and** to the `from`/`to` parameters. Details and use cases:
 `references/features/sensor-time-series.md`.
 
-### `onto_import_*`
-
-
 ### `onto_trigger_*`
 
 | Tool | Roles |
@@ -238,9 +210,6 @@ a foreign scope returns 403 even though the tool is visible.
 |---|---|
 | `onto_watch_changes` | `member` |
 | `onto_watch_cursor` | `member` |
-
-### `onto_action_*`
-
 
 ### `ontouser_scope_*`
 

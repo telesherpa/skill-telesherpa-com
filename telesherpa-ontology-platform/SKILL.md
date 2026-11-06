@@ -400,9 +400,9 @@ patterns, not a technical feature in itself:
     the schema at all). The call then runs through without an error but does not work as expected
     (silent no-op) or throws 400. On unexpected behaviour, check `tools/list` for that specific tool
     first, before suspecting your own request construction.
-11. **The user agent on REST login MUST be `Telesherpa-MCP/1.0`** — the backend binds the token to
-    it. Without it: 403 "Not authorized" on every tool call, although the token looks like a valid
-    one.
+11. **Send the same client headers on every call** — log in with the headers you will use
+    afterwards. If they differ, calls answer `403 Not authorized` although the token is valid; look
+    at the headers first.
 12. **In rare cases access AND refresh token can become invalid at the same time** (not just
     normal expiry) — then only a fresh human `login` step helps, see
     `references/features/auth-token-lifecycle.md`.
@@ -468,9 +468,9 @@ patterns, not a technical feature in itself:
     `comment` (via a `hascomment` link on the target object). You can **delete** a wrong comment —
     `onto_object_delete` with its udid, after which it is gone from the panel — but **not change**
     it. So delete and write again.
-25. **Own object types are platform schema:** `onto_type_create` is reserved for administrators.
-    For your own purposes take the types from the preset (`onto_catalog_apply`) and create objects
-    within them — `serviceOrder` can be used as a generic task.
+25. **Object types are platform schema.** Take the types from the presets (`onto_catalog_apply`) and
+    create your objects within them — `serviceOrder` works as a generic task. A type that is missing
+    is a service request to the operator.
 26. **Status is a separate property per object type — the object's `status` is something else.**
     - **Lifecycle of the row:** `active`/`inactive`/`deleted` sits in the object itself, not in a
       property. The platform sets it (visibility, soft delete), not the agent.

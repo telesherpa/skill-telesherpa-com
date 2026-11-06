@@ -126,10 +126,10 @@ itself as a header — the response tells it so as well:
 > "This client has no MCP session, therefore the token is NOT stored on the server side.
 > Send it with every following call as header 'Authorization: Bearer ...'.
 
-### The User-Agent at login MUST be `Telesherpa-MCP/1.0`
-The backend **binds the token to the User-Agent**. Without this header at login → 403
-"Not authorized" on every tool call, although the token looks valid. Applies to the direct
-REST login via the login tool call, which supplies the token for the Bearer header.
+### Send the same client headers on every call
+Log in with the client headers you will send on every following call, and keep them identical.
+If they differ, calls come back with `403 Not authorized` although the token itself is valid —
+the first place to look is the headers, not the token.
 
 ### Access and refresh token both invalid
 Rare, but possible (`invalid_grant` on refresh as well). Recognisable by: only the
