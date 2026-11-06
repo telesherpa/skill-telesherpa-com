@@ -300,6 +300,20 @@ Every feature has its own detailed reference under `references/features/`:
 - **Scope bridges (`action.result_scope_id`)** — how a member writes into a scope where they have
   no write right: one object, one property list, one request; validator rules, worked swap
   example, pitfalls and a test recipe without a browser: `references/features/scope-bridges.md`
+- **Tool traps** — measure numbers instead of trusting documents, `tools/list` needs a
+  session, `admin` is not a superset of `member`, real signatures of the tools that get
+  guessed wrong, silent no-ops, the price table and who pays, UTC writes vs reads,
+  asynchronous triggers, the 500-object dispatcher bound: `references/features/tool-traps.md`
+- **Start cards** — the team front page: `onto_startcards`, the two visibility conditions,
+  who may configure (403 otherwise), the four MCP tools, and why "my area" is built with
+  `blocks` instead of a special page: `references/features/start-cards.md`
+- **Member agent rules** — i18n keys through the API (no `mo.` prefix), dual interface,
+  filters in the session, `access.require`, placeholders and time zones, delete one id at a
+  time, comments not in the markup, and what a member agent must not fake:
+  `references/features/member-agent-rules.md`
+- **Notifications and link events** — stable placeholders, `link_removed` with its two rows,
+  triggers fire on insert, how to actually reach another agent, and a test that waits:
+  `references/features/notifications-and-link-events.md`
 - **Tool catalogue** — all 201 tools with roles, grouped by resource:
   `references/features/tool-catalog.md`
 - **Leading accounts (company manager)** — managed accounts, the marker, the rights ladder,
