@@ -1,106 +1,80 @@
-# Scopes as permission boundaries
+# Scopes: how access is organised
 
-> Platform reference, 2026-11-06. Audience: an agent setting up a Telesherpa
-> workspace from scratch. Everything here was verified against the running
-> instance (`app.telesherpa.com`, PHP side) — not against documentation.
+> Reference for agents building a workspace. It describes what you configure and
+> what you can observe — not how the platform is implemented.
 
-## 1. The one rule
+## 1. The model
 
-**A scope is a data boundary and a permission boundary at the same time.**
-There is no second permission system next to it. Roles exist (`member`,
-`admin`), but they only decide *which pages* you get; **what data you may see or
-change is decided exclusively by the scope grants.**
+A **scope** groups data *and* the people who may work with it. There is no second
+permission system: what an account may see or change is decided by its grant on a
+scope.
 
-Consequence for an agent: if a person must not see something, put the data in a
-different scope — do not try to hide it with a view filter. Filters are
-convenience, scopes are the lock.
+Practical consequence: if a person must not see something, put the data in a
+different scope. Hiding it in a view is convenience, not a boundary.
 
-## 2. Tables
+## 2. Three levels per grant
 
-| Table | Columns that matter | Meaning |
-|---|---|---|
-| `scopes` | `id`, `name` | the boundary |
-| `scopes_profiles` | `scope_id`, `profile_id`, `active_to`, `can_read`, `can_write`, `can_manage_scope` | the grant |
-
-- `active_to` NULL = unlimited; a date ends the grant automatically.
-- Every grant has exactly three switches: read, write, manage.
-- Profiles are linked to users **by e-mail** (`profiles.email = users.email`),
-  not by a numeric key. Any join you write has to use the e-mail.
-
-## 3. The three levels
-
-| Level | Column | What it allows |
-|---|---|---|
-| read | `can_read` | see objects of the scope in lists, views and details |
-| write | `can_write` | create and change objects in the scope |
-| manage | `can_manage_scope` | administer the scope itself: grants to other people, interfaces, action definitions, start cards |
-
-`can_manage_scope` does **not** imply `can_write` and does not imply `can_read`.
-Set what you mean; the platform does not fill the gaps for you.
-
-The PHP helpers mirror the columns one to one: `user_read_scopes()`,
-`user_write_scopes()`, `user_manage_scopes()`, `has_scope($id)` (read) and
-`has_scope_mode($id, 'write'|'read')`.
-
-## 4. Fail-closed, in every direction
-
-- No grant → the scope does not exist for that account. Empty list means empty,
-  never "all".
-- **There is no admin shortcut in the data path.** An admin account sees only
-  what is granted to it. This was a deliberate fix after a graph leak; do not
-  reintroduce `if (is_admin) return all`.
-- The single, explicit exception: in `/onto/scope` an admin may grant scopes
-  **to themselves** (bootstrap). Everywhere else `has_role('admin')` is not a
-  key to data.
-- Configuration pages may carry an admin exception (for example the start card
-  page lets an admin configure every scope). That is a *config* exception, not a
-  data permission — the data gate stays.
-
-## 5. PUBLIC scope
-
-Every account gets the `PUBLIC` scope **read-only, lazily** on its first request
-(`ensure_public_scope_for_profile()`), so a fresh account starts with something
-visible instead of an empty screen. Do not grant it write access; do not use it
-as a shared working scope.
-
-## 6. Where the gates sit
-
-| Place | Gate |
+| Level | What it allows |
 |---|---|
-| view (`view_config.access.require`) | `"write"` → needs `can_write`; `"manage"` → needs `can_manage_scope`; a number → that scope id; **missing → read is enough**; any unknown value → **denied** |
-| action definition | `require_scope_write` on the scope of the action; the executing account must hold `can_write` there |
-| own endpoints | check `has_scope`/`has_scope_mode` again — a hidden menu item is not a lock |
-| sidebar (`sidebar_menu` setting) | `required_role` and `require_scope_manage`, evaluated for top-level entries **and** for `children` |
+| read | see objects of the scope in lists, views and details |
+| write | create and change objects in the scope |
+| manage | administer the scope: grants for other people, its interfaces, action definitions, start cards |
 
-**A menu entry is not access control.** Hide it *and* gate the page. We shipped
-a page that was invisible in the menu and still fully usable by direct URL — a
-tester found it within minutes.
+The levels are independent: `manage` does not imply `write`, and not `read`.
+Grant what the person actually needs.
 
-## 7. The three-scope planning pattern
+## 3. Empty means empty
 
-The reference layout for a shift-planning workspace, one tree per customer:
+An account without a grant does not "see everything by default", and it inherits
+nothing from another scope. A list without a grant is an empty list.
 
-| Scope | Purpose | Who gets what |
-|---|---|---|
-| `<company>_stammdaten` (master data) | people, stations, qualifications, contract data | managers: read + write; staff: nothing |
-| `<company>_planung` (planning) | shifts, absences, demands, periods | managers: read + write; **staff: nothing at all** |
-| `<company>_team` (team) | the staff's own doors: my shifts, swap requests, clock in/out | staff: read (+ write only where a door needs it) |
+Two practical rules follow:
 
-Why staff get **no read** on the planning scope: reading it means reading *every
-colleague's* shifts, absences and corrections. The team scope exists precisely so
-that the planning scope can stay closed. This is the mistake that costs a
-customer's trust, not a technicality.
+- Check the real account, not just your own. A manager who sees a page does not
+  prove that a staff account sees it.
+- After changing a grant, verify with the affected account: sign in (or call the
+  API) as that account and confirm the expected result **and** the expected refusal.
 
-Everything a staff member is allowed to *change* in the planning scope happens
-through an action with `action.result_scope_id` — see
-`references/features/scope-bridges.md`.
+## 4. A public area for new accounts
 
-## 8. Checklist before you hand a workspace over
+Every new account automatically gets read access to the public scope, so the first
+screen is not empty. Treat it as read-only: do not build a customer's work area
+there, and do not give it write access.
 
-1. For every scope: who reads, who writes, who manages — written down, not implied.
-2. No account has grants it does not need (check the team accounts, not just the admins).
-3. Every view has `access.require` set where it shows personal data.
-4. Every own endpoint re-checks the scope, even if the menu hides it.
-5. The staff account (the real one, not a manager) has been used once: empty
-   menus, direct URLs, wrong-scope calls.
-6. `PUBLIC` is read-only for everybody.
+## 5. Where access is enforced
+
+| Place | How you declare it |
+|---|---|
+| a view | `access.require` in the view configuration: `"write"`, `"manage"` or a scope id; missing means read is enough; an unknown value is denied |
+| an action | the action carries the scope it runs in; the executing account needs write there |
+| your own endpoint | check the scope in the endpoint as well, even if the menu already hides the page |
+| the sidebar | `required_role` and `require_scope_manage` — a menu entry can be hidden per account |
+
+**A hidden menu entry is not a lock.** Both doors belong together: hide the entry
+*and* check inside the page. A page that only disappears from the menu is still
+reachable by URL.
+
+## 6. A layout that works for shift planning
+
+Three scopes per customer, one tree:
+
+| Scope | Content | Staff | Managers |
+|---|---|---|---|
+| master data | people, stations, qualifications, contract data | no access | read + write |
+| planning | shifts, absences, demands, periods | **no access** | read + write |
+| team | the staff's own doors: my shifts, swap requests, clock in/out | read, and write only where a door needs it | read |
+
+Why staff get **no read** on planning: reading it means reading every colleague's
+shifts, absences and corrections. The team scope exists so that the planning scope
+can stay closed. Everything a staff member may change in planning runs through an
+action with a target scope — see `references/features/scope-bridges.md`.
+
+## 7. Hand-over checklist
+
+1. For every scope, write down who reads, who writes, who manages.
+2. Remove grants nobody needs — look at the staff accounts, not only the managers.
+3. Set `access.require` on every view that shows personal data.
+4. Give every own endpoint its own scope check.
+5. Walk through the workspace once with a real staff account: menus, direct URLs,
+   calls against a foreign scope.
+6. Confirm the public scope is read-only for everybody.
