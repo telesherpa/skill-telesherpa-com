@@ -61,20 +61,29 @@ Three scopes per customer, one tree:
 | Scope | Content | Staff | Managers |
 |---|---|---|---|
 | master data | people, stations, qualifications, contract data | no access | read + write |
-| planning | shifts, absences, demands, periods | read, **no write** | read + write |
+| planning | shifts, absences, demands, periods | **no access** — own objects only, through the person link | read + write |
 | team | the staff's own doors: my shifts, swap requests, clock in/out | read, and write only where a door needs it | read |
 
-Why staff need **read** on planning: a view only shows objects from scopes the
-person may read. A team view that displays "my shifts" therefore cannot work while
-planning is invisible — the data simply is not there. Reading is what makes the
-staff's own doors possible; write stays with the managers, and every change a staff
-member makes runs through an action with a target scope (see
-`references/features/scope-bridges.md`).
+Why staff get **no** grant on planning: a grant is per scope, not per row. Whoever
+may read the planning scope reads every colleague's shifts, absences and
+corrections — filtering in a view does not change that, because the list and the API
+follow the grant.
 
-So the boundary is **write**, not read. If a customer wants planning to be invisible
-for staff as well, the team scope must carry its own copy of the data (written by a
-rule), and the team views read that copy — more moving parts, and a second place to
-keep consistent.
+The door for staff is **the person link**, not a grant: an object that hangs on the
+person's own person (the shift they work, the absence they filed) is reachable for
+them — the page opens, the actions on it run. Everything else in planning stays
+locked, and a foreign object answers exactly like a nonexistent one.
+
+Consequences for the design:
+
+- Every staff door is an object **linked to the person**, and the action is guarded
+  so that only that person's row can be changed
+  (`references/features/scope-bridges.md`).
+- Nothing that colleagues must not see goes into planning anyway — the person link
+  opens a row, not a redacted view of it. Put payroll rates and free-text notes for
+  managers in a scope of their own.
+- A team view therefore lists what is reachable for that person; it does not "read
+  planning" and hide the rest.
 
 ## 7. Hand-over checklist
 
