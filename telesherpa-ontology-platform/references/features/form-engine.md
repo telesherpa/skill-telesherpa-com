@@ -1,34 +1,34 @@
-# Formularengine
+# Form engine
 
-Die Formularengine erlaubt strukturierte Datenerfassung über Formulare, deren Antworten als
-Ereignis-Objekte in der Ontologie landen.
+The form engine allows structured data capture via forms whose answers land in the ontology
+as event objects.
 
-## Konzept
+## Concept
 
-- **Formular** = Objekttyp `form` mit `formdef`-JSON (Felddefinitionen).
-- **Antwort** = eigenständiges Ereignis-Objekt, Feldwerte als Properties.
-- **Links:** `usesForm` (Formular→Antwort), `performs` (Person→Antwort), `concerns` (Antwort→Zielobjekt).
-- **Props + Scope erben den FORMULAR-Scope.** Feld-`scope_id` = optionale Sichtbarkeit (fail-closed).
+- **Form** = object type `form` with `formdef` JSON (field definitions).
+- **Answer** = standalone event object, field values as properties.
+- **Links:** `usesForm` (form→answer), `performs` (person→answer), `concerns` (answer→target object).
+- **Props + scope inherit the FORMULAR scope.** Field `scope_id` = optional visibility (fail-closed).
 
-## MCP-Tools (Agenten-Workflow)
+## MCP tools (agent workflow)
 
-Fürs Ausfüllen per Agent (nicht App/Web): `list_formdefs` → `prepare_form_answer` →
-`submit_form_answer` (ein- oder mehrfach mit `status: draft`) → `submit_form_answer`
-(`status: sent`) → optional `show_form_answer` zur Kontrolle.
+For filling in via agent (not app/web): `list_formdefs` → `prepare_form_answer` →
+`submit_form_answer` (once or several times with `status: draft`) → `submit_form_answer`
+(`status: sent`) → optionally `show_form_answer` for checking.
 
-- **Parametername ist überall `form_udid`, nicht `formdef_udid`** — gilt für
-  `prepare_form_answer`, `submit_form_answer`, `show_form_answer` und
-  `resolve_form_answer`, obwohl das zugrunde liegende Objekt vom Typ `form` ist
-  (formdef-JSON als Property).
-- **`submit_form_answer` UND `show_form_answer` brauchen beide `form_udid` UND
-  `answer_udid`** (zweistellige Route, bewusst kein automatisches Auflösen über den
-  `usesForm`-Link). Nur die `answer_udid` bekannt (z.B. aus einer Antwort-Liste)?
-  Erst `resolve_form_answer(answer_udid)` aufrufen, um die passende `form_udid` zu holen.
-- `submit_form_answer`s `values`-Objekt landet als `answer`-Property je Feld-Key aus
-  `show_formdef`; Subform-Felder bekommen eine LISTE von Zeilen-Objekten als Wert.
+- **The parameter name is `form_udid` everywhere, not `formdef_udid`** — applies to
+  `prepare_form_answer`, `submit_form_answer`, `show_form_answer` and
+  `resolve_form_answer`, although the underlying object is of type `form`
+  (formdef JSON as property).
+- **`submit_form_answer` AND `show_form_answer` both need `form_udid` AND
+  `answer_udid`** (two-part route, deliberately no automatic resolution via the
+  `usesForm` link). Only the `answer_udid` known (e.g. from an answer list)?
+  First call `resolve_form_answer(answer_udid)` to fetch the matching `form_udid`.
+- `submit_form_answer`'s `values` object lands as an `answer` property per field key from
+  `show_formdef`; subform fields get a LIST of row objects as value.
 
 ## Pitfalls
 
-- Formular-Antworten sind Ereignis-Objekte (Zustandsbeschreibung zu einem Zeitpunkt), NICHT
-  Mutationen auf dem Ziel-Objekt.
-- Formübergreifende Aggregation läuft über den Link zur Person, nicht über ein gemeinsames Objekt.
+- Form answers are event objects (state description at a point in time), NOT
+  mutations on the target object.
+- Cross-form aggregation runs via the link to the person, not via a shared object.

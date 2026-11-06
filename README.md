@@ -21,7 +21,7 @@ references/features/                      One topic per file, in depth
   tool-catalog.md                         All 192 MCP tools with roles
   auth-token-lifecycle.md                 Login, refresh, mandatory session, stateless mode
   automation-and-functions.md             Rules (triggers) + functions: read, create, run
-  structured-image-ablage.md              Image categories per scope — read AND set
+  structured-image-storage.md              Image categories per scope — read AND set
   pwa-and-session.md                      Web app on the home screen, persistent sign-in, push
   form-engine.md                          Forms + answers as event objects
   service-order-dispatch.md               Digital task → real field work
@@ -47,7 +47,7 @@ including the cost calculation.
 **Building automation?** → `references/features/automation-and-functions.md`. Rules (triggers) and
 functions can also be **created via MCP** — not just read.
 
-**Images in categories?** → `references/features/structured-image-ablage.md`. Categories are
+**Images in categories?** → `references/features/structured-image-storage.md`. Categories are
 readable and settable via MCP; the file name has to match the `imagename` exactly.
 
 **"Login keeps coming back" / "no push on the iPhone"?** →

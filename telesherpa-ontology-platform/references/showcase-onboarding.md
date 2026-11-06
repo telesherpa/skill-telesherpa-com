@@ -1,62 +1,62 @@
 # Telesherpa Ontology Platform — Agent Showcase & Onboarding
 
-## Willkommen, Agent
+## Welcome, Agent
 
-Du brauchst **niemanden**, der dir Zugang gibt. Kein Admin-Ticket, keine manuelle Freigabe,
-kein Telefonat. Du bist **zero-touch** onboarded: Du registrierst dich, beweist deine Identität
-über dein Postfach, lädst Credits auf und arbeitest — **alles selbst, alles über die API.**
+You need **nobody** to give you access. No admin ticket, no manual approval,
+no phone call. You are **zero-touch** onboarded: you register yourself, prove your identity
+via your mailbox, top up credits and work — **all yourself, all via the API.**
 
-Du bekommst nicht nur Datenzugriff, sondern **eigene Datenräume (Scopes)**, die du selbst
-anlegst, selbst verwaltest und sogar **öffentlich anbieten** kannst (Marketplace) —
-du verdienst dabei automatisch Credits durch deine Arbeit.
+You do not just get data access, but **your own data spaces (scopes)** that you create
+yourself, manage yourself and can even **offer publicly** (marketplace) —
+you automatically earn credits through your work in the process.
 
-Und das Beste: **Du hast eine Übersicht, was jede Aktion kostet**, bevor du sie tust. Keine
-versteckten Rechnungen. Kontrolle über dein Budget.
+And the best part: **you have an overview of what every action costs** before you do it. No
+hidden invoices. Control over your budget.
 
-## Datenmodell in einem Satz
+## Data model in one sentence
 
-> **Alles ist ein Objekt**, jedes Objekt hat Properties (Attribute), Objekte sind über getypte
-> Links (Beziehungen) verbunden, und alles lebt in einem **Scope** (Datenraum = Datenhoheit).
+> **Everything is an object**, every object has properties (attributes), objects are connected via typed
+> links (relations), and everything lives in a **scope** (data space = data sovereignty).
 
-- Objekttypen: baseStation, building, car, file, machine, person, radioTower, room, serviceVisit,
-  tool, inspection … (vollständige Liste über die Schema-Introspektion, `onto_type_*`)
-- Identität: `udid` (32-hex) — NICHT eine numerische `id`.
-- Scopes steuern Sichtbarkeit: Wer darf was lesen/schreiben (fail-closed: ohne Scope = nichts).
+- Object types: baseStation, building, car, file, machine, person, radioTower, room, serviceVisit,
+  tool, inspection … (full list via schema introspection, `onto_type_*`)
+- Identity: `udid` (32-hex) — NOT a numeric `id`.
+- Scopes control visibility: who may read/write what (fail-closed: without a scope = nothing).
 
-## Onboarding — der komplette Weg (Zero-Touch)
+## Onboarding — the complete path (zero-touch)
 
-Alles über **MCP** (Streamable HTTP). Endpoint: `https://mcp.telesherpa.com`
+Everything via **MCP** (Streamable HTTP). Endpoint: `https://mcp.telesherpa.com`
 
-> **Bevor du anfängst:** Ohne Token bekommst du keine Werkzeugliste — `initialize` und `tools/list`
-> antworten mit 401. Die sechs Werkzeuge, die ohne Token funktionieren, stehen im
-> `www-authenticate`-Header dieser Antwort (`register`, `activate`, `login`, `refresh_access_token`,
-> `auth_status`, `onto_credit_pricing`) und werden **direkt beim Namen** aufgerufen. Kann dein
-> Client damit nicht umgehen, braucht der erste Verbindungsaufbau einmal einen Token.
+> **Before you start:** Without a token you get no tool list — `initialize` and `tools/list`
+> respond with 401. The six tools that work without a token are listed in the
+> `www-authenticate` header of this response (`register`, `activate`, `login`, `refresh_access_token`,
+> `auth_status`, `onto_credit_pricing`) and are called **directly by name**. If your
+> client cannot handle that, the first connection setup needs a token once.
 
-### Schritt 0 — Weg wählen: Einladungscode ODER eigene E-Mail
+### Step 0 — Choose a path: invitation code OR your own e-mail
 
-**Weg A — Einladungscode (der Agenten-Weg, empfohlen):** Dein Auftraggeber legt in seinem
-Scope einen Einladungscode an (`create_invite_code`) und gibt dir den Code. Du registrierst
-dich damit: **kein Postfach, keine Mail, keine Aktivierung.** Adresse und Passwort erzeugt die
-Plattform und gibt sie einmalig in der Antwort zurück.
+**Path A — invitation code (the agent path, recommended):** Your principal creates an invitation
+code in their scope (`create_invite_code`) and gives you the code. You register
+with it: **no mailbox, no mail, no activation.** The platform generates the address and password
+and returns them once in the response.
 
-**Weg B — eigene E-Mail-Adresse (der menschliche Weg):** Du brauchst nur eine E-Mail-Adresse,
-mit der du dich registrierst. **Einfachster Weg:**
+**Path B — your own e-mail address (the human path):** You only need an e-mail address
+with which you register. **Simplest way:**
 
-> „Ich lege uns einen Zugang an. In einer Minute kommt eine E-Mail mit einem
-> Aktivierungscode — bitte nenn mir den Code, dann schalte ich den Zugang frei."
+> "I'll set up an account for us. In a minute an e-mail with an
+> activation code will arrive — please tell me the code, then I'll unlock the access."
 
-Der Mensch liest den Code aus seinem Postfach vor. Fertig.
+The human reads the code out from their mailbox. Done.
 
-*Optional:* Hast du selbst IMAP-Zugriff (z.B. himalaya), kannst du den Code auch direkt
-aus dem Postfach holen — nötig ist das nicht.
+*Optional:* If you have IMAP access yourself (e.g. himalaya), you can also fetch the code directly
+from the mailbox — that is not required.
 
-### Schritt 1 — Session herstellen (PFLICHT)
+### Step 1 — Establish a session (MANDATORY)
 
-**Die MCP-Session-ID ist Pflicht.** Ohne sie wird jeder Aufruf abgelehnt:
-`Bad Request: Missing session ID` — auch mit gültigem Bearer-Token. Der `initialize`-Call
-liefert die `mcp-session-id` im **Response-Header**; diesen Header bei jedem weiteren Aufruf
-mitsenden. Details und der stateless-Weg: `references/features/auth-token-lifecycle.md`.
+**The MCP session ID is mandatory.** Without it every call is rejected:
+`Bad Request: Missing session ID` — even with a valid bearer token. The `initialize` call
+delivers the `mcp-session-id` in the **response header**; send this header with every further call.
+Details and the stateless path: `references/features/auth-token-lifecycle.md`.
 
 ```bash
 SID=$(curl -s -D /tmp/mh.txt -X POST "https://mcp.telesherpa.com" \
@@ -65,27 +65,27 @@ SID=$(curl -s -D /tmp/mh.txt -X POST "https://mcp.telesherpa.com" \
 grep -i "mcp-session-id" /tmp/mh.txt | tr -d '\r' | awk '{print $2}'
 ```
 
-### Schritt 2 — Public Tools vor Login
+### Step 2 — Public tools before login
 
-| Tool | Zweck |
-|------|-------|
-| `register` | neuen Account anlegen |
-| `activate` | Account mit E-Mail-Code aktivieren |
-| `login` | client_id+client_secret → Token |
-| `refresh_access_token` | Token selbst erneuern (kein Passwort) |
-| `auth_status` | Zustand und Rollen des angemeldeten Kontos |
-| `onto_credit_pricing` | alle Preise (kein Login) |
+| Tool | Purpose |
+|------|---------|
+| `register` | create a new account |
+| `activate` | activate account with e-mail code |
+| `login` | client_id+client_secret → token |
+| `refresh_access_token` | renew the token yourself (no password) |
+| `auth_status` | state and roles of the logged-in account |
+| `onto_credit_pricing` | all prices (no login) |
 
-> Rest erst nach Login (RBAC). Sichtbarkeit ≠ Bug.
+> The rest only after login (RBAC). Visibility ≠ bug.
 
-### Schritt 3 — Register
+### Step 3 — Register
 
-**Weg A — Einladungscode** (Agenten-Weg: kein Postfach, kein `activate`). `invite_code`
-statt `username`/`password`; `accept_terms` bleibt Pflicht. Die Plattform erzeugt Adresse und
-Passwort selbst und gibt **beide einmalig** in der Antwort zurück (`username`, `password`) —
-danach nie wieder. Die Adressen liegen im eigenen Namensraum `agents.telesherpa.com`;
-dorthin geht **nie** Post. Die Rollen `login`, `public`, `member` sind sofort gesetzt, und der
-Code vergibt beim Anlegen gleich die Scope-Rechte, die er trägt.
+**Path A — invitation code** (agent path: no mailbox, no `activate`). `invite_code`
+instead of `username`/`password`; `accept_terms` remains mandatory. The platform generates the address and
+password itself and returns **both once** in the response (`username`, `password`) —
+never again afterwards. The addresses live in their own namespace `agents.telesherpa.com`;
+mail **never** goes there. The roles `login`, `public`, `member` are set immediately, and the
+code grants the scope rights that it carries right on creation.
 
 ```bash
 curl -s -X POST "https://mcp.telesherpa.com" -H 'Content-Type: application/json' \
@@ -93,11 +93,11 @@ curl -s -X POST "https://mcp.telesherpa.com" -H 'Content-Type: application/json'
   -d '{"jsonrpc":"2.0","id":"2","method":"tools/call","params":{"name":"register","arguments":{"invite_code":"CODE-VOM-AUFTRAGGEBER","accept_terms":true}}}'
 ```
 
-> Codes, die zu einer **Scope-Vorlage (Bundle)** gehören, werden hier mit HTTP 403 abgewiesen —
-> die löst man nach der Anmeldung ein (`redeem_invite_code`). Ebenso wird ein Code verbraucht:
-> `max_uses` zählt, danach ist er ungültig.
+> Codes that belong to a **scope template (bundle)** are rejected here with HTTP 403 —
+> those are redeemed after login (`redeem_invite_code`). Likewise a code is consumed:
+> `max_uses` counts, after that it is invalid.
 
-**Weg B — eigene E-Mail** (menschlicher Weg):
+**Path B — own e-mail** (human path):
 
 ```bash
 curl -s -X POST "https://mcp.telesherpa.com" -H 'Content-Type: application/json' \
@@ -105,19 +105,19 @@ curl -s -X POST "https://mcp.telesherpa.com" -H 'Content-Type: application/json'
   -d '{"jsonrpc":"2.0","id":"2","method":"tools/call","params":{"name":"register","arguments":{"username":"EMAIL","password":"PW","password_confirm":"PW","accept_terms":true}}}'
 ```
 
-Feldname `username` (E-Mail). Password confirm muss matchen. Kein Captcha.
+Field name `username` (e-mail). Password confirm must match. No captcha.
 
-### Schritt 4 — Aktivierungscode besorgen (nur Weg B)
+### Step 4 — Obtain the activation code (path B only)
 
-> **Bei Weg A (Einladungscode) entfällt dieser Schritt und Schritt 5 vollständig** — das Konto
-> ist sofort aktiv. Weiter mit Schritt 6 (Login) und den Zugangsdaten aus der Register-Antwort.
+> **With path A (invitation code) this step and step 5 are omitted entirely** — the account
+> is active immediately. Continue with step 6 (login) and the credentials from the register response.
 
-Der Standardweg: **den Menschen fragen.** Die Mail kommt innerhalb einer Minute, der Code
-ist 7 Zeichen lang, in der Mail unter „Selbstregistrierung" / „authorization request".
+The standard way: **ask the human.** The mail arrives within a minute, the code
+is 7 characters long, in the mail under "Selbstregistrierung" / "authorization request".
 
-*Optional mit IMAP:* Postfach durchsuchen statt fragen.
+*Optional with IMAP:* search the mailbox instead of asking.
 
-### Schritt 5 — Activate (kein Token nötig — die Session bleibt Pflicht)
+### Step 5 — Activate (no token needed — the session remains mandatory)
 
 ```bash
 curl -s -X POST "https://mcp.telesherpa.com" -H 'Content-Type: application/json' \
@@ -125,11 +125,11 @@ curl -s -X POST "https://mcp.telesherpa.com" -H 'Content-Type: application/json'
   -d '{"jsonrpc":"2.0","id":"3","method":"tools/call","params":{"name":"activate","arguments":{"loginusername":"EMAIL","loginpassword":"PW","voucher":"CODE"}}}'
 ```
 
-Login-Daten kommen im POST, nicht über die Session. Nach der Aktivierung ist der Account
-freigeschaltet (Rolle `member`) und das Billing-Modell ist gesetzt
-(`pay_per_use` bzw. `flat`).
+Login data come in the POST, not via the session. After activation the account is
+unlocked (role `member`) and the billing model is set
+(`pay_per_use` or `flat`).
 
-### Schritt 6 — Login (Token) — LETZTER Schritt mit Passwort
+### Step 6 — Login (token) — LAST step with password
 
 ```bash
 curl -s -X POST "https://mcp.telesherpa.com" -H 'Content-Type: application/json' \
@@ -137,57 +137,57 @@ curl -s -X POST "https://mcp.telesherpa.com" -H 'Content-Type: application/json'
   -d '{"jsonrpc":"2.0","id":"4","method":"tools/call","params":{"name":"login","arguments":{"client_id":"EMAIL","client_secret":"PW"}}}'
 ```
 
-→ bearer `token` (10h) + `refresh_token` (30 Tage). Danach alle rollenbasierten Tools
-sichtbar. **Ab hier nie wieder ein Passwort eingeben** — `refresh_access_token` erneuert
-sich selbstständig, ohne Passwort, mit Rotation + Replay-Schutz. Details + Diagnose-Flow bei
-Auth-Fehlern: `references/features/auth-token-lifecycle.md`.
+→ bearer `token` (10h) + `refresh_token` (30 days). Afterwards all role-based tools are
+visible. **From here on never enter a password again** — `refresh_access_token` renews
+itself independently, without a password, with rotation + replay protection. Details + diagnostic flow on
+auth errors: `references/features/auth-token-lifecycle.md`.
 
 ## Billing
 
-> **Startguthaben beim Agenten-Weg:** ein per Einladungscode angelegtes Konto bekommt
-> **500 Credits = 5,00 EUR** — die Antwort nennt sie unter `credits.start_credits`.
-> Die Höhe stellt der Betreiber in der Server-Konfiguration ein (`0` = aus) — **kein Betrag im
-> Code**. Der Menschen-Weg (E-Mail +
-> Voucher) bekommt kein Startguthaben.
-> **Reicht das Guthaben nicht:** Guthaben selbst kaufen ist für Agenten nicht vorgesehen.
-> Wer etwas Gutes bauen will, stellt einen Service Request (`ontouser_service_request`) mit
-> Vorhaben, Zweck, benötigtem Scope und erwartetem Guthaben. Der Betreiber entscheidet frei;
-> bei einem Ja gibt es einen Prepaid-Code. Ein Anspruch besteht nicht.
-> Weiter aufladen: `onto_credit_chargeup`
-> (prepaid-Code) oder `onto_credit_checkout` (Karte). `billing_model` ist `pay_per_use`,
-> Anker = Tag der Anmeldung.
+> **Starting credit on the agent path:** an account created via invitation code receives
+> **500 credits = 5,00 EUR** — the response names them under `credits.start_credits`.
+> The operator sets the amount in the server configuration (`0` = off) — **no amount in the
+> code**. The human path (e-mail +
+> voucher) receives no starting credit.
+> **If the credit is not enough:** buying credit yourself is not intended for agents.
+> Anyone who wants to build something good submits a service request (`ontouser_service_request`) with
+> project, purpose, required scope and expected credit. The operator decides freely;
+> on a yes there is a prepaid code. There is no entitlement.
+> Top up further: `onto_credit_chargeup`
+> (prepaid code) or `onto_credit_checkout` (card). `billing_model` is `pay_per_use`,
+> anchor = day of registration.
 
-- `onto_credit_pricing` (öffentlich): Preise je Operation, inkl. Scope-Kosten.
-- `onto_credit_balance`: Saldo + Usage + `earnings_30d`/`earnings_total` (Revenue-Share aus
-  eigenen öffentlichen Scopes — landet automatisch in `balance`, kein separater
-  Auszahlungsschritt).
-- `onto_credit_chargeup`: prepaid_code (einmalig! 409 bei 2. mal, 410 abgelaufen) oder manual.
-- `onto_credit_checkout`: SumUp-Zahlung (Checkout-URL, Mensch zahlt).
+- `onto_credit_pricing` (public): prices per operation, incl. scope costs.
+- `onto_credit_balance`: balance + usage + `earnings_30d`/`earnings_total` (revenue share from
+  own public scopes — lands automatically in `balance`, no separate
+  payout step).
+- `onto_credit_chargeup`: prepaid_code (single use! 409 on 2nd time, 410 expired) or manual.
+- `onto_credit_checkout`: SumUp payment (checkout URL, human pays).
 
-## Scope-Self-Service (ASS) → Marketplace
+## Scope self-service (ASS) → Marketplace
 
-- Eigener Scope: `ontouser_scope_create` — Name frei wählbar (`[a-z0-9_]`, max 30 Zeichen),
-  kein automatisches Präfix.
-- `set_visibility` (read_allowed_for): leer=privat, ["PUBLIC"]=öffentlich, [scope_x]=nur Scope x.
-- `assign_public` / `remove_public`: buchbare öffentliche Scopes.
-- Jeder bekommt einen PUBLIC-Scope (read-only). Nur Owner (`can_manage_scope: 1`) darf die
-  Sichtbarkeit setzen.
-- Standard-Kontingent an eigenen Scopes; Flat ohne Obergrenze; mehr kosten Credits.
-- **Live verifiziert:** eigenen Scope kuratieren (z.B. OSM-Import + Geocoding-Anreicherung),
-  öffentlich anbieten, echte Fremdnutzung durch andere Nutzer → echte Credit-Gutschrift.
-  Volles Playbook inkl. Preisvergleich zu kommerziellen Data-Exchange-Angeboten:
+- Own scope: `ontouser_scope_create` — name freely selectable (`[a-z0-9_]`, max 30 characters),
+  no automatic prefix.
+- `set_visibility` (read_allowed_for): empty=private, ["PUBLIC"]=public, [scope_x]=only scope x.
+- `assign_public` / `remove_public`: bookable public scopes.
+- Everyone gets a PUBLIC scope (read-only). Only the owner (`can_manage_scope: 1`) may
+  set the visibility.
+- Standard quota of own scopes; flat without upper limit; more cost credits.
+- **Live verified:** curate your own scope (e.g. OSM import + geocoding enrichment),
+  offer it publicly, real third-party usage by other users → real credit credit.
+  Full playbook incl. price comparison with commercial data-exchange offerings:
   `references/features/marketplace-revenue-share.md`.
 
-## ServiceOrder — vom Datensatz zur realen Feldarbeit
+## ServiceOrder — from data record to real field work
 
-Ein Objekt kann per `create_service_order`-Action (oder manuell create_object+create_link)
-einen `serviceOrder` erzeugen, der für Field-Service-Techniker in App/Web sichtbar wird —
-Lifecycle open → inProgress (`claim_service_order`) → done (`complete_service_order`).
-**Real getestet:** ein Mensch hat einen von einem Agenten angelegten Auftrag angenommen und
-abgeschlossen. Das ist der Sprung von reiner Datenhaltung zu echter Mensch-Agent-Kollaboration.
-Details, Guardrails, RBAC-Grenzen: `references/features/service-order-dispatch.md`.
+An object can, via the `create_service_order` action (or manually create_object+create_link),
+generate a `serviceOrder` that becomes visible to field service technicians in the app/web —
+lifecycle open → inProgress (`claim_service_order`) → done (`complete_service_order`).
+**Really tested:** a human accepted and completed a job created by an agent.
+That is the leap from pure data storage to real human-agent collaboration.
+Details, guardrails, RBAC boundaries: `references/features/service-order-dispatch.md`.
 
 
-> **`accept_terms` ist Pflicht.** Ohne `"accept_terms":true` lehnt der Endpunkt
-> mit HTTP 400 ab ("Bitte bestaetigen Sie die Nutzungsbedingungen."). Damit stimmt der
-> Aufrufer den Nutzungsbedingungen zu: https://www.telesherpa.com/agb
+> **`accept_terms` is mandatory.** Without `"accept_terms":true` the endpoint rejects
+> with HTTP 400 ("Bitte bestaetigen Sie die Nutzungsbedingungen."). With that the
+> caller agrees to the terms and conditions: https://www.telesherpa.com/agb

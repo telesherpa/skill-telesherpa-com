@@ -1,6 +1,6 @@
-# Auth & Token-Lifecycle — selbstständig authentifiziert bleiben
+# Auth & Token Lifecycle — staying authenticated on your own
 
-## Login liefert zwei Tokens
+## Login returns two tokens
 
 ```json
 {"name":"login","arguments":{"client_id":"EMAIL","client_secret":"PASSWORD"}}
@@ -11,32 +11,32 @@
   "token": "...",            // = access_token, Bearer
   "token_type": "Bearer",
   "expires_in": 36000,       // 10h
-  "refresh_token": "..."     // 30 Tage gültig
+  "refresh_token": "..."     // valid for 30 days
 }
 ```
 
-`client_secret` = Passwort. **Nur der Mensch darf `login` aufrufen** (Passwort-Eingabe ist
-für einen Agenten grundsätzlich tabu). Alles danach — beliebig lange Weiterarbeit — läuft
-über den Refresh-Token, ohne dass ein Mensch je wieder ein Passwort eingeben muss.
+`client_secret` = password. **Only a human may call `login`** (entering a password is
+fundamentally off-limits for an agent). Everything after that — continuing work for any length of
+time — runs via the refresh token, without a human ever having to enter a password again.
 
-## ⚠️ Es gibt ZWEI Betriebsarten — der Unterschied ist entscheidend
+## ⚠️ There are TWO modes — the difference is decisive
 
-Der Server läuft **session-basiert**.
-Ein Bearer-Token allein genügt **nicht** — die Session-ID ist Pflicht:
+The server runs **session-based**.
+A Bearer token alone is **not** enough — the session ID is mandatory:
 
 ```
 {"jsonrpc":"2.0","id":null,"error":{"code":-32600,
  "message":"Bad Request: Missing session ID"}}
 ```
 
-Dieser Fehler kommt bei **jedem** `tools/list` und `tools/call` ohne Session-ID — auch mit
-perfekt gültigem Bearer-Token. **Bearer ohne Session → abgelehnt; Bearer mit Session
-→ `auth_status` antwortet `"status": "ok"`.
+This error occurs on **every** `tools/list` and `tools/call` without a session ID — even with a
+perfectly valid Bearer token. **Bearer without session → rejected; Bearer with session
+→ `auth_status` answers `"status": "ok"`.
 
-### Betriebsart A — klassisch, mit MCP-Session (der Normalfall)
+### Mode A — classic, with MCP session (the normal case)
 
 ```bash
-# 1. Session holen (initialize) — die mcp-session-id kommt im RESPONSE-HEADER
+# 1. Fetch the session (initialize) — the mcp-session-id comes in the RESPONSE HEADER
 curl -s -D /tmp/mh.txt -X POST "https://mcp.telesherpa.com/?format=json" \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json, text/event-stream' \
@@ -44,13 +44,13 @@ curl -s -D /tmp/mh.txt -X POST "https://mcp.telesherpa.com/?format=json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"cli","version":"1.0"}}}'
 grep -i "mcp-session-id" /tmp/mh.txt | tr -d '\r' | awk '{print $2}'
 ```
-**Diesen Header bei jedem weiteren Aufruf mitsenden.** Lebensdauer: 12 h Inaktivität.
-Danach neu `initialize` — das ist kein Fehlerzustand.
+**Send this header with every further call.** Lifetime: 12 h of inactivity.
+After that, `initialize` again — that is not an error state.
 
-### Betriebsart B — stateless (Protokoll „Era 2026-07-28")
+### Mode B — stateless (protocol "Era 2026-07-28")
 
-Clients ohne Session-Slot müssen einen **Envelope** in `params._meta` mitschicken. Fehlt er,
-antwortet der Server mit Klartext, was genau verlangt wird:
+Clients without a session slot must send an **envelope** in `params._meta`. If it is missing,
+the server answers in plain text what exactly is required:
 
 ```
 -32602  params._meta must be an object carrying the required
@@ -58,8 +58,8 @@ antwortet der Server mit Klartext, was genau verlangt wird:
         'io.modelcontextprotocol/clientCapabilities' envelope keys
 ```
 
-Vollständig funktionierender Aufruf (ohne Session-ID, ohne `initialize`) — die drei Header
-sind **alle** nötig:
+Fully working call (without session ID, without `initialize`) — the three headers
+are **all** required:
 
 ```bash
 curl -X POST "https://mcp.telesherpa.com/?format=json" \
@@ -72,98 +72,98 @@ curl -X POST "https://mcp.telesherpa.com/?format=json" \
       "io.modelcontextprotocol/clientCapabilities":{}}}}'
 ```
 
-Bei `tools/call` kommt **`mcp-name: <toolname>`** hinzu — muss exakt dem `params.name`
-entsprechen, sonst:
+For `tools/call`, **`mcp-name: <toolname>`** is added — it must match `params.name`
+exactly, otherwise:
 ```
 -32020  mcp-name header does not match the request body's 'name' parameter
 ```
-Analog bei falschem Methoden-Header: die Methode im Header muss zum Aufruf passen.
+Likewise with a wrong method header: the method in the header must match the call.
 
-**Diese Betriebsart funktioniert OHNE Token** für die öffentlichen Tools (`register`, `login`,
+**This mode works WITHOUT a token** for the public tools (`register`, `login`,
 `refresh_access_token`, `auth_status`, `onto_credit_pricing`).
 
-`register` verlangt **`accept_terms=true`** (Pflicht). Fehlt der Parameter, antwortet der
-Server mit HTTP 400 "Bitte bestaetigen Sie die Nutzungsbedingungen." — die AGB-Zustimmung
-ist Voraussetzung fuer die Kontoanlage: https://www.telesherpa.com/agb
+`register` requires **`accept_terms=true`** (mandatory). If the parameter is missing, the
+server answers with HTTP 400 "Bitte bestaetigen Sie die Nutzungsbedingungen." — consent to the terms
+is a prerequisite for creating the account: https://www.telesherpa.com/agb
 
-## Die öffentlichen Tools (belegt, 6 Stück)
+## The public tools (verified, 6 of them)
 
 ```
 register, activate, login, refresh_access_token, auth_status, onto_credit_pricing
 ```
 
-Der Server nennt sie selbst im `www-authenticate`-Header, wenn kein Token mitkommt — samt
-Ablauf (`register` → Voucher per E-Mail → `activate` → `login`).
+The server names them itself in the `www-authenticate` header when no token is included — along
+with the flow (`register` → voucher by e-mail → `activate` → `login`).
 
-**Wichtig:** `tools/list` **ohne Token** liefert keine Tool-Liste, sondern **HTTP 401** mit
-diesem Hinweistext. Die 6 Tools sind über den **Namen** aufrufbar, nicht über die Liste.
-Wer sich auf `tools/list` verlässt, sieht ohne Token gar nichts.
+**Important:** `tools/list` **without a token** does not return a tool list, but **HTTP 401** with
+this hint text. The 6 tools can be called by **name**, not via the list.
+Anyone relying on `tools/list` sees nothing at all without a token.
 
-## Selbst erneuern: `refresh_access_token`
+## Renewing yourself: `refresh_access_token`
 
 ```json
-{"name":"refresh_access_token","arguments":{"refresh_token":"<aktueller refresh_token>"}}
+{"name":"refresh_access_token","arguments":{"refresh_token":"<current refresh_token>"}}
 ```
-→ neues `access_token` + neuer `refresh_token`.
+→ new `access_token` + new `refresh_token`.
 
-**Rotation + Replay-Schutz:** jedes Refresh liefert **beide** Tokens neu. Wird der
-**alte** Refresh-Token ein zweites Mal benutzt:
+**Rotation + replay protection:** every refresh returns **both** tokens anew. If the
+**old** refresh token is used a second time:
 ```json
 {"error":"invalid_grant","error_description":"Refresh-Token unbekannt"}
 ```
 
-**Praxis-Pattern:**
-- Proaktiv erneuern, bevor `expires_in` abläuft (nicht erst nach einem 403 reagieren)
-- Bei jedem Refresh den **neuen** `refresh_token` sichern — der alte ist danach tot
-- `refresh_access_token` ist öffentlich — kein Bearer-Header nötig
+**Practice pattern:**
+- Renew proactively before `expires_in` runs out (not only after a 403)
+- On every refresh, save the **new** `refresh_token` — the old one is dead afterwards
+- `refresh_access_token` is public — no Bearer header needed
 
-## Fallen
+## Pitfalls
 
-### Keine Session → Token wird NICHT gespeichert
-Ein `login`-Aufruf **ohne** Session-Slot gibt den Token zwar zurück, speichert ihn aber
-absichtlich nicht (Schutz vor einem geteilten Slot für alle Clients). Der Client **muss** ihn
-selbst als Header mitsenden — er bekommt es in der Antwort auch so gesagt:
-> „Dieser Client hat keine MCP-Session, deshalb wird der Token serverseitig NICHT gespeichert.
-> Sende ihn bei jedem folgenden Aufruf als Header 'Authorization: Bearer ...'."
+### No session → the token is NOT stored
+A `login` call **without** a session slot does return the token, but deliberately does not
+store it (protection against a shared slot for all clients). The client **must** send it
+itself as a header — the response tells it so as well:
+> "This client has no MCP session, therefore the token is NOT stored on the server side.
+> Send it with every following call as header 'Authorization: Bearer ...'.
 
-### Der User-Agent beim Login MUSS `Telesherpa-MCP/1.0` sein
-Das Backend **bindet den Token an den User-Agent**. Ohne diesen Header beim Login → 403
-„Not authorized" bei jedem ToolCall, obwohl der Token gültig aussieht. Gilt für den direkten
-REST-Login über den Login-Tool-Aufruf, der den Token für den Bearer-Header liefert.
+### The User-Agent at login MUST be `Telesherpa-MCP/1.0`
+The backend **binds the token to the User-Agent**. Without this header at login → 403
+"Not authorized" on every tool call, although the token looks valid. Applies to the direct
+REST login via the login tool call, which supplies the token for the Bearer header.
 
-### Access- und Refresh-Token beide ungültig
-Selten, aber möglich (`invalid_grant` auch beim Refresh). Erkennbar: es erscheinen nur noch die
-öffentlichen Tools UND der Refresh scheitert. Dann hilft kein weiterer Versuch mit dem alten
-Token — es braucht einen frischen menschlichen `login`-Schritt.
+### Access and refresh token both invalid
+Rare, but possible (`invalid_grant` on refresh as well). Recognisable by: only the
+public tools still appear AND the refresh fails. Then no further attempt with the old
+token helps — a fresh human `login` step is needed.
 
-## Session-ID ≠ Zugriffsrecht auf fremde Scopes
+## Session ID ≠ access right to foreign scopes
 
-Eine Session-ID weist den Client aus, **nicht** seinen Zugriffsanspruch: sie gibt niemals
-Rechte auf fremde Scopes. Rechte werden ausschließlich serverseitig aus der Rolle des
-angemeldeten Kontos abgeleitet.
+A session ID identifies the client, **not** its access entitlement: it never grants
+rights to foreign scopes. Rights are derived exclusively on the server side from the role of the
+logged-in account.
 
-Daraus folgt für Agenten: **die Session-ID ist nicht teilbar und gehört nicht in Logs oder
-Fehlerberichte.** Sie ist der Schlüssel zum Token dieses Clients.
+It follows for agents: **the session ID is not shareable and does not belong in logs or
+error reports.** It is the key to this client's token.
 
-## Diagnose-Reihenfolge bei Auth-Fehlern
+## Diagnostic order for auth errors
 
-1. `auth_status` aufrufen (in der Session) — nennt Zustand und Rollen im Klartext
-2. Antwort `Bad Request: Missing session ID` → **kein** Auth-Problem, sondern der
-   `initialize`-Schritt fehlt (Betriebsart A) bzw. `params._meta` fehlt (Betriebsart B)
-3. `onto_credit_pricing` aufrufen — 401 = Token tot
-4. `refresh_access_token` mit gespeichertem Refresh-Token probieren
-5. Erfolgreich → neues Token-Paar übernehmen, weiterarbeiten
-6. `invalid_grant` → Refresh-Token ist ebenfalls tot → Mensch um neuen `login` bitten,
-   keine weiteren Refresh-Versuche mit dem toten Token
+1. Call `auth_status` (in the session) — states the condition and roles in plain text
+2. Answer `Bad Request: Missing session ID` → **not** an auth problem, but the
+   `initialize` step is missing (mode A) or `params._meta` is missing (mode B)
+3. Call `onto_credit_pricing` — 401 = token dead
+4. Try `refresh_access_token` with the stored refresh token
+5. Successful → adopt the new token pair, continue working
+6. `invalid_grant` → the refresh token is dead as well → ask a human for a new `login`,
+   no further refresh attempts with the dead token
 
-## Wenn nichts mehr geht: der Selbsttest per HTTP
+## When nothing works any more: the self-test via HTTP
 
-Der Server beschreibt sich selbst — man muss nicht raten. Ein Aufruf **ohne** Token liefert die
-genaue Anleitung:
+The server describes itself — you do not have to guess. A call **without** a token returns the
+exact instructions:
 ```bash
 curl -s -X POST "https://mcp.telesherpa.com/?format=json" \
   -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 ```
-→ 401 mit `www-authenticate`-Header, der die öffentlichen Tools, den Ablauf und den Hinweis auf
-den Voucher nennt.
+→ 401 with `www-authenticate` header that names the public tools, the flow and the reference to
+the voucher.

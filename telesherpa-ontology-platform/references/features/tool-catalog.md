@@ -303,7 +303,7 @@ a foreign scope returns 403 even though the tool is visible.
 
 **All timestamps are UTC** (ISO 8601 with `Z`, e.g. `2026-10-06T23:09:00Z`); this applies to
 `points[].ts`, `series_ts` **and** to the `from`/`to` parameters. Details and use cases:
-`references/features/sensor-zeitreihen.md`.
+`references/features/sensor-time-series.md`.
 
 ### `onto_import_*`
 

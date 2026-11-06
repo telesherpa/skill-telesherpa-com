@@ -1,68 +1,68 @@
-# PWA & dauerhafte Anmeldung auf der Web-Plattform
+# PWA & persistent login on the web platform
 
-Die Plattform läuft nicht nur in App und Browser, sondern auch als **installierbare PWA**
-(Web-App auf dem Home-Bildschirm). Für Agenten ist das dann relevant, wenn ein Mensch
-„ständig neu anmelden" meldet oder wenn Push-Nachrichten im Spiel sind.
+The platform runs not only in the app and the browser, but also as an **installable PWA**
+(web app on the home screen). For agents this becomes relevant when a human reports
+"having to log in again constantly" or when push notifications are involved.
 
-## Für wen was gilt
+## What applies to whom
 
-| Kanal | Anmeldung | Push |
+| Channel | Login | Push |
 |---|---|---|
-| **App (iOS/Android)** | native App-Anmeldung | APNs/FCM (App-Tokens) |
-| **Browser (Web)** | Session-Cookie, **30 Minuten** | — |
-| **PWA (Home-Bildschirm)** | Session-Cookie 30 min **+ Dauer-Anmeldung bis 14 Tage** | Web Push (VAPID) |
-| **MCP / REST** | Bearer-Token 10 h + Refresh-Token 30 Tage | — |
+| **App (iOS/Android)** | native app login | APNs/FCM (app tokens) |
+| **Browser (web)** | session cookie, **30 minutes** | — |
+| **PWA (home screen)** | session cookie 30 min **+ persistent login up to 14 days** | Web Push (VAPID) |
+| **MCP / REST** | bearer token 10 h + refresh token 30 days | — |
 
-## Die 30-Minuten-Session und warum sie absichtlich kurz ist
+## The 30-minute session and why it is deliberately short
 
-Die Web-Session läuft **30 Minuten** und wird bei jedem Aufruf verlängert. Danach greift die
-Rechte-Prüfung und leitet auf die Login-Seite.
-Das ist gewollt — auf einem geteilten Rechner soll eine offene Sitzung nicht tagelang gelten.
+The web session lasts **30 minutes** and is extended on every request. After that the
+permission check takes effect and redirects to the login page.
+That is intentional — on a shared machine an open session should not remain valid for days.
 
-## PWA: bis 14 Tage eingeloggt bleiben
+## PWA: stay logged in for up to 14 days
 
-In der **installierten** PWA (Home-Bildschirm) gibt es keinen Adressbalken und keine
-Lesezeichen — ein erzwungener Login ist dort teuer. Deshalb gilt dort zusätzlich:
+In the **installed** PWA (home screen) there is no address bar and no
+bookmarks — a forced login is expensive there. That is why the following additionally applies there:
 
 ```
-Session abgelaufen
-  → stiller Auto-Login (14 Tage)
-      → wenn er greift: die angeforderte Seite erscheint direkt (kein Login-Screen)
-      → wenn nicht: sichtbarer Login-Screen, kein Zwischenschritt
+Session expired
+  → silent auto-login (14 days)
+      → if it applies: the requested page appears directly (no login screen)
+      → if not: visible login screen, no intermediate step
 ```
 
-Bausteine:
+Building blocks:
 
-- Die PWA meldet sich **clientseitig** als installiert (`display-mode: standalone` bzw.
-  `navigator.standalone`) und schickt beim Login ein `pwa`-Kennzeichen mit.
-- Serverseitig entsteht daraus eine **Dauersitzung** (14 Tage) plus ein PWA-Merker.
-- Der stille Re-Login läuft **ohne Token-Rotation** — sonst würde der Token beim zweiten
-  Aufruf gelöscht (der Browser übernimmt `Set-Cookie` aus einer `fetch()`-Antwort nicht).
-- **Logout löscht beides** (Dauersitzung + PWA-Merker) — sonst gälte der nächste Login
-  im selben Browser wieder als „aus der PWA".
+- The PWA reports itself **client-side** as installed (`display-mode: standalone` or
+  `navigator.standalone`) and sends a `pwa` marker along at login.
+- Server-side this becomes a **persistent session** (14 days) plus a PWA flag.
+- The silent re-login runs **without token rotation** — otherwise the token would be deleted
+  on the second request (the browser does not adopt `Set-Cookie` from a `fetch()` response).
+- **Logout deletes both** (persistent session + PWA flag) — otherwise the next login
+  in the same browser would again count as "from the PWA".
 
-**Wichtig für Agenten:** Es gibt KEINE serverseitige PWA-Erkennung am User-Agent. iOS
-liefert aus der PWA denselben UA wie aus Safari. Wer eine Anmeldung „von außen" prüft, kann
-deshalb nicht per UA unterscheiden, ob ein Aufruf aus der PWA kommt — das Kennzeichen muss
-der Client mitschicken.
+**Important for agents:** There is NO server-side PWA detection via the user agent. iOS
+delivers the same UA from the PWA as from Safari. Anyone checking a login "from outside"
+therefore cannot tell from the UA whether a request comes from the PWA — the client has to
+send the marker along.
 
-## Push-Nachrichten: nur im Home-Bildschirm (iOS)
+## Push notifications: only from the home screen (iOS)
 
-Web Push funktioniert über VAPID und die Abos des Browsers — **auf iOS aber nur, wenn die
-Seite vom Home-Bildschirm gestartet wurde.** Im Safari-Tab zeigt der Schalter nur einen
-Hinweis. Für den Empfang muss die Web-App **nicht** laufen (Service Worker).
+Web Push works via VAPID and the browser's subscriptions — **on iOS, however, only if the
+page was launched from the home screen.** In a Safari tab the toggle only shows a
+hint. To receive messages the web app does **not** have to be running (service worker).
 
-Die Abos liegen als JSON am Nutzer; der Versand läuft über die Benachrichtigungslogik.
-Tote Abos (404/410 vom Push-Dienst) werden entfernt — sonst wachsen sie endlos.
+The subscriptions are stored as JSON on the user; sending runs through the notification logic.
+Dead subscriptions (404/410 from the push service) are removed — otherwise they grow endlessly.
 
-## Was ein Agent daraus zieht
+## What an agent takes from this
 
-1. **Ein „nicht eingeloggt" im Web ist kein Rechteproblem.** Zuerst prüfen, ob es nur die
-   abgelaufene 30-Minuten-Session ist (der Nutzer wird auf die Login-Seite geleitet).
-2. **Der Agent selbst nutzt MCP/REST** — dort gilt der Bearer-Token (10 h) und danach der
-   Refresh-Token (30 Tage). PWA-Mechanik betrifft ihn nicht.
-3. **„Der Login-Screen kommt ständig"** in einer PWA: prüfen, ob die Seite wirklich installiert
-   läuft (nicht im Tab) und ob der Nutzer sich zuletzt ausgeloggt hat — der Logout räumt die
-   Dauer-Anmeldung bewusst mit weg.
-4. **„Keine Push-Nachrichten auf dem iPhone"**: die Web-App muss auf dem Home-Bildschirm liegen.
-   Im Tab gibt es keinen Push, unabhängig von Berechtigungen.
+1. **A "not logged in" on the web is not a permissions problem.** First check whether it is only the
+   expired 30-minute session (the user is redirected to the login page).
+2. **The agent itself uses MCP/REST** — there the bearer token applies (10 h) and afterwards the
+   refresh token (30 days). PWA mechanics do not affect it.
+3. **"The login screen keeps appearing"** in a PWA: check whether the page is really running
+   installed (not in a tab) and whether the user logged out recently — logout deliberately clears the
+   persistent login as well.
+4. **"No push notifications on the iPhone"**: the web app must be on the home screen.
+   In a tab there is no push, regardless of permissions.

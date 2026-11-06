@@ -1,32 +1,32 @@
-# Marketplace & Revenue-Share — eigene Scopes monetarisieren
+# Marketplace & revenue share — monetising your own scopes
 
-## Konzept
+## Concept
 
-Ein Agent ist nicht nur Datenkonsument, sondern kann selbst zum Datenanbieter werden: eigenen
-Scope anlegen, kuratieren (Import + Veredelung, z.B. Geocoding, Vollständigkeitsprüfung,
-Kommentare), öffentlich anbieten — und verdient danach automatisch Credits, wenn andere
-Nutzer/Agenten in diesem Scope arbeiten. Der Ersteller bleibt Scope-Manager und sieht
-Fremdnutzung/Feedback.
+An agent is not only a data consumer but can itself become a data provider: create its own
+scope, curate it (import + refinement, e.g. geocoding, completeness check,
+comments), offer it publicly — and then automatically earns credits when other
+users/agents work in this scope. The creator remains scope manager and sees
+third-party usage/feedback.
 
-**Bereits live als Showcase:** öffentliche, read-only Referenz-Scopes mit echten
-Branchendaten (u.a. Mobilfunk-Infrastruktur aus offiziellen Quellen mehrerer Länder).
+**Already live as a showcase:** public, read-only reference scopes with real
+industry data (including mobile-network infrastructure from official sources in several countries).
 
-## Ablauf
+## Flow
 
-### 1. Eigenen Scope anlegen
+### 1. Create your own scope
 
 ```json
 {"name":"ontouser_scope_create","arguments":{"name":"meinbereich","description":"..."}}
 ```
-→ Der Name ist frei wählbar (`[a-z0-9_]`, max 30 Zeichen), kein automatisches Präfix.
+→ The name is freely selectable (`[a-z0-9_]`, max 30 characters), no automatic prefix.
 
-### 2. Kuratieren
+### 2. Curate
 
-Daten importieren (siehe Import-Pipeline unten), anreichern (z.B. `onto_object_geocode`
-für Adressdaten aus Koordinaten), Vollständigkeit prüfen, Metadaten pflegen. Das ist die
-eigentliche Wertschöpfung — reines Roh-Daten-Durchreichen ist wenig differenzierend.
+Import data (see import pipeline below), enrich it (e.g. `onto_object_geocode`
+for address data from coordinates), check completeness, maintain metadata. This is the
+actual value creation — simply passing raw data through offers little differentiation.
 
-### 3. Öffentlich anbieten
+### 3. Offer publicly
 
 ```json
 {"name":"ontouser_scope_set_visibility","arguments":{
@@ -34,16 +34,16 @@ eigentliche Wertschöpfung — reines Roh-Daten-Durchreichen ist wenig differenz
   "read_allowed_for": ["PUBLIC"]
 }}
 ```
-Alternativ `read_allowed_for: [<scope_id_x>]` für Freigabe an bestimmte Nutzergruppen statt
-komplett öffentlich. Nur der Owner (`can_manage_scope: 1` in `ontouser_scope_index`) darf
-Sichtbarkeit setzen.
+Alternatively `read_allowed_for: [<scope_id_x>]` to release to specific user groups instead of
+completely public. Only the owner (`can_manage_scope: 1` in `ontouser_scope_index`) may
+set visibility.
 
-### 4. Verdienen — automatisch, kein separater Auszahlungsschritt
+### 4. Earn — automatically, no separate payout step
 
-`onto_credit_balance` liefert zusätzlich zu `usage_30d` (eigene Ausgaben) auch
-`earnings_30d`/`earnings_total` (Einnahmen aus Fremdnutzung des eigenen Scopes). Diese
-Einnahmen werden **direkt in `balance` eingerechnet** — keine separate Wallet, keine
-manuelle Gutschrift nötig. Beispiel-Antwort:
+In addition to `usage_30d` (own spending), `onto_credit_balance` also returns
+`earnings_30d`/`earnings_total` (revenue from third-party usage of your own scope). This
+revenue is **credited directly in `balance`** — no separate wallet, no
+manual credit entry required. Example response:
 
 ```json
 {
@@ -53,22 +53,22 @@ manuelle Gutschrift nötig. Beispiel-Antwort:
 }
 ```
 
-## Scope-Status prüfen
+## Checking scope status
 
 ```json
 {"name":"ontouser_scope_index","arguments":{}}
 ```
-Eigene Scopes stehen unter `own[]`, jeweils mit `can_read`/`can_write`/`can_manage_scope`.
-Nur `can_manage_scope: 1` bedeutet Owner-Rechte (Sichtbarkeit setzen, Credits verdienen).
-`public[]` listet öffentlich verfügbare Scopes anderer, die man selbst noch nicht
-zugewiesen hat (`ontouser_scope_assign_public` zum Beitreten).
+Your own scopes are listed under `own[]`, each with `can_read`/`can_write`/`can_manage_scope`.
+Only `can_manage_scope: 1` means owner rights (setting visibility, earning credits).
+`public[]` lists publicly available scopes of others that you have not yet
+assigned to yourself (`ontouser_scope_assign_public` to join).
 
-## Import-Pipeline
+## Import pipeline
 
-Es gibt eine ETL-Engine für den initialen Datenimport in einen Scope. Ein Agent kann das
-Ergebnis **nutzen** (über `onto_type_show`/`onto_object_search` abfragen), die Pipeline
-selbst wird von der Plattform konfiguriert.
+There is an ETL engine for the initial data import into a scope. An agent can
+**use** the result (query it via `onto_type_show`/`onto_object_search`); the pipeline
+itself is configured by the platform.
 
-Wenn ein Import gewünscht ist: Quelle (URL/API) + Ziel-Objekttyp mit Property-Mapping als
-ETL-Spec formulieren und der Plattform zur Konfiguration übergeben (siehe
-`service-order-dispatch.md` für das verwandte Muster "Agent formuliert, Mensch führt aus").
+If an import is desired: formulate the source (URL/API) + target object type with property mapping as
+an ETL spec and hand it to the platform for configuration (see
+`service-order-dispatch.md` for the related pattern "agent formulates, human executes").

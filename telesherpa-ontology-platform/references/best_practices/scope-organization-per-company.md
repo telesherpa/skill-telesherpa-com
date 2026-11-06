@@ -1,66 +1,65 @@
-# Scope-Organisation für Firmen (Agent → Mitarbeiter)
+# Scope organisation for companies (agent → employee)
 
-**Status:** Empfohlenes Muster für neue Firmen-Scope-Setups im Self-Service.
-**Frage:** Wie organisiert man Scopes so, dass Mitarbeiter genau das dürfen, was sie sollen —
-welche Scopes legt der Firmenagent an, was kommt rein, wer bekommt welche Rechte?
+**Status:** Recommended pattern for new company scope setups in self-service.
+**Question:** How do you organise scopes so that employees may do exactly what they should —
+which scopes does the company agent create, what goes into them, who gets which rights?
 
 ---
 
-## 1. Der Kern: Rechte laufen über Scopes, nicht über Rollen
+## 1. The core: rights run through scopes, not through roles
 
-Auf der Plattform gibt es keine frei definierbaren Datenzugriffs-Rollen. Alle Plattformnutzer
-teilen dieselbe Grundrolle; **wer was darf, ergibt sich ausschließlich aus den
-Scope-Mitgliedschaften:**
+On the platform there are no freely definable data-access roles. All platform users
+share the same base role; **who may do what follows exclusively from the
+scope memberships:**
 
-- `can_read` — lesen
-- `can_write` — schreiben
-- `can_manage_scope` — verwalten (einladen, Rechte setzen, Sichtbarkeit)
+- `can_read` — read
+- `can_write` — write
+- `can_manage_scope` — manage (invite, set rights, visibility)
 
-Es gibt also nur *eine* Achse für Rechte-Unterscheidung — und das ist der Scope.
+So there is only *one* axis for distinguishing rights — and that is the scope.
 
-**Konsequenz:** Wer A darf und B nicht, muss über Scopes getrennt werden. Es gibt keine zweite
-Achse, über die man das ausdrücken könnte.
+**Consequence:** Anyone who may do A but not B must be separated via scopes. There is no second
+axis through which one could express that.
 
-**Und daraus folgt das eigentliche Problem:** Schreibrecht auf einen Scope gilt für **alle
-Objekte** dieses Scopes, ohne Ausnahme. Ein Scope pro Firma heißt: alle Mitarbeiter dürfen alles.
+**And from that follows the actual problem:** write permission on a scope applies to **all
+objects** of that scope, without exception. One scope per company means: all employees may do everything.
 
-## 2. Der Ausweg: Lesen und Schreiben sind ZWEI Achsen
+## 2. The way out: reading and writing are TWO axes
 
-Man muss nicht alle in denselben Scope stecken. Zugriff wird auf getrennten Wegen gegeben:
+You do not have to put everyone into the same scope. Access is granted along separate paths:
 
-| Achse | Wirkung |
+| Axis | Effect |
 | --- | --- |
-| **Schreiben** (`can_write`) | schreiben auf alle Objekte des Scopes |
-| **Lesen** (`can_read`) | lesen aller Objekte des Scopes |
-| **Verwalten** (`can_manage_scope`) | Owner: einladen, Rechte setzen, Sichtbarkeit |
-| **Buchbarkeit** | wer den Scope selbst buchen darf (`read_allowed_for`) |
-| **Opt-out** | Firma schaltet einzelne Aktionen ab |
-| **Feld-Ebene** | einzelne Felder nur für bestimmte Scope-Halter |
+| **Writing** (`can_write`) | write to all objects of the scope |
+| **Reading** (`can_read`) | read all objects of the scope |
+| **Managing** (`can_manage_scope`) | owner: invite, set rights, visibility |
+| **Bookability** | who may book the scope itself (`read_allowed_for`) |
+| **Opt-out** | company switches off individual actions |
+| **Field level** | individual fields only for specific scope holders |
 
-Ein Objekt liegt in **genau einem** Scope. Aber **lesbar** kann ein Scope für Halter anderer
-Scopes sein. Also: **Schreiben ist exklusiv, Lesen ist teilbar.** Das ist die ganze Konstruktion.
+An object lies in **exactly one** scope. But a scope can be **readable** for holders of other
+scopes. So: **writing is exclusive, reading is shareable.** That is the whole construction.
 
-## 3. Der eigentliche Mechanismus: der Zwei-Phasen-Commit ist deine Objekt-Berechtigung
+## 3. The actual mechanism: the two-phase commit is your object permission
 
-Das ist der wichtigste Punkt. Es gibt bereits einen Commit beim Absenden:
+This is the most important point. There is already a commit on submit:
 
-| Phase | Antwort-Scope | Wer darf schreiben |
+| Phase | Answer scope | Who may write |
 | --- | --- | --- |
-| **Entwurf** (`status=draft`) | Schreib-Scope des Ausfüllenden | der Mitarbeiter |
-| **Absenden** (`status=sent`) | Ziel-Scope der Aktion (`target_scope`) | nur, wer dort schreiben darf |
+| **Draft** (`status=draft`) | write scope of the person filling it in | the employee |
+| **Submit** (`status=sent`) | target scope of the action (`target_scope`) | only those who may write there |
 
-Der Mitarbeiter hat auf dem **Ziel-Scope kein Schreibrecht** — deshalb kann er die fertige
-Antwort nach dem Absenden nicht mehr ändern, obwohl er sie erstellt hat. **Das ist die
-Berechtigung**, ohne eine einzige Objekt-ACL: die Antwort *wandert* beim Absenden aus seinem
-Schreib- in einen Lese-Scope.
+The employee has **no write permission on the target scope** — which is why he cannot change the
+finished answer after submitting, even though he created it. **That is the permission**, without a
+single object ACL: on submit the answer *moves* out of his write scope into a read scope.
 
-Der Commit läuft serverseitig aus der Konfiguration (nie aus dem Request) und verschiebt in
-einer Transaktion Objekt + Properties + Links + Dateien + Subform-Zeilen. **Wichtig:** ohne die
-Datei-Kaskade sieht der Kunde die Antwort ohne Unterschrift/Fotos.
+The commit runs server-side from the configuration (never from the request) and moves object +
+properties + links + files + subform rows in one transaction. **Important:** without the
+file cascade the customer sees the answer without signature/photos.
 
-**`target_scope` ist eine Entscheidung, keine Pflicht** — siehe Abschnitt 8.
+**`target_scope` is a decision, not an obligation** — see section 8.
 
-## 4. Vorschlag: DREI Scopes pro Firma (Grundmuster, nicht starr)
+## 4. Proposal: THREE scopes per company (base pattern, not rigid)
 
 ```
 <firma>_stammdaten   Stammdaten: Standorte, Kundenobjekte, Anlagen
@@ -68,35 +67,35 @@ Datei-Kaskade sieht der Kunde die Antwort ohne Unterschrift/Fotos.
 <firma>_archiv       Ziel-Scope: abgeschlossene Antworten
 ```
 
-Warum genau diese drei — und nicht einer oder zehn:
+Why exactly these three — and not one or ten:
 
-- **`stammdaten`** — die Objekte, *an* denen gearbeitet wird. Muss von allen gelesen werden können
-  (der Außendienst muss den Standort sehen), soll aber nicht von allen geändert werden.
-- **`arbeit`** — hier leben **Entwürfe**. Schreiben ja, aber niemand außerhalb sieht Halbfertiges.
-  Getrennt von `stammdaten`, damit ein Entwurf **nie** versehentlich im Kundenbestand auftaucht.
-- **`archiv`** — hier landen abgeschlossene Antworten. Nur Backoffice/Agent schreiben hier.
+- **`stammdaten`** — the objects *on* which work is done. Must be readable by everyone
+  (the field service must see the site), but should not be changed by everyone.
+- **`arbeit`** — **drafts** live here. Writing yes, but nobody outside sees half-finished work.
+  Separate from `stammdaten` so that a draft **never** accidentally turns up in the customer records.
+- **`archiv`** — completed answers land here. Only back office/agent write here.
 
-**Das ist ein Grundmuster für den Ein-Team-Fall, keine feste Zahl.** Wenn zwei Teams sich nicht
-gegenseitig in Entwürfen sehen sollen, braucht jedes Team einen eigenen `arbeit`-Scope — die Formel
-ist eigentlich **1× `stammdaten` + 1× `archiv` + N× `arbeit`** (eins pro Team mit
-Entwurfs-Trennung), nicht starr drei. **Schreib-Granularität = Scope-Granularität.**
+**This is a base pattern for the single-team case, not a fixed number.** If two teams must not
+see each other's drafts, each team needs its own `arbeit` scope — the formula
+is actually **1× `stammdaten` + 1× `archiv` + N× `arbeit`** (one per team with
+draft separation), not rigidly three. **Write granularity = scope granularity.**
 
-**Das Standard-Kontingent an Scopes ist bewusst knapp bemessen** — eine Firma mit einem Team kommt
-damit aus. Wächst die Firma auf mehrere Teams, wird mehr benötigt; zusätzliche Scopes sind über
-Credits erhältlich, alternativ gibt es ein Flat-Modell ohne Obergrenze. Wer an das Kontingent
-stößt, hat also nicht einen Fehler gefunden, sondern den Punkt erreicht, an dem sich die Nutzung
-bezahlt macht — das ist beabsichtigtes Design, kein Bug, den man umgehen müsste.
+**The standard scope quota is deliberately tight** — a company with one team gets by with
+it. If the company grows to several teams, more is needed; additional scopes are available via
+credits, alternatively there is a flat model without an upper limit. So whoever hits the quota
+has not found an error but reached the point at which usage pays off — that is intended
+design, not a bug that one would have to work around.
 
-## 5. Was trägt welche Achse — die vier Ebenen
+## 5. What carries which axis — the four levels
 
-| Ebene | Wo es hingehört |
+| Level | Where it belongs |
 | --- | --- |
-| Sichtbarkeit der Formular-Definition | `stammdaten` (oder `+PUBLIC` bei generischer Vorlage) |
-| Erlaubter Objekttyp | `["building"]` (bzw. der Standort-Typ) |
-| Sichtbarkeit des Buttons | `stammdaten` — Button nur an diesen Objekten |
-| Datenhoheit der Antwort | `archiv` oder „Scope des übergeordneten Objekts" |
+| Visibility of the form definition | `stammdaten` (or `+PUBLIC` for a generic template) |
+| Allowed object type | `["building"]` (or the site type) |
+| Visibility of the button | `stammdaten` — button only on these objects |
+| Data ownership of the answer | `archiv` or "scope of the parent object" |
 
-Beispiel einer Aktion:
+Example of an action:
 ```json
 {
   "object_types": ["building"],
@@ -109,35 +108,35 @@ Beispiel einer Aktion:
 }
 ```
 
-**Wichtig:** Die Button-Sichtbarkeit (`scopes`) ist **keine Sicherheitsgrenze**. Sie filtert nur,
-*wo ein Button angezeigt wird*; wer eine Aktion auslöst, wird zusätzlich am Scope des Zielobjekts
-geprüft. Wer eine echte Grenze braucht, muss sie dort ziehen — nicht über die Button-Anzeige.
+**Important:** button visibility (`scopes`) is **not a security boundary**. It only filters
+*where a button is displayed*; whoever triggers an action is additionally checked against the scope of the
+target object. Whoever needs a real boundary must draw it there — not via the button display.
 
-## 6. Wer bekommt welche Rechte — die drei Muster
+## 6. Who gets which rights — the three patterns
 
-Der Agent ist **Scope-Owner** (`can_manage_scope=1`) und verteilt Rechte auf drei Wegen:
+The agent is **scope owner** (`can_manage_scope=1`) and distributes rights in three ways:
 
-**(a) Invite-Codes — gerichtet, für bekannte Personen**
+**(a) Invite codes — targeted, for known people**
 `create_invite_code(scope_id, can_read, can_write, can_manage_scope, allowlist, max_uses, expires_at)`
-- Code-Format `XXXX-XXXX`, abtippbar (ohne 0/O/1/I/L). **Nicht geheim** — zum Weitergeben gedacht.
-- Allowlist per `email` / `domain` / `glob` (z.B. Domain der Firma = alle Mitarbeiter).
-- Rechte sind **additiv** (`max(code, bestehend)`) — ein Code kann nie entziehen.
-- `revoke` verhindert nur neue Einlösungen; wer schon drin ist, bleibt.
-- **Ein Code = ein Scope.** Braucht ein Mitarbeiter Rechte auf mehreren Scopes (z.B. Außendienst:
-  `stammdaten`-read + `arbeit`-write), löst er dafür mehrere Codes ein — einen pro Scope.
+- Code format `XXXX-XXXX`, typeable (without 0/O/1/I/L). **Not secret** — meant to be passed on.
+- Allowlist via `email` / `domain` / `glob` (e.g. the company's domain = all employees).
+- Rights are **additive** (`max(code, bestehend)`) — a code can never revoke.
+- `revoke` only prevents new redemptions; whoever is already in stays.
+- **One code = one scope.** If an employee needs rights on several scopes (e.g. field service:
+  `stammdaten` read + `arbeit` write), he redeems several codes for that — one per scope.
 
-**(b) Sichtbarkeit — Selbstbuchung, für offene Gruppen**
-Owner setzt den Scope auf öffentlich/buchbar → er erscheint in der öffentlichen Liste →
-Mitarbeiter bucht sich per `assign_public` **nur Lesen**. Schreiben ist so nicht erreichbar —
-das ist Absicht.
+**(b) Visibility — self-booking, for open groups**
+Owner sets the scope to public/bookable → it appears in the public list →
+the employee books himself **read only** via `assign_public`. Writing is not reachable that
+way — that is intentional.
 
-**(c) Admin — für Fälle, die Self-Service nicht deckt**
-Mehr Scopes als das Kontingent, oder ein Scope ohne Owner.
+**(c) Admin — for cases that self-service does not cover**
+More scopes than the quota, or a scope without an owner.
 
-### Rechte-Matrix aufbauen — per MCP
+### Building the rights matrix — via MCP
 
-Die Zuordnung läuft über Invite-Codes; der Agent als Owner (`can_manage_scope=1`) legt sie an
-und teilt sie aus:
+The assignment runs via invite codes; the agent as owner (`can_manage_scope=1`) creates them
+and hands them out:
 
 ```
 create_invite_code   scope_id=<stammdaten>  can_read=1  can_write=0
@@ -145,82 +144,82 @@ create_invite_code   scope_id=<arbeit>      can_read=1  can_write=1
 create_invite_code   scope_id=<archiv>      can_read=1  can_write=0
 ```
 
-Drei Codes für den Außendienst — einer pro Scope, weil **ein Code genau einen Scope** vergibt.
-Für offene Gruppen (wechselnde Subunternehmer) den Domain-Eintrag in die Allowlist setzen oder
-die Adressliste als XLSX über `upload_code_allowlist` hochladen (ersetzt die `email`-Einträge
-dieses Codes vollständig, `domain`/`glob` bleiben).
+Three codes for the field service — one per scope, because **a code grants exactly one scope**.
+For open groups (changing subcontractors) put the domain entry into the allowlist or
+upload the address list as XLSX via `upload_code_allowlist` (fully replaces the `email` entries
+of this code, `domain`/`glob` remain).
 
-Nachkontrolle jederzeit mit `list_members` (wer ist drin, welche Flags) und
-`list_invite_codes` (welche Codes sind noch gültig). **`toggle_member_flag` ändert nur EIN
-Recht** — `remove_member` löscht die ganze Zuordnung.
+Follow-up check at any time with `list_members` (who is in, which flags) and
+`list_invite_codes` (which codes are still valid). **`toggle_member_flag` changes only ONE
+right** — `remove_member` deletes the whole assignment.
 
-### Konkrete Rechte-Matrix (Empfehlung)
+### Concrete rights matrix (recommendation)
 
-**Firmen-Agent / Disposition**
+**Company agent / dispatch**
 - `stammdaten` — write + manage
 - `arbeit` — write + manage
 - `archiv` — write + manage
 
-**Backoffice / Innendienst**
+**Back office / inside service**
 - `stammdaten` — write
-- `arbeit` — read (sieht laufende Aufträge)
-- `archiv` — write (wertet abgeschlossene aus)
+- `arbeit` — read (sees running jobs)
+- `archiv` — write (evaluates completed ones)
 
-**Außendienst / Mitarbeiter**
-- `stammdaten` — **read** (sieht den Standort, ändert ihn nicht)
-- `arbeit` — **write** (legt Entwürfe an, lädt Unterschrift hoch)
-- `archiv` — read (sieht eigene abgeschlossene Besuche)
+**Field service / employees**
+- `stammdaten` — **read** (sees the site, does not change it)
+- `arbeit` — **write** (creates drafts, uploads signature)
+- `archiv` — read (sees own completed visits)
 
-**Nur-Leser / Auswertung**
+**Read-only users / reporting**
 - `stammdaten` — read
-- `arbeit` — kein Zugriff
+- `arbeit` — no access
 - `archiv` — read
 
-Wichtig für den Außendienst: `stammdaten` **nur read** zu geben ist der Hebel. Genau dort sitzen die
-Standorte — und niemand soll die Stammdaten ändern, während er einen Besuch dokumentiert.
+Important for the field service: giving `stammdaten` **read only** is the lever. That is exactly where the
+sites sit — and nobody should change the master data while documenting a visit.
 
-## 6b. Bilder als Teil des Aufbaus (strukturierte Bildablage)
+## 6b. Images as part of the setup (structured image storage)
 
-Gehört zu jedem Standort-Setup dazu und wird **vor** dem ersten Feldbesuch eingerichtet, weil
-die App dann genau die Motive abfragt, die das Backoffice braucht:
+It belongs to every site setup and is configured **before** the first field visit, because
+the app then asks for exactly the motifs the back office needs:
 
 ```
 onto_scope_structuredimage_categories       scope_id=<stammdaten>  → was gibt es schon?
 onto_scope_save_structuredimage_categories  scope_id, categories=[...]
 ```
 
-Empfehlung für ein Standort-Setup: 4–6 Motive, jeweils `de`+`en` als Sprachvarianten desselben
-`imagename`, und **genau eines mit `thumbnail: true`** (das wird das Vorschaubild in Karten und
-Listen). Motive, die sich bei jedem Besuch wiederholen, bekommen `versioned: true`.
+Recommendation for a site setup: 4–6 motifs, each with `de`+`en` as language variants of the same
+`imagename`, and **exactly one with `thumbnail: true`** (that becomes the preview image in cards and
+lists). Motifs that repeat on every visit get `versioned: true`.
 
-**Der Dateiname ist der Schlüssel:** der Fotografierende (Mensch in der App) lädt unter dem
-Namen hoch, der als `imagename` in der Kategorie steht. Passt der Name nicht exakt, erscheint
-nur der Platzhalter — ohne Fehlermeldung. Details und ein vollständiges Beispiel:
-`references/features/structured-image-ablage.md`.
+**The file name is the key:** the person taking the photo (human in the app) uploads under the
+name that stands as `imagename` in the category. If the name does not match exactly, only the
+placeholder appears — without an error message. Details and a complete example:
+`references/features/structured-image-storage.md`.
 
-## 7. Feinjustierung: Felder und Buttons
+## 7. Fine-tuning: fields and buttons
 
-**Einzelne Felder** — einem Feld lässt sich ein Scope zuordnen, sodass es nur für Halter dieses
-Scopes sichtbar ist (beim Rendern *und* beim Absenden geprüft). Damit geht z.B.: Kostenfelder nur
-für Backoffice sichtbar.
+**Individual fields** — a scope can be assigned to a field so that it is only visible for holders of this
+scope (checked when rendering *and* on submit). This allows, for example: cost fields only
+visible for the back office.
 ```json
 { "key": "kosten", "widget": "float", "label": "Kosten", "scope_id": <archiv-id> }
 ```
 
-**Einzelne Aktionen** — die Firma kann einzelne Aktionen am Scope abwählen (Opt-out), ohne dass
-sich an der Konfiguration selbst etwas ändert.
+**Individual actions** — the company can deselect individual actions on the scope (opt-out) without anything
+changing in the configuration itself.
 
-**Papierkorb-Falle:** `toggle_member_flag` ändert **ein** Recht, `remove_member` löscht die **ganze**
-Zuordnung. Wer „nur Schreiben wegnehmen" will, darf nicht `remove_member` benutzen — sonst ist auch
-das Leserecht weg.
+**Recycle-bin trap:** `toggle_member_flag` changes **one** right, `remove_member` deletes the **whole**
+assignment. Anyone who wants to "remove only writing" must not use `remove_member` — otherwise the
+read right is gone as well.
 
-## 7b. Zwei Automatiken, die sich fast immer lohnen
+## 7b. Two automations that almost always pay off
 
-Regeln (Trigger) und Functions sind **kein Extra** — sie ersetzen die Rückfrage per Telefon.
-Beides lässt sich per MCP anlegen (`onto_trigger_create`, `onto_function_create`), im
-Ziel-Scope mit `can_manage_scope=1`.
+Rules (triggers) and functions are **not an extra** — they replace the phone call-back.
+Both can be created via MCP (`onto_trigger_create`, `onto_function_create`), in the
+target scope with `can_manage_scope=1`.
 
-**1. Eskalation bei kritischem Befund** (Muster ist auf der Plattform live):
+**1. Escalation on a critical finding** (the pattern is live on the platform):
 
 ```json
 {"on":"insert","object_types":["inspection"],"scope_id":<arbeit>,
@@ -231,7 +230,7 @@ Ziel-Scope mit `can_manage_scope=1`.
              "links":[{"linktype":"proposesChange","to":"{object_udid}"}]}]}
 ```
 
-**2. Kennzahl aus zwei Feldern** (Function, per `run_function` in einer Regel aufrufbar):
+**2. Metric from two fields** (function, callable in a rule via `run_function`):
 
 ```json
 {"inputs":[{"key":"kmStand","type":"int","required":true}],
@@ -239,56 +238,56 @@ Ziel-Scope mit `can_manage_scope=1`.
  "effects":[],"timeout_ms":2000}
 ```
 
-**Zwei Regeln für den Betrieb** (beide sonst als Fehler erlebt):
-- **`condition.changed` immer setzen.** Ein Formular-Submit schreibt mehrere Felder = mehrere
-  Ereignisse; ohne `changed` feuert die Regel pro Feld (real: 1 Vorgang → 4 Effekte).
-- **Der Dispatcher muss laufen.** Je einer für Ereignisse und für Zeitpläne. Einer deckt den
-  anderen nicht ab.
+**Two rules for operation** (both otherwise experienced as errors):
+- **Always set `condition.changed`.** A form submit writes several fields = several
+  events; without `changed` the rule fires per field (real: 1 case → 4 effects).
+- **The dispatcher must be running.** One each for events and for schedules. One does not
+  cover the other.
 
-Vollständig, inklusive Effekt-Typen und Operator-Liste:
+Complete, including effect types and operator list:
 `references/features/automation-and-functions.md`.
 
-## 8. Der ehrliche Rest
+## 8. The honest remainder
 
-- **Kein Objekt-Level-Recht.** Wer Schreibrecht auf einem Scope hat, darf *alle* Objekte darin
-  ändern. Eine Ausnahme pro Objekt gibt es nicht. Wer das braucht, muss feiner schneiden
-  (mehr Scopes).
-- **`can_write` impliziert nicht `can_read`.** Beide Rechte getrennt setzen, sonst sieht der
-  Mitarbeiter seine eigenen Entwürfe nicht.
-- **Der Antwort-Scope erbt beim Entwurf** den Schreib-Scope. Ohne Ziel-Scope (`target_scope`) bleibt
-  die Antwort dort liegen — dann sieht das Backoffice sie nie.
-  **`target_scope` ist eine bewusste Entscheidung, keine Pflicht in jedem Fall:** Sinnvoll, wenn
-  Ersteller (Entwurf) und Bearbeiter der fertigen Antwort unterschiedliche Rollen/Personen sein
-  sollen (Außendienst schreibt, Backoffice wertet aus). In einem Drei-Personen-Betrieb, wo jeder
-  alles bearbeiten darf (z.B. Malerbetrieb ohne Rollentrennung), ist Weglassen valide — keine
-  Lücke, sondern bewusster Verzicht auf die Trennung. Nur klar sein, WARUM man sich entscheidet —
-  nicht aus Versehen vergessen.
-- **Sichtbarkeit ist Buchbarkeit, nicht Leserecht.** Wer lesen darf, entscheidet `can_read`.
-  Verwechslung führt zu „Scope sichtbar, Objekte nicht".
-- **Ein Scope kann verwaisen** (kein aktiver Manager). Verwaiste Scopes lassen sich gezielt
-  auflisten, damit eine Firma nicht ohne Owner festsitzt.
+- **No object-level right.** Anyone with write permission on a scope may change *all* objects in it.
+  There is no per-object exception. Whoever needs that must cut finer
+  (more scopes).
+- **`can_write` does not imply `can_read`.** Set both rights separately, otherwise the
+  employee does not see his own drafts.
+- **On draft, the answer scope inherits** the write scope. Without a target scope (`target_scope`) the
+  answer stays there — then the back office never sees it.
+  **`target_scope` is a deliberate decision, not an obligation in every case:** sensible when
+  creator (draft) and editor of the finished answer should be different roles/people
+  (field service writes, back office evaluates). In a three-person operation where everyone
+  may edit everything (e.g. a painting business without role separation), omitting it is valid — not a
+  gap but a deliberate renunciation of the separation. Just be clear about WHY you decide that way —
+  do not forget it by accident.
+- **Visibility is bookability, not read permission.** Who may read is decided by `can_read`.
+  Confusion leads to "scope visible, objects not".
+- **A scope can become orphaned** (no active manager). Orphaned scopes can be listed
+  specifically so that a company does not get stuck without an owner.
 
-## 9. Zusammenfassung in einem Satz
+## 9. Summary in one sentence
 
-Nicht ein Scope pro Firma, sondern **mindestens zwei**: einer, in dem gearbeitet wird (Write für
-Mitarbeiter), und einer, in dem Ergebnisse liegen (Write nur für Backoffice) — der Wechsel passiert
-automatisch beim Absenden über `target_scope`, wenn ihr euch bewusst dafür entscheidet. Lesen wird
-über `can_read` geteilt, Schreiben über Scope-Grenzen getrennt.
+Not one scope per company, but **at least two**: one in which work is done (write for
+employees) and one in which results lie (write only for the back office) — the switch happens
+automatically on submit via `target_scope`, if you deliberately decide in favour of it. Reading is shared
+via `can_read`, writing is separated via scope boundaries.
 
-## 10. Entscheidungspunkte — was der Agent festlegen muss
+## 10. Decision points — what the agent must determine
 
-Die Scope-Struktur erschließt sich aus dem Geschäft, nicht aus der Plattform. Vier Punkte
-muss der Agent **bewusst** entscheiden und in der Übergabe-Notiz festhalten:
+The scope structure follows from the business, not from the platform. The agent must decide four points
+**deliberately** and record them in the handover note:
 
-| Entscheidung | Woran es hängt |
+| Decision | What it depends on |
 | --- | --- |
-| `target_scope` ja/nein | Sind Ersteller (Entwurf) und Bearbeiter (fertige Antwort) verschiedene Personen? |
-| Anzahl `arbeit`-Scopes | Wie viele Teams dürfen sich **nicht** gegenseitig in Entwürfe sehen? |
-| Scope öffentlich (`PUBLIC`) | Soll Fremdnutzung automatisch Credits gutschreiben (Marketplace)? |
-| Rechte-Matrix | Wer liest Stammdaten, wer schreibt wo, wer verwaltet? |
+| `target_scope` yes/no | Are creator (draft) and editor (finished answer) different people? |
+| Number of `arbeit` scopes | How many teams must **not** see each other's drafts? |
+| Scope public (`PUBLIC`) | Should third-party usage automatically credit credits (marketplace)? |
+| Rights matrix | Who reads master data, who writes where, who manages? |
 
-Details zu `target_scope` in Abschnitt 8 — es ist eine **Entscheidung, keine Pflicht**. Ein
-weggelassenes `target_scope` ist gültig, aber nur als bewusste Wahl: die Antwort bleibt dann im
-Schreib-Scope, und das Backoffice sieht sie nie. Der Unterschied zwischen „bewusst weggelassen"
-und „vergessen" zeigt sich erst Monate später — deshalb gehört die Begründung schriftlich in die
-Übergabe-Notiz (`references/best_practices/first-30-minutes.md`).
+Details on `target_scope` in section 8 — it is a **decision, not an obligation**. An
+omitted `target_scope` is valid, but only as a deliberate choice: the answer then stays in the
+write scope, and the back office never sees it. The difference between "deliberately omitted"
+and "forgotten" only shows months later — which is why the reasoning belongs in writing in the
+handover note (`references/best_practices/first-30-minutes.md`).

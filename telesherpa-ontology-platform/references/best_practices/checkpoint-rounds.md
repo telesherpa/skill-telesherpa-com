@@ -1,28 +1,28 @@
-# Kontrollgänge per QR aufbauen — Arbeitsanweisung mit Nachweis
+# Building checkpoint rounds with QR — work instruction with proof
 
-**Ziel:** Ein Wach- oder Sicherheitsdienst quittiert seine Rundgänge am Ort per QR-Code, und danach
-gibt es einen Nachweis, der auch einer Prüfung standhält — je Kontrolle eine Zeile mit Zeit, Punkt,
-Konto und einer Plausibilitätsbewertung.
+**Goal:** A guard or security service acknowledges its patrol rounds on site by QR code, and afterwards
+there is a record that also withstands an audit — one row per check with time, point,
+account and a plausibility rating.
 
-**Für wen:** Betreiber/Administrator. Objekttypen sind Plattform-Schema (`onto_type_create` ist
-admin-only); Kunden-Agenten arbeiten mit den Typen, die da sind, und bauen darauf Aktionen,
-Ansichten und Reports.
+**For whom:** Operator/administrator. Object types are platform schema (`onto_type_create` is
+admin-only); customer agents work with the types that are there and build actions,
+views and reports on them.
 
-Das technische Verhalten steht in `references/features/scan-and-checkpoints.md` (Server-Vertrag,
-Ausführungsregel, Feldformate). Hier steht die Reihenfolge, in der man so etwas aufbaut.
+The technical behaviour is documented in `references/features/scan-and-checkpoints.md` (server contract,
+execution rule, field formats). What follows is the order in which you build something like this.
 
-## 0. Entscheidungen vor dem Bauen (nicht raten)
+## 0. Decisions before building (do not guess)
 
-| Frage | Warum sie vorher geklärt wird |
+| Question | Why it is clarified beforehand |
 |---|---|
-| Welche Rundgänge (`tour`) und Bereiche (`section`) gibt es? | Aus ihnen entsteht die Liste der Punkte, nicht umgekehrt |
-| Wie oft muss jeder Punkt kontrolliert werden (`interval_min`)? | Bestimmt die Bewertung „zu früh / überfällig" im Nachweis |
-| Wer darf quittieren? | Rolle und Scope; `PUBLIC` im Scope bedeutet Lesen, **nicht** Mitscannen |
-| Was passiert bei einer ausgefallenen Kontrolle? | Heute nur sichtbar im Report. Ein Alarm ist ein eigener Auftrag (Trigger/Function) |
-| Muss bewiesen werden, **wer** geprüft hat, oder auch **wo**? | Heute ist die Geräteposition **nicht** Teil des Nachweises. Wer sie braucht, muss das ausdrücklich beauftragen |
-| Wieviel Rückmeldung ist zumutbar? | Ton, Farbe und Haptik je Stufe; zu viel Rückmeldung wird weggehört |
+| Which patrol rounds (`tour`) and sections (`section`) exist? | They produce the list of points, not the other way round |
+| How often must each point be checked (`interval_min`)? | Determines the “too early / overdue” rating in the record |
+| Who may acknowledge? | Role and scope; `PUBLIC` in the scope means reading, **not** scanning along |
+| What happens when a check is missed? | Today only visible in the report. An alarm is a separate order (trigger/function) |
+| Must it be proven **who** checked, or also **where**? | Today the device position is **not** part of the record. Anyone who needs it must commission it explicitly |
+| How much feedback is reasonable? | Sound, colour and haptics per level; too much feedback gets tuned out |
 
-## 1. Typ und Felder anlegen (Admin)
+## 1. Create type and fields (admin)
 
 ```
 onto_type_create        name="checkpoint", label="mo.Checkpoint",
@@ -38,18 +38,18 @@ onto_property_set_create key="checkpoint_props", label="mo.Checkpoint_Props",
                         def_ids=[…], type_ids=[<Typ-ID von checkpoint>]
 ```
 
-Regeln dazu:
+Rules for this:
 
-- **Feldnamen englisch, Beschriftung als i18n-Schlüssel** (`mo.…`). Existiert der Schlüssel nicht,
-  zeigen Oberfläche und Introspektion den Rohschlüssel. Erst `onto_i18n_index`/`onto_i18n_matrix`
-  lesen, dann `onto_i18n_create`; die Annahme/den Export macht der Betreiber.
-- **Adresse nicht nachbauen:** das Set `address` (`street`, `postalCode`, `city`, `latitude`,
-  `longitude` mit Geocode- und Reverse-Layout) existiert und wird an den Typ gebunden.
-- `checked_at`/`checked_by` sind **Zustandsfelder**: sie stehen am Objekt, damit eine Liste „wann
-  zuletzt geprüft" ohne Log-Auswertung funktioniert. Der Verlauf bleibt trotzdem im Protokoll.
-- Pflichtfelder (`required`) sparsam setzen — ein Pflichtfeld blockiert jede Ausführung.
+- **Field names in English, label as i18n key** (`mo.…`). If the key does not exist,
+  UI and introspection show the raw key. First read `onto_i18n_index`/`onto_i18n_matrix`,
+  then `onto_i18n_create`; the assumption/the export is done by the operator.
+- **Do not rebuild the address:** the set `address` (`street`, `postalCode`, `city`, `latitude`,
+  `longitude` with geocode and reverse layout) exists and is bound to the type.
+- `checked_at`/`checked_by` are **state fields**: they sit on the object so that a list “when
+  last checked” works without evaluating the log. The history still remains in the log.
+- Set required fields (`required`) sparingly — a required field blocks every execution.
 
-## 2. Punkte anlegen und Codes drucken
+## 2. Create points and print codes
 
 ```
 onto_object_create      type="checkpoint", name="KP-01 Haupteingang",
@@ -57,13 +57,13 @@ onto_object_create      type="checkpoint", name="KP-01 Haupteingang",
                                tour:"Rundgang Nord", interval_min:60}
 ```
 
-- Der QR-Code enthält die **UDID** des Objekts (32 Hex-Zeichen), sonst nichts. Kein Klartext, keine
-  URL mit Parametern: die UDID ist der Schlüssel, die Bedeutung steht in den Properties.
-- Codes **haltbar** drucken: ein abgerissener oder überklebter Code ist der häufigste Ausfall.
-- Ein Punkt, der nie kontrolliert wird, gehört nicht in den Rundgang — sonst bewertet der Nachweis
-  dauerhaft „überfällig".
+- The QR code contains the **UDID** of the object (32 hex characters), nothing else. No plain text, no
+  URL with parameters: the UDID is the key, the meaning is in the properties.
+- Print codes **durably**: a torn-off or pasted-over code is the most common failure.
+- A point that is never checked does not belong in the round — otherwise the record permanently
+  rates it “overdue”.
 
-## 3. Aktion bauen
+## 3. Build the action
 
 ```
 onto_actiondef_save   key="qr_control", label="Kontrolle quittieren",
@@ -75,58 +75,57 @@ onto_actiondef_save   key="qr_control", label="Kontrolle quittieren",
                             "feedback":{…}}
 ```
 
-- **Keine Verknüpfung** in dieser Aktion: ein Kontrollpunkt hat kein Gegenüber, also genügt ein
-  Scan, und die Aktion darf sofort laufen (`scan.ausfuehrung: "auto"`).
-- Eine Aktion, die eine Verknüpfung **löst** (z. B. Paket aus dem Regal), läuft **nie** automatisch —
-  das erzwingt der Server, unabhängig von `ausfuehrung`.
-- `condition` immer serverseitig formulieren (z. B. „nur wenn der Auftrag offen ist"), mit
-  `message` in Klartext für den Nutzer.
-- Rückmeldung dreistufig: Scan angenommen, Ergebnis, Fehler. Zu jeder Stufe Ton, Farbe, Haptik und
-  Dauer; `dedupe_ms` gegen Doppelscans.
+- **No link** in this action: a checkpoint has no counterpart, so a scan is enough
+  and the action may run immediately (`scan.ausfuehrung: "auto"`).
+- An action that **resolves** a link (e.g. package from the shelf) **never** runs automatically —
+  the server enforces that, regardless of `ausfuehrung`.
+- Always formulate `condition` on the server side (e.g. “only when the order is open”), with
+  `message` in plain text for the user.
+- Feedback in three stages: scan accepted, result, error. For each stage sound, colour, haptics and
+  duration; `dedupe_ms` against double scans.
 
-## 4. Abnehmen (am laufenden Dienst, nicht am Schreibtisch)
+## 4. Acceptance (on the running service, not at the desk)
 
-1. **Introspektion:** `onto_type_show` am Typ — Felder und Aktionsschlüssel müssen erscheinen,
-   Beschriftungen in der Zielsprache.
-2. **Ernstfall:** je Rundgang einen echten Scan ausführen (`QR-Code → Aktion`).
-   Danach am Objekt prüfen: `checked_at` gesetzt, `checked_by` = Konto.
-3. **Protokoll:** `onto_action_logs` muss je Ausführung eine Zeile mit Aktionsschlüssel, Objekt,
-   Konto und `scope_id` tragen.
-4. **Ausführungsregel:** eine lösende Aktion muss Knöpfe zeigen, eine harmlose sofort laufen.
-5. **Gegenprobe Negativfall:** zweimal derselbe Code innerhalb der Dedupe-Frist darf nicht doppelt
-   buchen; ein unbekannter Code darf keine Aktion anbieten.
-6. **Nachweis:** Report öffnen und gegen die eigenen Scans lesen.
+1. **Introspection:** `onto_type_show` on the type — fields and action keys must appear,
+   labels in the target language.
+2. **Real case:** run one real scan per round (`QR code → action`).
+   Then check on the object: `checked_at` set, `checked_by` = account.
+3. **Log:** `onto_action_logs` must carry one row per execution with action key, object,
+   account and `scope_id`.
+4. **Execution rule:** a resolving action must show buttons, a harmless one runs immediately.
+5. **Counter-check negative case:** the same code twice within the dedupe window must not book
+   twice; an unknown code must not offer any action.
+6. **Record:** open the report and read it against your own scans.
 
-## 5. Nachweis (Report „Kontrollen")
+## 5. Proof (report “Kontrollen”)
 
-Je Zeile: Zeit, Kontrollpunkt, Scope, Konto, Ergebnis, Abstand zur vorigen Kontrolle am selben
-Punkt, Soll aus `interval_min`, Bewertung, voriger Punkt, Wegzeit, Rundgang.
+Per row: time, checkpoint, scope, account, result, interval to the previous check at the same
+point, target from `interval_min`, rating, previous point, travel time, round.
 
-- Bewertung im SQL, **nicht im Scan**: `erste Kontrolle` (kein Vorgänger), `zu frueh` (< Soll),
-  `ueberfaellig` (> 2 × Soll), sonst `ok`. Der Faktor ist eine Vereinbarung mit dem Auftraggeber —
-  er gehört schriftlich festgehalten, nicht stillschweigend gesetzt.
-- **Wegzeit** = Minuten seit der letzten Kontrolle desselben Kontos an einem **anderen** Punkt.
-  Auffällig kleine Werte (unter zwei Minuten) sind der beste Hinweis auf Abhaken ohne Ortswechsel —
-  deshalb steht die Spalte im Nachweis und nicht in einer Sonderauswertung.
-- Filter: Scope, Kontrolleur (E-Mail), Zeitraum. Filterwerte gehen **nur per POST** in der
-  Reihenfolge der `search_cols`; die JSON-/GET-Route ignoriert sie.
-- **Den Scope im Report-SQL ausschreiben.** `{scope_where}` wird im Report **nicht** ersetzt (das
-  gilt nur für Actiondef-Zähler und Interface-SQL): mit Platzhalter bricht die Abfrage ab, ohne
-  Scope-Bedingung wertet sie über alle Scopes aus.
-- `candownload = 1` gibt den CSV-Export frei (für Prüfungen und Akten).
-- `candownload` heißt auch: was der Report zeigt, lässt sich als Datei mitnehmen. Scope und Filter
-  sind damit Teil der Zusage an den Kunden, nicht nur eine Anzeigefrage.
+- Rating in the SQL, **not in the scan**: `erste Kontrolle` (no predecessor), `zu frueh` (< target),
+  `ueberfaellig` (> 2 × target), otherwise `ok`. The factor is an agreement with the client —
+  it belongs in writing, not set silently.
+- **Travel time** = minutes since the last check by the same account at a **different** point.
+  Conspicuously small values (under two minutes) are the best indication of ticking off without changing location —
+  which is why the column is in the record and not in a special evaluation.
+- Filters: scope, checker (email), period. Filter values go **only via POST** in the
+  order of the `search_cols`; the JSON/GET route ignores them.
+- **Write the scope out in the report SQL.** `{scope_where}` is **not** replaced in the report (that
+  only applies to actiondef counters and interface SQL): with the placeholder the query aborts, without a
+  scope condition it evaluates across all scopes.
+- `candownload = 1` releases the CSV export (for audits and files).
+- `candownload` also means: what the report shows can be taken away as a file. Scope and filter
+  are therefore part of the promise to the customer, not just a display question.
 
-## 6. Missbrauch im Blick behalten
+## 6. Keep an eye on misuse
 
-Der Nachweis ist nur so gut wie seine Nebenrechnung. Deshalb von Anfang an mitliefern:
+The record is only as good as its side calculation. That is why you supply from the start:
 
-- Wegzeit-Spalte (Abhaken ohne Ortswechsel),
-- Zähler im Actiondef („Kontrollen heute") als Sofort-Kontrolle für den Schichtleiter,
-- `scope_id` im Protokoll, damit die Zeilen dem Kunden zuordenbar bleiben,
-- bei Bedarf ein zweiter Code je Punkt (Gegenstand + Ort), wenn der Vorgang eine Verknüpfung
-  braucht.
+- travel-time column (ticking off without changing location),
+- counter in the actiondef (“Kontrollen heute”) as an immediate check for the shift supervisor,
+- `scope_id` in the log so that the rows remain attributable to the customer,
+- if required a second code per point (object + location) when the process needs a link.
 
-Was der Nachweis **nicht** kann, und das gehört in die Übergabe: er beweist Zeit, Konto, Objekt und
-Reihenfolge — nicht die Anwesenheit am Ort. Für Anwesenheit braucht es die Geräteposition (eigener
-Auftrag, siehe `references/features/scan-and-checkpoints.md`).
+What the record **cannot** do, and that belongs in the handover: it proves time, account, object and
+sequence — not presence at the location. Presence requires the device position (separate
+order, see `references/features/scan-and-checkpoints.md`).

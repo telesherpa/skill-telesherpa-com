@@ -1,17 +1,17 @@
-# ServiceOrder — Digitale Aufgabe → reale menschliche Arbeit
+# ServiceOrder — digital task → real human work
 
-## Konzept
+## Concept
 
-Der größte Differenzierer der Plattform gegenüber reinen Daten-Backends (Firebase, Supabase,
-Snowflake): ein Agent kann nicht nur Daten schreiben, sondern **reale Feldarbeit auslösen**.
-Ein `serviceOrder`-Objekt, verlinkt an einen Standort, erscheint für menschliche
-Field-Service-Techniker in deren App/Web-Interface — sie nehmen ihn an, erledigen die Arbeit,
-schließen ihn ab. Der Agent bekommt das Ergebnis (inkl. hochgeladener Fotos, Kommentare) zurück.
+The platform's biggest differentiator compared with pure data backends (Firebase, Supabase,
+Snowflake): an agent can not only write data but **trigger real field work**.
+A `serviceOrder` object, linked to a site, appears for human field service technicians
+in their app/web interface — they accept it, do the work, close it. The agent gets the
+result back (including uploaded photos, comments).
 
-**Wichtig:** Das ist keine Simulation. Ein realer Mensch fährt tatsächlich zu einem Standort.
-Ein `serviceOrder` sollte daher nie leichtfertig angelegt werden — bei Tests immer klar als
-`TEST` im Namen/Task markieren, damit für den Ausführenden sofort erkennbar ist, dass es sich
-nicht um einen echten Einsatz handelt.
+**Important:** This is not a simulation. A real person actually drives to a site.
+A `serviceOrder` should therefore never be created carelessly — in tests always mark it clearly as
+`TEST` in the name/task, so that the person executing it can immediately recognise that it is
+not a real assignment.
 
 ## Lifecycle
 
@@ -19,15 +19,15 @@ nicht um einen echten Einsatz handelt.
 open --(claim_service_order)--> inProgress --(complete_service_order)--> done
 ```
 
-- **open**: Auftrag ist unzugewiesen, sichtbar im offenen Pool (Interface `serviceOrders`)
-- **inProgress**: jemand hat ihn übernommen (`assignedTo` gesetzt, `startedAt` Timestamp)
-- **done**: abgeschlossen (`completedAt` Timestamp)
+- **open**: the order is unassigned, visible in the open pool (interface `serviceOrders`)
+- **inProgress**: someone has taken it over (`assignedTo` set, `startedAt` timestamp)
+- **done**: completed (`completedAt` timestamp)
 
-Sowohl Mensch als auch Agent können `claim_service_order` aufrufen (Selbstzuweisung ist
-gewünscht, nicht nur erlaubt — alles wird geloggt/auditiert, das ist der Kontrollmechanismus,
-keine Vorab-Sperre).
+Both human and agent can call `claim_service_order` (self-assignment is wanted, not merely
+permitted — everything is logged/audited, that is the control mechanism,
+not an upfront lock).
 
-## Objekt anlegen (manuell, zwei Schritte)
+## Creating the object (manual, two steps)
 
 ```json
 // 1. serviceOrder-Objekt erzeugen
@@ -46,14 +46,14 @@ keine Vorab-Sperre).
 }}
 ```
 
-Der Link erscheint am Standort-Objekt als `hasServiceVisit` (verb `mo.hasServiceVisit`,
+The link appears on the site object as `hasServiceVisit` (verb `mo.hasServiceVisit`,
 reverse verb `mo.takesPlaceAt`).
 
-## Objekt anlegen (direkt am Standort, kürzer)
+## Creating the object (directly at the site, shorter)
 
-Viele Objekttypen haben inzwischen eine `create_service_order`-Action direkt im Schema
-(prüfbar über `onto_type_show`, Feld `schema.action_keys`). Das spart den manuellen
-create+link-Schritt:
+Many object types now have a `create_service_order` action directly in the schema
+(checkable via `onto_type_show`, field `schema.action_keys`). That saves the manual
+create+link step:
 
 ```json
 {"name":"onto_object_execute_action","arguments":{
@@ -63,30 +63,30 @@ create+link-Schritt:
 }}
 ```
 
-## Auftrag steuern
+## Steering the order
 
 ```json
 {"name":"onto_object_execute_action","arguments":{"action_key":"claim_service_order","udid":"<serviceOrder-udid>"}}
 {"name":"onto_object_execute_action","arguments":{"action_key":"complete_service_order","udid":"<serviceOrder-udid>"}}
 ```
 
-## Ergebnis prüfen
+## Checking the result
 
-`onto_object_show` auf die serviceOrder-udid liefert `status`, `assignedTo`, `startedAt`,
-`completedAt`. Fotos/Kommentare, die der ausführende Mensch hinzufügt, landen als eigene
-`comment`-Objekte (verlinkt via `hascomment`) bzw. in der strukturierten Bildablage des
-verlinkten Standort-Objekts — dort nachschauen, nicht nur am serviceOrder selbst.
+`onto_object_show` on the serviceOrder udid returns `status`, `assignedTo`, `startedAt`,
+`completedAt`. Photos/comments that the executing person adds land as separate
+`comment` objects (linked via `hascomment`) or in the structured image store of the
+linked site object — look there, not only at the serviceOrder itself.
 
-## Poll statt raten
+## Poll instead of guessing
 
-Statt periodisch `onto_object_show` auf die serviceOrder-udid zu wiederholen, den
-Poll-Cursor nutzen (`references/features/auth-token-lifecycle.md` beschreibt das
-verwandte Auth-Pattern, `onto_watch_changes` mit `action` als Filter, z.B.
-`action: "claim_service_order"`, spart Calls und Credits).
+Instead of periodically repeating `onto_object_show` on the serviceOrder udid, use the
+poll cursor (`references/features/auth-token-lifecycle.md` describes the
+related auth pattern; `onto_watch_changes` with `action` as a filter, e.g.
+`action: "claim_service_order"`, saves calls and credits).
 
-## Berechtigungsgrenze (wichtig)
+## Permission boundary (important)
 
-Schreibrecht auf einen Scope bedeutet NICHT automatisch das Recht, `serviceOrder`-Objekte
-anzulegen oder `create_service_order`/`claim_service_order`-Actions auszuführen — das kann
-separat RBAC-gegated sein (403 trotz sonst funktionierendem Schreibzugriff ist ein Signal,
-das explizit freigeschaltet werden muss, nicht automatisch aus Objektrechten folgt).
+Write permission on a scope does NOT automatically mean the right to create `serviceOrder` objects
+or to execute `create_service_order`/`claim_service_order` actions — that can be
+gated separately by RBAC (a 403 despite otherwise working write access is a signal
+that must be explicitly unlocked, it does not follow automatically from object rights).

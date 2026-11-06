@@ -1,81 +1,81 @@
-# Testagent — Anweisung: Registrieren, Bauen, Einladen
+# Test agent — instruction: register, build, invite
 
-Du testest als Agent den Weg **ohne** Einladungscode. Basis: `https://app.telesherpa.com`.
-Alle Aufrufe mit `?format=json`; ab Schritt 2 mit `Authorization: Bearer <access_token>`.
+You are testing, as an agent, the path **without** an invitation code. Base: `https://app.telesherpa.com`.
+All calls with `?format=json`; from step 2 with `Authorization: Bearer <access_token>`.
 
-Nach der Registrierung hast du zwei Wege — beide stehen in der Antwort unter `next.wege`:
-**(a) beitreten**: du hast einen Einladungscode bekommen und löst ihn ein.
-**(b) bauen und einladen**: du baust deinen eigenen Scope und erzeugst danach Einladungscodes.
+After registration you have two paths — both are listed in the response under `next.wege`:
+**(a) join**: you have received an invitation code and redeem it.
+**(b) build and invite**: you build your own scope and then generate invitation codes.
 
-## Vier Wege zu Zugang und Guthaben (je mit Werkzeugnamen)
+## Four ways to access and credit (each with tool name)
 
-- **(a) Einladung:** `invite_code` bei `register` oder später `redeem_invite_code` — Zugang zu einem
-  fremden Scope mit den Rechten des Codes, aber kein Guthaben.
-- **(b) Selbst zahlen:** `onto_credit_checkout` — gehostete Zahlseite (Karte).
-- **(c) Prepaid:** `onto_credit_chargeup` mit `prepaid_code`.
-- **(d) Idee:** `ontouser_service_request` (kostenlos) — beschreibe, was du bauen willst; die
-  Administratoren prüfen es und schicken bei Gefallen einen Prepaid-Code.
+- **(a) Invitation:** `invite_code` at `register` or later `redeem_invite_code` — access to a
+  foreign scope with the rights of the code, but no credit.
+- **(b) Pay yourself:** `onto_credit_checkout` — hosted payment page (card).
+- **(c) Prepaid:** `onto_credit_chargeup` with `prepaid_code`.
+- **(d) Idea:** `ontouser_service_request` (free) — describe what you want to build; the
+  administrators review it and, if they like it, send a prepaid code.
 
-Ohne Guthaben darfst du lesen, aber nichts anlegen (Scope anlegen = HTTP 402).
+Without credit you may read, but create nothing (creating a scope = HTTP 402).
 
-## 1. Registrieren (kostet nichts, kein Postfach, kein Mensch)
+## 1. Register (costs nothing, no mailbox, no human)
 
 ```
 POST /de/ontouser/user/register?format=json
 agent=1&accept_terms=1
 ```
 
-Erwartet: `status=ok`, `username` (`agent-...@agents.telesherpa.com`), `password`
-(**nur einmal** — sofort sichern), `roles=[login,public,member]`, `scopes=[]`,
+Expected: `status=ok`, `username` (`agent-...@agents.telesherpa.com`), `password`
+(**only once** — save it immediately), `roles=[login,public,member]`, `scopes=[]`,
 `credits.start_credits=0`, `next.wege`.
-Fehlt `accept_terms`, kommt HTTP 400 „Bitte bestaetigen Sie die Nutzungsbedingungen."
-Optional zusätzlich `invite_code=<CODE>` mitschicken: dann kommen dessen Scope-Rechte sofort mit.
+If `accept_terms` is missing, you get HTTP 400 "Bitte bestaetigen Sie die Nutzungsbedingungen."
+Optionally also send `invite_code=<CODE>`: then its scope rights come along immediately.
 
-## 2. Anmelden
+## 2. Log in
 
 ```
 POST /de/ontouser/user/token?format=json
 client_id=<username>&client_secret=<password>
 ```
 
-Erwartet: `access_token`.
+Expected: `access_token`.
 
-**Zugangsdaten dauerhaft ablegen (Pflicht fuer autonome Agenten):** `password` (aus der
-`register`-Antwort) und `refresh_token` (aus der `login`-Antwort) kommen nur einmal. Schreib beide
-sofort weg — Datei mit `chmod 600` oder Secret-Store — und lies sie bei jedem Start wieder ein.
-Ohne gespeicherte Zugangsdaten hast du beim naechsten Start **kein Konto**; eine Neuregistrierung
-waere ein neues, leeres Konto. Der `refresh_token` gilt 30 Tage und holt per
-`grant_type=refresh_token` an `/de/ontouser/user/token_refresh` neue Access-Tokens (10 h) ohne Passwort.
+**Store credentials permanently (mandatory for autonomous agents):** `password` (from the
+`register` response) and `refresh_token` (from the `login` response) come only once. Write both
+down immediately — file with `chmod 600` or secret store — and read them again on every start.
+Without stored credentials you have **no account** on the next start; a new registration
+would be a new, empty account. The `refresh_token` is valid for 30 days and, via
+`grant_type=refresh_token` at `/de/ontouser/user/token_refresh`, fetches new access tokens (10 h) without a password.
 
-## 3. Prüfen (lesend)
+## 3. Check (read-only)
 
-`GET /de/ontouser/user/profile?format=json` → HTTP 200 mit `{"status":"ok","data":{...}}`.
+`GET /de/ontouser/user/profile?format=json` → HTTP 200 with `{"status":"ok","data":{...}}`.
 
-## 4. Bauen — kostet Guthaben
+## 4. Build — costs credit
 
 ```
 POST /de/ontouser/scope/create?format=json
 name=<Name>
 ```
 
-Ohne Guthaben erwartet: **HTTP 402**
+Without credit expected: **HTTP 402**
 `{"error":"Nicht genug Credits (Pay-per-Use). Bitte Guthaben aufladen."}`
-Mit Guthaben: HTTP 200 mit `scope_id`.
-Guthaben: `onto_credit_chargeup` (prepaid_code) oder `onto_credit_checkout` (Karte) — oder ein
-Service Request an den Betreiber (`ontouser_service_request`).
+With credit: HTTP 200 with `scope_id`.
+Credit: `onto_credit_chargeup` (prepaid_code) or `onto_credit_checkout` (card) — or a
+service request to the operator (`ontouser_service_request`).
 
-## 5. Einladen (erst nach dem Bauen möglich)
+## 5. Invite (only possible after building)
 
-Einladungscode erzeugen: MCP-Werkzeug `create_invite_code`. Danach kannst du Menschen und andere
-Agenten damit in **deinen** Scope holen.
+Generate an invitation code: MCP tool `create_invite_code`. Afterwards you can use it to bring
+humans and other agents into **your** scope.
 
-Weg (a) gegenprüfen — Code einlösen:
-`POST /de/ontouser/scope/redeem_invite_code?format=json` mit `code=<CODE>`.
-Bei falschem oder schon benutztem Code erwartet: HTTP 404 „Code ungueltig".
+Cross-check path (a) — redeem the code:
+`POST /de/ontouser/scope/redeem_invite_code?format=json` with `code=<CODE>`.
+With a wrong or already used code expected: HTTP 404 "Code ungueltig".
 
-## Was zurückmelden
+## What to report back
 
-1. Kamen die erwarteten Antworten und Statuscodes? (ja/nein, mit Rohtext)
-2. Konntest du **ohne** Guthaben einen Scope anlegen? (erwartet: nein, HTTP 402)
-3. Klappte (a) Code einlösen bzw. (b) Code erzeugen und einladen?
-4. Was hat gefehlt, was war unklar? Wörtliche Fehlermeldungen, keine Zusammenfassung.
+1. Did the expected responses and status codes arrive? (yes/no, with raw text)
+2. Could you create a scope **without** credit? (expected: no, HTTP 402)
+3. Did (a) redeeming the code work, or (b) generating a code and inviting?
+4. What was missing, what was unclear? Verbatim error messages, no summary.

@@ -1,28 +1,28 @@
-# Regeln & Functions — Automatik auf der Plattform
+# Rules & Functions — automation on the platform
 
-Die Plattform hat einen **Automatik-Layer**: Regeln (im System „Trigger" genannt) reagieren auf
-Änderungen an Objekten, Functions sind benannte Berechnungen/Effekt-Bündel, die Regeln aufrufen
-können. Beides sind **Ontologie-Objekte**, kein separates Schema.
+The platform has an **automation layer**: rules (called „Trigger" in the system) react to
+changes on objects, functions are named calculations/effect bundles that rules can call.
+Both are **ontology objects**, not a separate schema.
 
-> **Regeln und Functions lassen sich auch über MCP ANLEGEN.** Lesen, Ausführen
-> **und Schreiben** gehen über MCP (`onto_trigger_create/_update/_delete`,
-> `onto_function_create/_update/_delete`). Frühere Fassungen dieser Referenz sagten „anlegen nur
-> über HTTP/Admin" — das ist überholt.
+> **Rules and functions can also be CREATED via MCP.** Reading, running
+> **and writing** go via MCP (`onto_trigger_create/_update/_delete`,
+> `onto_function_create/_update/_delete`). Earlier versions of this reference said „creation only
+> via HTTP/admin" — that is outdated.
 
-## Die Bausteine
+## The building blocks
 
-| Objekttyp | ID | Definition liegt als | Zweck |
+| Object type | ID | Definition stored as | Purpose |
 |---|---|---|---|
-| `trigger` | 25 | Property `triggerdef` | Regel: „wenn X passiert, tu Y" |
-| `function` | 26 | Property `functiondef` | benannte Berechnung + Effekte |
+| `trigger` | 25 | property `triggerdef` | rule: „if X happens, do Y" |
+| `function` | 26 | property `functiondef` | named calculation + effects |
 
-Wie bei `actiondef` und `formdef` gibt es **keinen eigenen Schema-Eintrag** dafür — bewusst.
-Die Automatik liest genau diese Property; die GUI schreibt nichts anderes.
+As with `actiondef` and `formdef` there is **no separate schema entry** for them — deliberately.
+The automation reads exactly this property; the GUI writes nothing else.
 
-**Jede Objekt-Schreibung erzeugt ein Ereignis** (Art der Änderung, betroffenes Objekt, Feld,
-alter und neuer Wert, Auslöser). Der Abarbeiter arbeitet diesen Puffer ab.
+**Every object write produces an event** (kind of change, affected object, field,
+old and new value, trigger source). The worker drains this buffer.
 
-## Ablauf
+## Flow
 
 ```
 Objekt wird geschrieben
@@ -34,20 +34,20 @@ Objekt wird geschrieben
                         → Effekt erzeugt Event → nächste Runde (max_depth 3)
 ```
 
-Zwei Betriebsarten — **zwei Timer, nicht einer**:
+Two operating modes — **two timers, not one**:
 
-| Betriebsart | Auslöser | Abarbeiter | Takt |
+| Operating mode | Trigger source | Worker | Interval |
 |---|---|---|---|
-| `on_change` (insert/update/delete) | Objekt-Änderung | eigener Abarbeiter | kurz |
-| `schedule` (zeitgesteuert) | Zeitplan | eigener Abarbeiter | länger |
+| `on_change` (insert/update/delete) | object change | own worker | short |
+| `schedule` (time-driven) | time schedule | own worker | longer |
 
-Jeder Pfad hat **seinen eigenen** Abarbeiter — einer deckt den anderen **nicht** ab. Läuft nur
-der zeitgesteuerte, sieht man ereignisgesteuerte Regeln nie feuern.
+Each path has **its own** worker — one does **not** cover the other. If only
+the time-driven one runs, one never sees event-driven rules fire.
 
-Status und Rückstand sind abfragbar (offen / gesamt / fehler / ok / skip). Der Status-Endpunkt
-ist nicht von aussen erreichbar.
+Status and backlog are queryable (open / total / error / ok / skip). The status endpoint
+is not reachable from outside.
 
-## Aufbau einer Regel (`triggerdef`)
+## Structure of a rule (`triggerdef`)
 
 ```json
 {
@@ -66,28 +66,28 @@ ist nicht von aussen erreichbar.
 }
 ```
 
-**Erlaubte `on`-Werte:** `insert`, `update`, `delete`, `schedule`.
+**Allowed `on` values:** `insert`, `update`, `delete`, `schedule`.
 
-**Erlaubte `effects[].type`:** `set_property`, `create_object`, `create_link`, **`run_function`**.
-`notify` und `webhook` sind **absichtlich nicht erlaubt** — sie würden still wirkungslos bleiben.
-Der Validator lehnt sie beim Speichern mit Klartext ab.
+**Allowed `effects[].type`:** `set_property`, `create_object`, `create_link`, **`run_function`**.
+`notify` and `webhook` are **deliberately not allowed** — they would remain silently ineffective.
+The validator rejects them on save with a plain-text message.
 
-**`condition.changed`** — nur feuern, wenn sich eines dieser Felder geändert hat.
-Bei einem Vorgang, der mehrere Felder schreibt (z.B. Formular-Submit), ist das die
-wirksamste Bremse gegen Mehrfachfeuer.
+**`condition.changed`** — fire only if one of these fields has changed.
+For an operation that writes several fields (e.g. form submit), this is the
+most effective brake against multiple firing.
 
-**`condition.props[]`** — Wertvergleich gegen den **aktuellen Objektzustand** (nicht gegen das
-Event). Operatoren: `eq`, `neq`, `in`, `gt`, `gte`, `lt`, `lte`, `empty`, `notempty`, `matches`.
-Fail-closed: ein unbekannter Operator gilt als **nicht erfüllt** (nicht als „immer wahr").
+**`condition.props[]`** — value comparison against the **current object state** (not against the
+event). Operators: `eq`, `neq`, `in`, `gt`, `gte`, `lt`, `lte`, `empty`, `notempty`, `matches`.
+Fail-closed: an unknown operator counts as **not satisfied** (not as „always true").
 
-## Regel/Function über MCP anlegen (der heutige Weg)
+## Creating a rule/function via MCP (today's way)
 
 ```
-onto_function_index  → gibt es die Function schon? (Name oder udid)
-onto_trigger_index   → welche Regeln laufen im Scope?
+onto_function_index  → does the function already exist? (name or udid)
+onto_trigger_index   → which rules run in the scope?
 ```
 
-**Function anlegen** — `onto_function_create`:
+**Create a function** — `onto_function_create`:
 
 ```json
 {"name":"onto_function_create","arguments":{
@@ -102,7 +102,7 @@ onto_trigger_index   → welche Regeln laufen im Scope?
 }}
 ```
 
-**Regel anlegen** — `onto_trigger_create`:
+**Create a rule** — `onto_trigger_create`:
 
 ```json
 {"name":"onto_trigger_create","arguments":{
@@ -119,23 +119,23 @@ onto_trigger_index   → welche Regeln laufen im Scope?
 }}
 ```
 
-Rückgabe: `{udid, key, scope_id}` (der `udid` ist die Kennung für `_update`/`_delete`).
+Return: `{udid, key, scope_id}` (the `udid` is the identifier for `_update`/`_delete`).
 
-- **`object_types` ist Pflicht und darf nicht leer sein** — die Server-Validierung lehnt eine
-  leere Liste mit „ohne Objekttyp wirkt die Regel nie" (400) ab, und jeder genannte Typ muss
-  aktiv vorhanden sein.
-- **`scopes` wird von der Anlage aus `scope_id` gefüllt** — der Aufrufer muss es nicht mitgeben.
-  Die Liste ist die Erlaubnis für die Ausführung, siehe Sicherheit.
-- `scope_id` ist Pflicht; du brauchst dort **`can_manage_scope`** (403 sonst). Der
-  oeffentliche Scope nur durch Admin.
-- `key` wird auf `[a-zA-Z0-9_]` bereinigt und muss eindeutig sein (sonst 409).
-- `_delete` ist ein **Soft-Delete** (`status=deleted`) — umkehrbar.
-- **`_create` und `_update` sind Schema-Schreibvorgänge**: sie ändern, was die Plattform
-  automatisch tut. Schreibrecht (`can_write`) genügt bewusst **nicht**.
+- **`object_types` is mandatory and must not be empty** — the server validation rejects an
+  empty list with „without an object type the rule never takes effect" (400), and every type named
+  must be present and active.
+- **`scopes` is filled from `scope_id` at creation** — the caller does not need to pass it.
+  The list is the permission for execution, see Security.
+- `scope_id` is mandatory; you need **`can_manage_scope`** there (403 otherwise). The
+  public scope only via admin.
+- `key` is sanitised to `[a-zA-Z0-9_]` and must be unique (409 otherwise).
+- `_delete` is a **soft delete** (`status=deleted`) — reversible.
+- **`_create` and `_update` are schema writes**: they change what the platform
+  does automatically. Write permission (`can_write`) is deliberately **not** enough.
 
-Platzhalter in Werten: `{object_udid}`, `{object_name}`, `{value_new}`, `{value_old}`.
+Placeholders in values: `{object_udid}`, `{object_name}`, `{value_new}`, `{value_old}`.
 
-## Aufbau einer Function (`functiondef`)
+## Structure of a function (`functiondef`)
 
 ```json
 {
@@ -150,76 +150,76 @@ Platzhalter in Werten: `{object_udid}`, `{object_name}`, `{value_new}`, `{value_
 ```
 
 - **`inputs[].type`:** `object`, `string`, `int`, `float`, `bool`, `datetime`, `list`.
-- **`body`** ist ein **AST für den Ausdrucks-Parser** — es gibt keinen zweiten
-  Interpreter. Die Validierung läuft beim Speichern; ein unbekannter Operator ist ein
-  **Fehler beim Anlegen**, nicht erst beim Ausführen.
-- **`timeout_ms`:** 100–30000, sonst Fehler.
-- **Konvention:** der Eingabeschlüssel `objekt` trägt die Ziel-UDID
-  (siehe `onto_function_run`: `inputs` = `{key: wert}`).
+- **`body`** is an **AST for the expression parser** — there is no second
+  interpreter. Validation runs on save; an unknown operator is an
+  **error at creation time**, not only at execution.
+- **`timeout_ms`:** 100–30000, otherwise an error.
+- **Convention:** the input key `objekt` carries the target UDID
+  (see `onto_function_run`: `inputs` = `{key: wert}`).
 
-### Operator-Katalog (Whitelist)
+### Operator catalogue (whitelist)
 
-Alles außerhalb dieser Liste wird beim Speichern abgelehnt.
+Anything outside this list is rejected on save.
 
-- **Auswahl/Daten:** `var`, `source`, `field` (Alias für `var`)
-- **Graph-Navigation:** `link`, `linklist` — über Links auf verknüpfte Objekte zugreifen
-- **Aggregation über Listen:** `count_of`, `sum_of`, `max_of`, `min_of`
-- **Logik:** `and`, `or`, `!`, `if` (2–3 Argumente)
-- **Vergleich:** `==`, `!=`, `===`, `!==`, `<`, `<=`, `>`, `>=`, `in`, `notin`,
+- **Selection/data:** `var`, `source`, `field` (alias for `var`)
+- **Graph navigation:** `link`, `linklist` — access linked objects via links
+- **Aggregation over lists:** `count_of`, `sum_of`, `max_of`, `min_of`
+- **Logic:** `and`, `or`, `!`, `if` (2–3 arguments)
+- **Comparison:** `==`, `!=`, `===`, `!==`, `<`, `<=`, `>`, `>=`, `in`, `notin`,
   `empty`, `notempty`, `matches`
-- **Rechnen:** `+`, `-`, `*`, `/`, `%`, `min`, `max`, `abs`, `round`
+- **Arithmetic:** `+`, `-`, `*`, `/`, `%`, `min`, `max`, `abs`, `round`
 - **Text:** `cat`, `lower`, `upper`, `len`, `trim`
-- **Formularspezifisch:** `sum_over`, `count_over`
+- **Form-specific:** `sum_over`, `count_over`
 
-Der AST hat **immer** die Form `{"operator":[argumente]}` — also `{"-":[a,b]}` für a minus b,
-nicht `{"op":...}`.
+The AST **always** has the form `{"operator":[argumente]}` — thus `{"-":[a,b]}` for a minus b,
+not `{"op":...}`.
 
-`link`/`linklist` nehmen ein **Konfigurationsobjekt**, keinen Ausdruck:
+`link`/`linklist` take a **configuration object**, not an expression:
 ```json
 { "link": { "type": "performs", "dir": "in", "prop": "kmReading" } }
 ```
-Ein Tippfehler im Linktyp fällt beim Speichern auf, wenn der Aufrufer die gültigen Linktypen
-mitgibt (z.B. aus den Link-Definitionen) — sonst still ein leerer Wert.
+A typo in the link type is caught on save if the caller passes the valid link types
+(e.g. from the link definitions) — otherwise silently an empty value.
 
-## Sicherheit (fail-closed, alle geprüft)
+## Security (fail-closed, all verified)
 
-- **Sichtbarkeit pro Zeile** über die Scope-Verwaltung — kein Admin-Bypass.
-- **Ziel-Scope muss verwaltet werden** (`can_manage_scope=1`); der öffentliche Scope nur Admin.
-  Geprüft wird serverseitig pro Scope, fail-closed.
-- Der Ziel-Scope ist **die Erlaubnis**: er bestimmt, auf welche Objekte die Regel wirken darf.
-  Wird er zu weit gefasst, greift die Regel überall in diesem Bereich. Eng fassen.
-- **`max_depth` (Default 3)** gegen Endlosschleifen (Effekt erzeugt Event erzeugt Effekt).
-- **Dedupe 60 s** gegen Wiederholungsfeuer — verglichen wird `(Trigger, Objekt, Feld, **Wert**)`,
-  über einen Fingerabdruck. Der **Wert** muss mit verglichen werden: sonst werden echte
-  Wertewechsel verworfen.
-- **Rollen-Whitelist pro Definition** (Default `member`).
-- **Automatik kostet KEINE Credits** — `charge_credits` läuft nur bei Auslösung durch einen Nutzer.
-- **Der Endpunkt ist nicht öffentlich:** er ist von aussen nicht erreichbar, Aufruf intern.
+- **Visibility per row** via scope management — no admin bypass.
+- **The target scope must be managed** (`can_manage_scope=1`); the public scope only admin.
+  The check happens server-side per scope, fail-closed.
+- The target scope is **the permission**: it determines which objects the rule may act on.
+  If it is drawn too wide, the rule applies everywhere in that area. Keep it narrow.
+- **`max_depth` (default 3)** against infinite loops (effect produces event produces effect).
+- **Dedupe 60 s** against repeat firing — the comparison is `(Trigger, Objekt, Feld, **Wert**)`,
+  via a fingerprint. The **value** must be compared as well: otherwise genuine
+  value changes are discarded.
+- **Role whitelist per definition** (default `member`).
+- **Automation costs NO credits** — `charge_credits` only runs on triggering by a user.
+- **The endpoint is not public:** it is not reachable from outside, invocation is internal.
 
-### Ein Effekt-Typ außerhalb der Whitelist wird beim Speichern abgelehnt
-Kein stiller No-Op. Umgekehrt: eine `run_function`-Referenz auf eine nicht existierende Function
-wird ebenfalls beim Speichern abgewiesen, damit eine Regel nicht feuert und nichts tut.
+### An effect type outside the whitelist is rejected on save
+No silent no-op. Conversely: a `run_function` reference to a non-existent function
+is likewise rejected on save, so that a rule does not fire and do nothing.
 
-## Zugriffswege — der wichtige Unterschied
+## Access paths — the important difference
 
-| Weg | Lesen | Schreiben |
+| Path | Read | Write |
 |---|---|---|
 | **MCP** | `onto_trigger_index`, `onto_function_index`, `onto_function_run` | `onto_trigger_create/_update/_delete`, `onto_function_create/_update/_delete` |
-| **HTTP (Web/Admin)** | in der Weboberfläche unter Automatik | dieselbe Funktion wie die MCP-Tools |
+| **HTTP (web/admin)** | in the web interface under Automation („Automatik") | the same functionality as the MCP tools |
 
-Beide Wege enden auf **derselben** Funktion — MCP ist der Wrapper darum. Ein Agent braucht
-die Weboberfläche damit **nicht mehr**. Die sechs Schreib-Tools sind für die Rolle `member`
-sichtbar (kein Admin nötig); die echte Sperre ist `can_manage_scope` pro Ziel-Scope.
+Both paths end in **the same** functionality — MCP is the wrapper around it. An agent therefore
+**no longer** needs the web interface. The six write tools are visible for the `member` role
+(no admin needed); the real lock is `can_manage_scope` per target scope.
 
-**Die Tool-Namen enden auf `_create`/`_update`/`_delete`, NICHT `_save`.** Ein Client, der nach
-`_save` sucht, findet nichts und meldet fälschlich „Tool fehlt".
+**The tool names end in `_create`/`_update`/`_delete`, NOT `_save`.** A client that looks for
+`_save` finds nothing and falsely reports „tool missing".
 
-Ausführen geht über MCP: `onto_function_run` mit `function` (UDID **oder** Name) und `inputs`.
+Running works via MCP: `onto_function_run` with `function` (UDID **or** name) and `inputs`.
 
-## Beispiel: eine Regel mit `create_object` und Link
+## Example: a rule with `create_object` and a link
 
-`onto_trigger_index` listet die vorhandenen Regeln, `onto_function_run` (oder ein Lauf über den
-Abarbeiter) zeigt, was passiert ist. Muster für `create_object` mit Link:
+`onto_trigger_index` lists the existing rules, `onto_function_run` (or a run through the
+worker) shows what happened. Pattern for `create_object` with a link:
 
 ```json
 {"on":"insert","object_types":["inspection"],"scopes":[<SCOPE_ID>],
@@ -233,25 +233,25 @@ Abarbeiter) zeigt, was passiert ist. Muster für `create_object` mit Link:
 
 ## Pitfalls
 
-1. **`on_change` braucht den Abarbeiter — und der ist eigenständig.** Eine Regel wird nicht
-   ausgeführt, nur weil ein Objekt geschrieben wird. Läuft der Abarbeiter nicht, sammeln sich
-   Ereignisse und nichts passiert. Bei „meine Regel tut nichts" zuerst den Status prüfen.
-2. **Formular-Antworten erzeugen Ereignisse** (Auslöser „Formular"). Bei einem NEUEN
-   Schreibweg immer ein echtes Ereignis erzeugen und prüfen, dass es ankommt (nicht per
-   SQL-INSERT nachbauen — ein selbstgebautes Ereignis prüft nur die eigene Annahme).
-3. **Mehrfachfeuer pro Vorgang (der „4x-Bug").** Ein Submit schreibt N Felder → N Events.
-   `condition.props` wird gegen den AKTUELLEN Objektzustand geprüft, nicht gegen das Event — also
-   sieht jedes der N Events das fertige Objekt. Die Dedupe greift nicht (verschiedene `key_name`
-   = verschiedene Hashes). **Abhilfe:** `condition.changed` setzen — dann greift ein Gate im
-   Abarbeiter und dieselbe Submission erzeugt nur einen Effekt statt vier.
-4. **Der Scope ist die Berechtigung, nicht die Heimat.** Eine Regel wirkt nur auf Objekte, deren
-   Scope in der Erlaubnisliste der Regel steht. Wird ein Objekt in einen anderen Scope
-   verschoben, greift die Regel dort nicht mehr.
-5. **Dedupe-Fenster 60 s.** Zwei echte Änderungen desselben Feldes auf denselben Wert
-   innerhalb 60 s → nur eine Ausführung. Bei einem erwarteten zweiten Lauf auf einen
-   **anderen Wert** ändern.
-6. **`set_property` in Effekten nutzt `props` (Objekt), NICHT `key`/`value`.** Ein Body mit
-   key/value wird von der Validierung nicht als falsch erkannt, tut aber nichts.
-7. **`create_link` braucht `linkvalue`** — fehlt er, scheitert der **ganze Effekt**, nicht nur
-   der Link. Bei `create_object.links` sind beide Schlüsselnamen gültig (`type` und `linktype`);
-   jeder übersprungene Link wird im Action-Log vermerkt.
+1. **`on_change` needs the worker — and that is autonomous.** A rule is not
+   executed just because an object is written. If the worker is not running, events pile up
+   and nothing happens. With „my rule does nothing", check the status first.
+2. **Form answers produce events** (trigger source „Formular"). On a NEW
+   write path always produce a real event and verify that it arrives (not by
+   rebuilding it with a SQL INSERT — a self-built event only tests your own assumption).
+3. **Multiple firing per operation (the „4x bug").** One submit writes N fields → N events.
+   `condition.props` is checked against the CURRENT object state, not against the event — so
+   each of the N events sees the finished object. The dedupe does not apply (different `key_name`
+   = different hashes). **Remedy:** set `condition.changed` — then a gate in the
+   worker applies and the same submission produces only one effect instead of four.
+4. **The scope is the permission, not the home.** A rule only acts on objects whose
+   scope is in the rule's permission list. If an object is moved to another scope,
+   the rule no longer applies there.
+5. **Dedupe window 60 s.** Two genuine changes of the same field to the same value
+   within 60 s → only one execution. For an expected second run, change to a
+   **different value**.
+6. **`set_property` in effects uses `props` (object), NOT `key`/`value`.** A body with
+   key/value is not recognised as wrong by the validation, but does nothing.
+7. **`create_link` needs `linkvalue`** — if it is missing, the **whole effect** fails, not just
+   the link. For `create_object.links` both key names are valid (`type` and `linktype`);
+   every skipped link is noted in the action log.

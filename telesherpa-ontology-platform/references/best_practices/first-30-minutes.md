@@ -75,7 +75,7 @@ Four to six motifs are enough (`01_<Motiv>.jpg`, `02_<Motiv>.jpg`, `03_<Motiv>.j
 one each in `de` and `en` as the language variant of the same `imagename`, exactly one with
 `thumbnail: true`. **The filename is the key later on** — if it does not match the
 `imagename` exactly, only the placeholder appears. Example:
-`references/features/structured-image-ablage.md`.
+`references/features/structured-image-storage.md`.
 
 **What these 5 minutes produce:** the permission structure. From now on, "may write" and
 "may only read" are no longer a question of trust, but of technology.

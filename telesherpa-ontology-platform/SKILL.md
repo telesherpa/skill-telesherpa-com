@@ -39,14 +39,14 @@ answer in.
   local time yourself — compare UTC with UTC. Times you send (`from`/`to`) are UTC as well. The web
   view, by contrast, shows viewer time: `01:09` in the interface and `23:09` in the API are the same
   instant. Details: `references/features/tool-catalog.md` (section "Time values"), real examples in
-  `references/features/sensor-zeitreihen.md`.
+  `references/features/sensor-time-series.md`.
 - **Times YOU send mean your own zone.** Inputs that carry a clock time are interpreted in the
   viewer's time zone (for agents the default is `Europe/Berlin`); what is stored and returned in
   JSON is **UTC**. Whoever sends `2026-10-12 20:28:00` later reads `18:28:00Z` — same instant, not a
   shift. If you want to be certain, send UTC directly.
 - `?format=json` in the URL = JSON mode (an agent always uses this). Without it = web mode
   (session cookie, 302 redirects).
-- **Auth needs BOTH**: a valid `Authorization: Bearer *** **and** the
+- **Auth needs BOTH**: a valid `Authorization: Bearer <access_token> **and** the
   `mcp-session-id` from the `initialize` response header. Without a session the server answers
   `Bad Request: Missing session ID` — even with a perfect token. (Alternative for clients without a
   session slot: the stateless envelope via protocol 2026-07-28.)
@@ -274,7 +274,7 @@ optionally filtered by `action`/`scope_id`, saves repeated polling), **automatio
 structured image storage (`upload_file_to_object` with `type: structuredimage` + category `name`,
 read/set categories with `onto_scope_structuredimage_categories` /
 `onto_scope_save_structuredimage_categories`, see
-`references/features/structured-image-ablage.md`), interfaces (lists/maps), reports,
+`references/features/structured-image-storage.md`), interfaces (lists/maps), reports,
 favorites, credit + marketplace earnings, ASS scopes, onboarding, autonomous
 token refresh (`references/features/auth-token-lifecycle.md`).
 
@@ -312,14 +312,14 @@ Every feature has its own detailed reference under `references/features/`:
   revoking stay with the scope manager — the admin view only looks.
 - **Sensor time series** — read series (`onto_series_range`, `onto_series_last`), grid instead of
   raw points, UTC times, real use cases (fleet, daily route, measurement curve):
-  `references/features/sensor-zeitreihen.md`
+  `references/features/sensor-time-series.md`
 - **App users (iOS & Android)** — app protocol, auth, app vs web configuration:
   `references/features/app-user-ios-android.md`
 - **PWA & session** — home-screen installation, 30-minute session, persistent sign-in up to 14
   days, web push on iOS: `references/features/pwa-and-session.md`
 - **Form engine** — forms, answers as event objects, app: `references/features/form-engine.md`
 - **Structured image storage** — read and set categories via MCP, name matching, thumbnail, scope
-  flags: `references/features/structured-image-ablage.md`
+  flags: `references/features/structured-image-storage.md`
 - **Service-order dispatch** — digital task → real human field work, lifecycle
   open/inProgress/done, self-assignment, RBAC boundary:
   `references/features/service-order-dispatch.md`
