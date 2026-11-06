@@ -294,6 +294,11 @@ via `POST /onto/object/counter`. The proof is in the action log. These routes ar
 
 Every feature has its own detailed reference under `references/features/`:
 
+- **Views without SQL (building blocks)** — how a list is described instead of written:
+  columns and formats, person binding, time window and period switch, filters, `status`
+  (including deleted rows), `ohne_link` ("nobody assigned yet"), `passt` ("fits my own
+  links"), per-row and per-person rule columns, counters, pitfalls:
+  `references/features/view-blocks.md`
 - **Scopes as permission boundaries** — read/write/manage grants, fail-closed, no admin
   shortcut in the data path, PUBLIC scope, where the gates sit (view `access.require`, actions,
   own endpoints, sidebar), the three-scope planning pattern and the hand-over checklist:
