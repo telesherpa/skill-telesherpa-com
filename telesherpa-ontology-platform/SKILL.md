@@ -293,6 +293,13 @@ via `POST /onto/object/counter`. The proof is in the action log. These routes ar
 
 Every feature has its own detailed reference under `references/features/`:
 
+- **Scopes as permission boundaries** — read/write/manage grants, fail-closed, no admin
+  shortcut in the data path, PUBLIC scope, where the gates sit (view `access.require`, actions,
+  own endpoints, sidebar), the three-scope planning pattern and the hand-over checklist:
+  `references/features/scopes-and-permissions.md`
+- **Scope bridges (`action.result_scope_id`)** — how a member writes into a scope where they have
+  no write right: one object, one property list, one request; validator rules, worked swap
+  example, pitfalls and a test recipe without a browser: `references/features/scope-bridges.md`
 - **Tool catalogue** — all 201 tools with roles, grouped by resource:
   `references/features/tool-catalog.md`
 - **Leading accounts (company manager)** — managed accounts, the marker, the rights ladder,
