@@ -252,8 +252,10 @@ the release list.
 **You can help yourself:** `onto_actiondef_save` requires only membership plus `can_manage_scope`
 on the **target scope**. Copy the platform action (`onto_actiondef_list` shows `key`, `label` and
 `body`) and set `body.scopes = [<your scope>]`; on creation exactly **one** target scope is allowed.
-Afterwards the same action runs in your scope. `public: true` (platform level) and the PUBLIC scope
-`15` remain reserved for administrators, as do SQL conditions in actions.
+Afterwards the same action runs in your scope.
+
+Keep your objects in your own scopes: publishing to the public area is not available to customer
+accounts.
 
 `PUBLIC` on a scope means **read for everyone** — it releases **no** actions.
 ## Capabilities

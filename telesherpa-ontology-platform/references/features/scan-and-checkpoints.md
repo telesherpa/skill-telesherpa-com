@@ -53,7 +53,7 @@ automatically.* There are no exceptions, not even with `scan.ausfuehrung: "auto"
 
 `object_types`, `scopes`, `roles` as usual, plus for the scan:
 
-- `condition`: `{ "props": [{"key","op","value"}], "sql": "…", "message": "…" }` — **always
+- `condition`: `{ "props": [{"key","op","value"}], "message": "…" }` — **always evaluated
   server-side**. A condition that only the interface checks is not a condition.
 - `prompts[]`: additionally `default_value`; `object_types: ["storage"]` turns a text field into an
   **object selection** (the client fills in the UDID).
