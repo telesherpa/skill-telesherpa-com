@@ -1,9 +1,9 @@
 # Tool Catalog
 
-This overview is generated from the service's tool list: **192 tools** (server 2.3.0), of which
-**124** are visible to an account with
-`login`+`public`+`member`, **192** with `login`+`public`+`admin`, **6** without a token. An account with
-`admin` **and** `member` sees all **192**.
+This overview is generated from the service's tool list: **201 tools** (server 2.3.0), of which
+**137** are visible to an account with
+`login`+`public`+`member`, **201** with `login`+`public`+`admin`, **6** without a token. An account with
+`admin` **and** `member` sees all **201**.
 
 **As of 2026-10-30.** For your own account, `auth_status` (`tools_visible`) is what counts — that is the
 number that applies there.
@@ -264,6 +264,19 @@ Check both together, not just visibility.
 | `onto_favorite_delete` | `member` |
 | `onto_favorite_index` | `member` |
 | `onto_favorite_toggle` | `member` |
+
+### `onto_startcard_*` (team start cards)
+
+| Tool | Roles |
+|---|---|
+| `onto_startcard_index` | `member` |
+| `onto_startcard_save` | `member` |
+| `onto_startcard_delete` | `member` |
+| `onto_startcard_move` | `member` |
+
+Write access is additionally gated by `can_manage_scope` on the card's scope (admins may
+configure all scopes, as in `/onto/scope`). The cards carry no roles of their own: a card is
+visible to everyone who can read the scope and see the target interface.
 
 ### `onto_file_*`
 
