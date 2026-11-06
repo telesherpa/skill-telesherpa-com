@@ -61,13 +61,20 @@ Three scopes per customer, one tree:
 | Scope | Content | Staff | Managers |
 |---|---|---|---|
 | master data | people, stations, qualifications, contract data | no access | read + write |
-| planning | shifts, absences, demands, periods | **no access** | read + write |
+| planning | shifts, absences, demands, periods | read, **no write** | read + write |
 | team | the staff's own doors: my shifts, swap requests, clock in/out | read, and write only where a door needs it | read |
 
-Why staff get **no read** on planning: reading it means reading every colleague's
-shifts, absences and corrections. The team scope exists so that the planning scope
-can stay closed. Everything a staff member may change in planning runs through an
-action with a target scope — see `references/features/scope-bridges.md`.
+Why staff need **read** on planning: a view only shows objects from scopes the
+person may read. A team view that displays "my shifts" therefore cannot work while
+planning is invisible — the data simply is not there. Reading is what makes the
+staff's own doors possible; write stays with the managers, and every change a staff
+member makes runs through an action with a target scope (see
+`references/features/scope-bridges.md`).
+
+So the boundary is **write**, not read. If a customer wants planning to be invisible
+for staff as well, the team scope must carry its own copy of the data (written by a
+rule), and the team views read that copy — more moving parts, and a second place to
+keep consistent.
 
 ## 7. Hand-over checklist
 

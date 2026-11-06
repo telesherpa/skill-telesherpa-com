@@ -67,12 +67,14 @@ Team scope; the member approves a swap for their own shift:
 {
   "action": {
     "type": "update",
-    "target": "{linked:works_in:...:udid}",
+    "target": "{linked:worksShift:...:udid}",
     "result_scope_id": 80,
-    "props": ["swap_status", "swap_partner"],
-    "params": { "person": "{current_user_email}" }
+    "props": ["swap_status", "swap_partner"]
   },
-  "guards": [ { "key": "linked_to_user", "arg": "person" } ]
+  "guards": [
+    { "type": "linked_to_user", "linktype": "worksShift",
+      "message": "Only your own shift can be changed." }
+  ]
 }
 ```
 
@@ -88,8 +90,9 @@ door closes; the member still has no write grant there.
    event; check it separately when the action is supposed to remove a relation.
 3. **`type: "create"`** needs the person binding in the body — no link to the person
    is created automatically.
-4. **Guards first.** Without a guard (`linked_to_user`) the door writes into a
-   foreign object as soon as somebody manipulates an id.
+4. **Guards first.** A guard of type `linked_to_user` with the `linktype` proves
+   "only my own row". Without it the door writes into a foreign object as soon as
+   somebody manipulates an id.
 5. **Costs.** An action costs 20 credits, paid by the executing account. The bridge
    does not change who pays; a member without credits gets HTTP 402 before anything
    happens.
