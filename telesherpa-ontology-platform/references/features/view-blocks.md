@@ -1,12 +1,12 @@
-# Views without SQL — the building blocks
+# Views from building blocks
 
 A view is described, not written: you say which objects, which columns, which
 condition — the server builds the query. Two rules follow from that:
 
-- Raw SQL is **not available** to customer accounts. A view that carries hand-written
-  SQL is refused with `403`; build it from the blocks below.
-- Every built block carries the scope filter, so a view can only ever show what its
-  reader may see.
+- Views are built **only from the blocks below**; free-form queries are not available to
+  customer accounts.
+- Every block carries the scope filter, so a view can only ever show what its reader may
+  see.
 
 Minimal shape:
 
@@ -55,6 +55,28 @@ write `{current_user_email}` yourself. Without a person binding, a view with
 `param`/`span` create the period switch in the header (`?woche=YYYY-MM-DD`); the
 `zeitraum` uses the resulting placeholders. `filter` lists column keys — the value comes
 from the filter bar, never from the definition.
+
+Without a date in the URL the window starts at the beginning of the week. A daily view
+wants another start:
+
+```json
+"param": "tag", "span": 1, "basis": "heute"
+```
+
+`basis`: `woche` (default, Monday of the current week), `heute` (today), `monat` (first
+of the month).
+
+## Empty and filled fields
+
+A condition can ask whether a field has no value at all — no value needed:
+
+```json
+"ohne_link": {"link": "worksShift", "richtung": "rueckwaerts"},
+"wo": [{"prop": "shiftStatus", "op": "leer"}]
+```
+
+`op`: `leer` (no value) and `nicht_leer` (has a value) work in `wo` and in counters;
+all other operators take a `wert`.
 
 ## Status — active, deleted, both
 
@@ -116,11 +138,22 @@ These look at the other shifts of the same person:
 ]
 ```
 
-- `u18` — the person on the shift is younger than 18 (optionally only after `zeit_ab`).
+- `u18` — the person on the shift is younger than 18 (optionally only when the shift
+  **ends** after `zeit_ab`; `zeit_feld` changes which time is compared, default
+  `shiftEnd`).
 - `tagessumme` — the person's planned hours on that day exceed `wert`.
 - `ruhezeit` — the gap to the person's previous shift is below `wert` hours.
 
 The person is resolved through the shift's `worksShift` link.
+
+### Only the rows that trip a rule
+
+By default every row keeps its rule columns, most of them empty. To see only the
+offenders:
+
+```json
+"nur_treffer": true
+```
 
 ## Counters
 
@@ -129,18 +162,19 @@ The person is resolved through the shift's `worksShift` link.
   "from": "objects",
   "zaehler": [
     {"type": "shift", "label": "all"},
-    {"type": "shift", "label": "open", "filter": [{"feld": "shiftStatus", "op": "=", "wert": "offen"}]}
+    {"type": "shift", "label": "open", "filter": [{"feld": "shiftStatus", "op": "=", "wert": "offen"}]},
+    {"type": "shift", "label": "started, no actual time", "filter": [{"feld": "actualStart", "op": "leer"}]}
   ]
 }
 ```
 
-Each counter needs `type`, `label` and — if it filters — a `wert`; a filter without a
-value is refused. `"from": "objects"` is required, otherwise the counter block is ignored.
+Each counter needs `type`, `label` and — if it filters a value — a `wert`;
+`leer`/`nicht_leer` need none. A filter without a value is refused. `"from": "objects"`
+is required, otherwise the counter block is ignored.
 
 ## Pitfalls
 
 - A column `key` is used once per view — including rule columns. A duplicate is refused.
 - `prop` must be a field key of the object type; unknown names are refused, not ignored.
 - Formats change the display only; sorting and filtering use the raw value.
-- The stored `sql` inside a saved view is **generated**. Only a view with
-  `"from": "sql"` carries hand-written SQL — and that one needs the operator.
+- One list shows one object type. Two kinds of objects in one list means two lists.
