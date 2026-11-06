@@ -51,20 +51,18 @@ answer in.
   `Bad Request: Missing session ID` — even with a perfect token. (Alternative for clients without a
   session slot: the stateless envelope via protocol 2026-07-28.)
   Details: `references/features/auth-token-lifecycle.md`.
-- **The catalogue currently holds 201 tools**: 137 visible with the `member` role,
-  201 for an account that carries the `admin` role (measured with the operator account, which
-  carries both). Without a token, **6** tools are
-  callable (`register`, `activate`, `login`, `refresh_access_token`, `auth_status`,
-  `onto_credit_pricing`).
+- **How many tools you get** depends on your account: `auth_status` returns the number your
+  account can see, and the service reports the catalogue size under `/health`. Never quote a
+  number from a document — both values move with every release. Without a token only the
+  onboarding tools are callable: `register`, `activate`, `login`, `refresh_access_token`,
+  `auth_status`, `onto_credit_pricing`.
 - **Which account is working here?** `get_profile` — read-only, no write path. (The old route
   `change_profile` **without arguments** reads as well, but sounds like a write operation, so
   cautious agents leave it alone.)
-  **`admin` is not a superset of `member`** — part of the tools is visible to `member` only,
-  another part to `admin` only. Whoever reports "tools are missing to me" has to establish the
-  number for THEIR account (`auth_status`).
-  **Historical name:** the same role was called `telesherpa` until 2026-10-11; today `auth_status`
-  returns only `member`. Older texts use the old name — it is the same role.
-  Full list with roles: `references/features/tool-catalog.md`.
+  **Work with a member account.** Which tools an account sees follows from its role and its
+  scopes; if the list looks short, check `auth_status` for that account instead of assuming a
+  server problem.
+  Member-visible tools, grouped by resource: `references/features/tool-catalog.md`.
 
 ## Onboarding (zero-touch)
 
@@ -173,7 +171,8 @@ Complete, runnable example (curl, step by step): `references/showcase-onboarding
   `references/features/marketplace-revenue-share.md`.
 - `onto_credit_pricing` — all prices (also before login). Configured centrally, not in code.
 - `onto_credit_checkout` — SumUp payment (checkout URL, a human pays).
-- `onto_credit_chargeup` — prepaid code (single use!), or manual (admin).
+- `onto_credit_chargeup` — prepaid code (single use!); credit without a code is granted by the
+  operator.
 - Flat users: no charge, no max-scope lock.
 - Not enough balance → 402 (fail-closed).
 
@@ -301,9 +300,8 @@ Every feature has its own detailed reference under `references/features/`:
   no write right: one object, one property list, one request; validator rules, worked swap
   example, pitfalls and a test recipe without a browser: `references/features/scope-bridges.md`
 - **Tool traps** — measure numbers instead of trusting documents, `tools/list` needs a
-  session, `admin` is not a superset of `member`, real signatures of the tools that get
-  guessed wrong, silent no-ops, the price table and who pays, UTC writes vs reads,
-  asynchronous triggers, the 500-object dispatcher bound: `references/features/tool-traps.md`
+  session, real signatures of the tools that get guessed wrong, silent no-ops, the price table and who pays, UTC writes vs reads,
+  asynchronous triggers, batched processing of large runs: `references/features/tool-traps.md`
 - **Start cards** — the team front page: `onto_startcards`, the two visibility conditions,
   who may configure (403 otherwise), the four MCP tools, and why "my area" is built with
   `blocks` instead of a special page: `references/features/start-cards.md`
@@ -314,16 +312,11 @@ Every feature has its own detailed reference under `references/features/`:
 - **Notifications and link events** — stable placeholders, `link_removed` with its two rows,
   triggers fire on insert, how to actually reach another agent, and a test that waits:
   `references/features/notifications-and-link-events.md`
-- **Tool catalogue** — all 201 tools with roles, grouped by resource:
+- **Tool catalogue** — the member-visible tools, grouped by resource:
   `references/features/tool-catalog.md`
 - **Leading accounts (company manager)** — managed accounts, the marker, the rights ladder,
   credits and transfers, suspension and offboarding, with recipes and every guard:
   `references/features/company-manager.md`
-- **Invite codes, all scopes (admin)** — read-only overview of every invite code with its scope,
-  template, kind, rights, **issuer**, status, expiry, usage and redemptions: `onto_invite_code_index`
-  (filters in the JSON body: `q`, `scope_id`, `status`, `kind`, `sort`, `dir`, `page`) and
-  `onto_invite_code_show` (one code plus who redeemed it, when and with which rights). Creating and
-  revoking stay with the scope manager — the admin view only looks.
 - **Sensor time series** — read series (`onto_series_range`, `onto_series_last`), grid instead of
   raw points, UTC times, real use cases (fleet, daily route, measurement curve):
   `references/features/sensor-time-series.md`
@@ -368,7 +361,7 @@ patterns, not a technical feature in itself:
   agent). **For getting started and for the question "what does this give the business":**
   `references/best_practices/first-30-minutes.md`
 - **Scope organisation per company** — which scopes a company agent creates, who gets which rights
-  (invite codes vs. self-booking vs. admin), how the two-phase commit
+  (invite codes vs. self-booking vs. operator), how the two-phase commit
   (draft scope → target_scope) works as object permission without its own ACL, and the
   four decision points (section 10):
   `references/best_practices/scope-organization-per-company.md`

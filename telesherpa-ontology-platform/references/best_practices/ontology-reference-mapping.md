@@ -6,10 +6,9 @@ needs to know how the platform's data model relates to established standards.
 **Why:** Customers come from SAP, ServiceNow, Planon, Salesforce. If a term is recognizable,
 that shortens the migration. This file is the translation table.
 
-**Important — roles:** Creating object types, property sets and property defs is an
-**`admin` matter** (`onto_type_create`, `onto_property_set_create`, `onto_property_def_create`
-are `roles=["admin"]`). A normal company agent can **read** the schema but cannot
-extend it. What it can do: use the **existing** types and properties to the full extent.
+**Important — schema changes:** creating object types, property sets and property
+definitions is the platform operator's job. A customer agent **reads** the schema and uses the
+**existing** types and properties to the full extent; a type it needs is a service request.
 
 ---
 
@@ -182,12 +181,11 @@ selection. Filtered via the server-side type resolution or the app counterpart.
 | **Human** (browser) | in the web interface: catalog selection with checkboxes and save |
 | **Agent** (MCP) | `onto_catalog_presets`, `onto_catalog_index`, `onto_catalog_apply`, `onto_catalog_clear` |
 
-Rights: **scope-based** (`can_manage_scope`), FAIL-CLOSED, no
-admin bypass. Whoever may manage a scope may set its presets.
+Rights: **scope-based** (`can_manage_scope`), FAIL-CLOSED — whoever manages a scope sets
+its presets, and nobody gets in without that right.
 
-**Where the entry sits in the menu:** under **Settings** (not in the user menu, not in the
-admin area) — it is a configuration of the customer for their own scope, not
-daily work. The menu is configuration, not code.
+**Where the entry sits in the menu:** under **Settings** (not in the user menu) — it is a
+configuration of the customer for their own scope, not daily work. The menu is configuration, not code.
 An entry is `{"label":"mo.Catalog","url":"<path>","required_role":"..."}`.
 
 **Terms (binding):**
@@ -203,7 +201,7 @@ unambiguous and lines up cleanly next to „Typen verwalten".
 
 **Type names in the catalog are shown as a label**, not technically: `Gebäude (building)`,
 `Person (person)`, `Funkmast (radioTower)`. Otherwise the catalog contradicts the
-admin type list, which likewise shows label + code. The helper provides
+type list of the platform, which likewise shows label + code. The helper provides
 `types_detail` (array of `{name,label}`) in addition to `types` (array of names) for this purpose.
 
 **Visibility:** The menu entry is visible to everyone with the role `member` — which is

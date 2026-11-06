@@ -83,9 +83,9 @@ automatically.* There are no exceptions, not even with `scan.ausfuehrung: "auto"
   `concerns → {user_person}` with `replace: "source"`) and **leave** (`admitted = ""`,
   `left_at = {now}`, the same link with `remove: true`). The state `admitted` is the
   truth, the link only shows the holder.
-- Create them with `onto_type_create`, `onto_property_def_create`, `onto_property_set_create`;
-  **object types are platform schema and therefore admin-only** — customer agents work with the
-  existing types (catalogue/presets) and build actions, views and reports on top of them.
+- **Object types are part of the platform schema** and are created by the platform operator. A
+  customer agent starts from the types that exist (catalogue/presets) and builds actions, views
+  and reports on top of them; new types are a service request.
   Field names in English, labels as **i18n keys without the `mo.` prefix**. Without an export of the
   language files the interface shows the raw key (`mo.Checkpoint`). Check beforehand which
   keys already exist (`onto_i18n_matrix`) — `mo.Area` means "Areal", not "Bereich".
@@ -163,13 +163,12 @@ What follows from this:
 - The **assessment belongs in the report, not in the scan**: the interval to the previous control at the
   same checkpoint against `interval_min`, plus the travel time since the previous control at a **different**
   checkpoint of the same account — conspicuously short travel times expose ticking off without changing location.
-- Counters in the actiondef (`counter`) and interface SQL insert **`{scope_where}`**; the platform
-  replaces the placeholder there with the caller's read scopes (fail-closed: without a read scope
-  `AND 1=0` remains).
-- **In report SQL `{scope_where}` is NOT replaced.** If the placeholder is in the report query,
-  the query aborts with an SQL syntax error; if every scope condition is missing, the report
-  evaluates **across all scopes**. Anyone building a report therefore writes the scope out explicitly — the
-  platform does not scope for them.
+- Counters in the action definition (`counter`) and interface SQL accept **`{scope_where}`**; the
+  platform replaces the placeholder there with the scopes the caller may read — and closes hard when
+  there are none, so the result is empty rather than complete.
+- **In a report query the placeholder is NOT replaced.** A report that relies on it either fails or
+  runs without any scope narrowing. Whoever writes a report query therefore scopes it itself — and the
+  first thing to check when a report shows too much is exactly that missing condition.
 - Filter values are **third-party input**. For the built-in filters the platform handles them
   correctly server-side; for **self-written** SQL (report query, interface SQL) that does
   not apply automatically — there column names must come from the own definition and values must go through the

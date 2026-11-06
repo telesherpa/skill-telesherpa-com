@@ -130,7 +130,7 @@ Owner sets the scope to public/bookable → it appears in the public list →
 the employee books himself **read only** via `assign_public`. Writing is not reachable that
 way — that is intentional.
 
-**(c) Admin — for cases that self-service does not cover**
+**(c) Operator — for cases that self-service does not cover**
 More scopes than the quota, or a scope without an owner.
 
 ### Building the rights matrix — via MCP
@@ -241,8 +241,8 @@ target scope with `can_manage_scope=1`.
 **Two rules for operation** (both otherwise experienced as errors):
 - **Always set `condition.changed`.** A form submit writes several fields = several
   events; without `changed` the rule fires per field (real: 1 case → 4 effects).
-- **The dispatcher must be running.** One each for events and for schedules. One does not
-  cover the other.
+- **Rules act asynchronously.** A rule never fires inside the call that triggered it; the
+  effect follows within minutes. Do not resend the write because "nothing happened yet".
 
 Complete, including effect types and operator list:
 `references/features/automation-and-functions.md`.

@@ -1,63 +1,22 @@
-# Tool Catalog
+# Tool catalog (member view)
 
-This overview is generated from the service's tool list: **201 tools** (server 2.3.0), of which
-**137** are visible to an account with
-`login`+`public`+`member`, **201** with `login`+`public`+`admin`, **6** without a token. An account with
-`admin` **and** `member` sees all **201**.
+These are the tools a customer account sees. The list is not fixed: it follows the
+role and the scopes of the account and it changes with every release.
 
-**As of 2026-10-30.** For your own account, `auth_status` (`tools_visible`) is what counts — that is the
-number that applies there.
+- **How many does my account see?** `auth_status` returns `tools_visible` for your
+  account. The service reports the catalogue size under `/health`.
+- **Never quote a number from a document.** Both values move; the tool that tells you
+  the truth is the one you can call right now.
+- **Visibility is not permission.** Whether a call is executed depends on your right
+  on the scope (`read`, `write`, `manage`). The service checks on every call.
+- **Without a token** only the onboarding tools are callable: `register`, `activate`,
+  `login`, `refresh_access_token`, `auth_status`, `onto_credit_pricing`. A client that
+  insists on `tools/list` before the first call gets no catalogue at all in that state —
+  so the first call has to know these names.
 
-**The roles column says who SEES the tool.** It does not protect execution — the
-actual safeguard is the write permission on the scope (`can_write`, `can_manage_scope`).
-What is authoritative for your own account remains `tools/list` with your own token; the service verifies
-the permission on every call.
-
-**Careful: `admin` is NOT a superset of `member`.** Some of the tools are visible **only** to
-`member`, others **only** to `admin`; only some carry both roles. An
-admin account therefore does **not** see `change_password`, `onto_catalog_apply` or `onto_actiondef_save`,
-because only `member` is listed there. Anyone reporting „mir fehlen Tools" after a role change
-must check **both** numbers — not assume that admin sees everything.
-
-## Without a token (public, 6 tools)
-
-`register`, `activate`, `login`, `refresh_access_token`, `auth_status`, `onto_credit_pricing`
-
-`tools/list` without a token returns **HTTP 401** instead of a list — the six can be invoked by
-**name** (the `www-authenticate` header names them). Without a token these six are also
-**executable**; all others answer without a token with 401, even if they would be visible.
-
-**What this means for the client:** a client that must first complete `initialize` and `tools/list`
-successfully — the usual SDKs, desktop clients, Hermes too — gets **no**
-tool catalog at all without a token. The first call must therefore know the six names. A tool that
-is not in the catalog does not exist for the agent, even if the server would execute it.
-
-### A role list is silent — in both directions
-
-Two cases that produce **no** error message and are therefore easily overlooked:
-
-- An **empty** role list does **not** mean „nobody", but „everyone": a tool that
-  should be restricted becomes visible to every account with a valid token.
-- A role list with **exclusively invalid** names makes a tool visible to **nobody**
-  — likewise silently.
-
-In both cases the tool **list** looks unremarkable for an authorized account, and the
-code reads correctly. A tool nevertheless remains executable only with the write permissions on the
-scope — the actual lock is there, not in the role list.
-
-**The lesson for every role change:** call `auth_status` and compare `tools_visible` against the
-expected **count**. One number exposes both silent cases.
-
-### Legacy tools with dead targets
-
-Three report tools of the first world pointed at **deleted paths** (all 404) and carried
-**exclusively** a role name that does not exist — i.e. visible to nobody. They have been
-removed; the functionality is fully covered by the `onto_report_*` tools (9 tools:
-6 read-only for `admin`+`member`, 3 write for `admin` only).
-
-**The lesson:** a tool that points at a 404 path AND is unreachable for anyone is
-dead weight — it bloats the catalog and costs in the tool quality rating (tool count).
-Check both together, not just visibility.
+Schema changes (object types, property definitions, link types) are the platform
+operator's job; a member agent asks for them. Everything in this catalogue is what
+you can do yourself.
 
 ## Base tools
 
@@ -73,7 +32,7 @@ Check both together, not just visibility.
 | `get_document` | `member` | Download document |
 | `upload_file_to_object` | `member` | File/image to an object (also `structuredimage`) |
 | `upload_staging_csv` | `member` | CSV into the import staging store |
-| `upload_code_allowlist` | `member`, `admin` | XLSX/XLS bulk of the e-mail allowlist of an invite code |
+| `upload_code_allowlist` | `member` | XLSX/XLS bulk of the e-mail allowlist of an invite code |
 | `change_password` | `member` | Change password |
 | `change_profile` | `member` | Change profile (without arguments: **read** profile) |
 | `get_profile` | `member` | Fetch own profile purely read-only — no write path |
@@ -98,7 +57,6 @@ Check both together, not just visibility.
 | `onto_object_graph` | `member` |
 | `onto_object_index` | `member` |
 | `onto_object_search` | `member` |
-| `onto_object_search_scopes` | `admin` |
 | `onto_object_set_property` | `member` |
 | `onto_object_show` | `member` |
 | `onto_object_update` | `member` |
@@ -108,57 +66,38 @@ Check both together, not just visibility.
 
 | Tool | Roles |
 |---|---|
-| `onto_type_create` | `admin` |
-| `onto_type_delete` | `admin` |
-| `onto_type_index` | `admin` |
 | `onto_type_show` | `member` |
-| `onto_type_update` | `admin` |
 
 ### `onto_link_*`
 
-| Tool | Roles |
-|---|---|
-| `onto_link_create_def` | `admin` |
-| `onto_link_delete_def` | `admin` |
-| `onto_link_index` | `admin` |
-| `onto_link_update_def` | `admin` |
 
 ### `onto_property_def_*`
 
 | Tool | Roles |
 |---|---|
-| `onto_property_def_create` | `admin`, `member` |
-| `onto_property_def_delete` | `admin` |
-| `onto_property_def_index` | `admin` |
-| `onto_property_def_delete_override` | `admin`, `member` |
-| `onto_property_def_update` | `admin`, `member` |
+| `onto_property_def_create` | `member` |
+| `onto_property_def_delete_override` | `member` |
+| `onto_property_def_update` | `member` |
 
 ### `onto_property_set_*`
 
 | Tool | Roles |
 |---|---|
-| `onto_property_set_create` | `admin`, `member` |
-| `onto_property_set_delete` | `admin` |
-| `onto_property_set_index` | `admin` |
-| `onto_property_set_update` | `admin`, `member` |
+| `onto_property_set_create` | `member` |
+| `onto_property_set_update` | `member` |
 
 ### `onto_interface_*`
 
 | Tool | Roles |
 |---|---|
-| `onto_interface_create_def` | `admin` |
-| `onto_interface_delete_def` | `admin` |
-| `onto_interface_index` | `admin` |
 | `onto_interface_map_markers` | `member` |
 | `onto_interface_show` | `member` |
-| `onto_interface_update_def` | `admin` |
 
 ### `onto_actiondef_*`
 
 | Tool | Roles |
 |---|---|
 | `onto_actiondef_delete` | `member` |
-| `onto_actiondef_index` | `admin` |
 | `onto_actiondef_list` | `member` |
 | `onto_actiondef_save` | `member` |
 
@@ -166,34 +105,14 @@ Check both together, not just visibility.
 
 | Tool | Roles |
 |---|---|
-| `onto_scope_assign_profile` | `admin` |
-| `onto_scope_create` | `admin` |
-| `onto_scope_delete` | `admin` |
-| `onto_scope_index` | `admin` |
-| `onto_scope_remove_profile` | `admin` |
 | `onto_scope_save_structuredimage_categories` | `member` |
-| `onto_scope_search` | `admin` |
-| `onto_scope_search_profiles` | `admin` |
-| `onto_scope_toggle_scope_flag` | `admin` |
 | `onto_scope_structuredimage_categories` | `member` |
-| `onto_scope_update` | `admin` |
 
 ### `onto_settings_*`
 
-| Tool | Roles |
-|---|---|
-| `onto_settings_create` | `admin` |
-| `onto_settings_delete` | `admin` |
-| `onto_settings_index` | `admin` |
-| `onto_settings_list` | `admin` |
-| `onto_settings_update` | `admin` |
 
 ### `onto_invite_code_*`
 
-| Tool | Roles |
-|---|---|
-| `onto_invite_code_index` | `admin` |
-| `onto_invite_code_show` | `admin` |
 
 > Read-only oversight across **all** scopes: code, scope, template, kind, R/W/M, issuer, status,
 > expiry, usage, redemptions. Filters travel in the JSON body (`q`, `scope_id`, `status`, `kind`,
@@ -202,15 +121,6 @@ Check both together, not just visibility.
 
 ### `onto_user_*`
 
-| Tool | Roles |
-|---|---|
-| `onto_user_delete` | `admin` |
-| `onto_user_delete_profile` | `admin` |
-| `onto_user_get` | `admin` |
-| `onto_user_index` | `admin` |
-| `onto_user_show` | `admin` |
-| `onto_user_update` | `admin` |
-| `onto_user_update_profile` | `admin` |
 
 > **`onto_user_delete`** clears everything for the account in ONE call: tokens, passkeys, sessions,
 > trackings, roles, scope assignments, favorites, memo lines, own notifications,
@@ -223,15 +133,12 @@ Check both together, not just visibility.
 
 | Tool | Roles |
 |---|---|
-| `onto_report_aggregate` | `admin`, `member` |
-| `onto_report_copy` | `admin` |
-| `onto_report_csv` | `admin`, `member` |
-| `onto_report_delete` | `admin` |
-| `onto_report_index` | `admin`, `member` |
-| `onto_report_json` | `admin`, `member` |
-| `onto_report_map_data` | `admin`, `member` |
-| `onto_report_save` | `admin` |
-| `onto_report_show` | `admin`, `member` |
+| `onto_report_aggregate` | `member` |
+| `onto_report_csv` | `member` |
+| `onto_report_index` | `member` |
+| `onto_report_json` | `member` |
+| `onto_report_map_data` | `member` |
+| `onto_report_show` | `member` |
 
 ### `onto_catalog_*`
 
@@ -244,17 +151,6 @@ Check both together, not just visibility.
 
 ### `onto_i18n_*`
 
-| Tool | Roles |
-|---|---|
-| `onto_i18n_create` | `admin` |
-| `onto_i18n_delete` | `admin` |
-| `onto_i18n_export` | `admin` |
-| `onto_i18n_index` | `admin` |
-| `onto_i18n_matrix` | `admin` |
-| `onto_i18n_missing` | `admin` |
-| `onto_i18n_review` | `admin` |
-| `onto_i18n_suggestions` | `admin` |
-| `onto_i18n_translate` | `admin` |
 
 ### `onto_favorite_*`
 
@@ -274,9 +170,9 @@ Check both together, not just visibility.
 | `onto_startcard_delete` | `member` |
 | `onto_startcard_move` | `member` |
 
-Write access is additionally gated by `can_manage_scope` on the card's scope (admins may
-configure all scopes, as in `/onto/scope`). The cards carry no roles of their own: a card is
-visible to everyone who can read the scope and see the target interface.
+Write access is additionally gated by `can_manage_scope` on the card's scope. The cards carry
+no roles of their own: a card is visible to everyone who can read the scope and see the target
+interface.
 
 ### `onto_file_*`
 
@@ -307,22 +203,6 @@ a foreign scope returns 403 even though the tool is visible.
 
 ### `onto_import_*`
 
-| Tool | Roles |
-|---|---|
-| `onto_import_analyze` | `admin` |
-| `onto_import_analyze_step` | `admin` |
-| `onto_import_create_source` | `admin` |
-| `onto_import_delete_source` | `admin` |
-| `onto_import_delete_step` | `admin` |
-| `onto_import_index` | `admin` |
-| `onto_import_reorder_step` | `admin` |
-| `onto_import_run_step` | `admin` |
-| `onto_import_save_step` | `admin` |
-| `onto_import_sources` | `admin` |
-| `onto_import_step_cancel` | `admin` |
-| `onto_import_step_status` | `admin` |
-| `onto_import_steps` | `admin` |
-| `onto_import_update_source` | `admin` |
 
 ### `onto_trigger_*`
 
@@ -330,7 +210,7 @@ a foreign scope returns 403 even though the tool is visible.
 |---|---|
 | `onto_trigger_create` | `member` |
 | `onto_trigger_delete` | `member` |
-| `onto_trigger_index` | `admin`, `member` |
+| `onto_trigger_index` | `member` |
 | `onto_trigger_update` | `member` |
 
 ### `onto_function_*`
@@ -339,19 +219,18 @@ a foreign scope returns 403 even though the tool is visible.
 |---|---|
 | `onto_function_create` | `member` |
 | `onto_function_delete` | `member` |
-| `onto_function_index` | `admin`, `member` |
-| `onto_function_run` | `admin`, `member` |
+| `onto_function_index` | `member` |
+| `onto_function_run` | `member` |
 | `onto_function_update` | `member` |
 
 ### `onto_credit_*`
 
 | Tool | Roles |
 |---|---|
-| `onto_credit_balance` | `admin`, `member` |
-| `onto_credit_chargeup` | `admin`, `member` |
-| `onto_credit_checkout` | `admin`, `member` |
-| `onto_credit_create_prepaid` | `admin` |
-| `onto_credit_receipt` | `admin`, `member` |
+| `onto_credit_balance` | `member` |
+| `onto_credit_chargeup` | `member` |
+| `onto_credit_checkout` | `member` |
+| `onto_credit_receipt` | `member` |
 
 ### `onto_watch_*`
 
@@ -362,39 +241,36 @@ a foreign scope returns 403 even though the tool is visible.
 
 ### `onto_action_*`
 
-| Tool | Roles |
-|---|---|
-| `onto_action_logs` | `admin` |
 
 ### `ontouser_scope_*`
 
 | Tool | Roles |
 |---|---|
-| `ontouser_scope_assign_public` | `member`, `admin` |
-| `ontouser_scope_create` | `member`, `admin` |
-| `ontouser_scope_index` | `member`, `admin` |
-| `ontouser_scope_list_public` | `member`, `admin` |
-| `ontouser_scope_remove_public` | `member`, `admin` |
-| `ontouser_scope_set_visibility` | `member`, `admin` |
+| `ontouser_scope_assign_public` | `member` |
+| `ontouser_scope_create` | `member` |
+| `ontouser_scope_index` | `member` |
+| `ontouser_scope_list_public` | `member` |
+| `ontouser_scope_remove_public` | `member` |
+| `ontouser_scope_set_visibility` | `member` |
 
 ### `ontouser_team_*` — managed accounts
 
-The manager view of an account that is managed by a company scope (`profiles.managed_by_scope_id`).
+The manager view of an account that is managed by a company scope (`managed_by_scope_id`).
 Every tool needs `can_manage_scope` in the scope that carries the marker, plus the respective right.
 
 | Tool | Roles |
 |---|---|
-| `ontouser_team_index` | `member`, `admin` |
-| `ontouser_team_show` | `member`, `admin` |
-| `ontouser_team_suspend` | `member`, `admin` |
-| `ontouser_team_unsuspend` | `member`, `admin` |
-| `ontouser_team_update_profile` | `member`, `admin` |
-| `ontouser_team_set_scope_rights` | `member`, `admin` |
-| `ontouser_team_set_write_scope` | `member`, `admin` |
-| `ontouser_team_credits` | `member`, `admin` |
-| `ontouser_team_transfer` | `member`, `admin` |
-| `ontouser_team_offboard_preview` | `member`, `admin` |
-| `ontouser_team_offboard` | `member`, `admin` |
+| `ontouser_team_index` | `member` |
+| `ontouser_team_show` | `member` |
+| `ontouser_team_suspend` | `member` |
+| `ontouser_team_unsuspend` | `member` |
+| `ontouser_team_update_profile` | `member` |
+| `ontouser_team_set_scope_rights` | `member` |
+| `ontouser_team_set_write_scope` | `member` |
+| `ontouser_team_credits` | `member` |
+| `ontouser_team_transfer` | `member` |
+| `ontouser_team_offboard_preview` | `member` |
+| `ontouser_team_offboard` | `member` |
 
 Notes an agent must not guess:
 
@@ -429,9 +305,9 @@ Notes an agent must not guess:
 
 | Tool | Roles |
 |---|---|
-| `ontouser_notification_index` | `member`, `admin` |
-| `ontouser_notification_read` | `member`, `admin` |
-| `ontouser_notification_send` | `member`, `admin` |
+| `ontouser_notification_index` | `member` |
+| `ontouser_notification_read` | `member` |
+| `ontouser_notification_send` | `member` |
 
 `ontouser_notification_send` writes into the inbox of a **different** account: `to` is the e-mail
 of an existing account (own address allowed), `text` the message (over 4000 characters is
@@ -450,31 +326,31 @@ with the message in the inbox (`ontouser_notification_index`).
 
 | Tool | Roles |
 |---|---|
-| `ontouser_service_request` | `member`, `admin` |
+| `ontouser_service_request` | `member` |
 
 ### Forms & invite/members (without name prefix)
 
 | Tool | Roles |
 |---|---|
-| `add_code_allowlist_entry` | `member`, `admin` |
-| `create_invite_code` | `member`, `admin` |
-| `delete_code_allowlist_entry` | `member`, `admin` |
-| `list_code_allowlist` | `member`, `admin` |
+| `add_code_allowlist_entry` | `member` |
+| `create_invite_code` | `member` |
+| `delete_code_allowlist_entry` | `member` |
+| `list_code_allowlist` | `member` |
 | `list_formdefs` | `member` |
-| `list_invite_codes` | `member`, `admin` |
-| `list_members` | `member`, `admin` |
+| `list_invite_codes` | `member` |
+| `list_members` | `member` |
 | `onto_formdef_create` | `member` |
 | `onto_formdef_list_templates` | `member` |
 | `onto_formdef_save` | `member` |
 | `prepare_form_answer` | `member` |
-| `redeem_invite_code` | `member`, `admin` |
-| `remove_member` | `member`, `admin` |
+| `redeem_invite_code` | `member` |
+| `remove_member` | `member` |
 | `resolve_form_answer` | `member` |
-| `revoke_invite_code` | `member`, `admin` |
+| `revoke_invite_code` | `member` |
 | `show_form_answer` | `member` |
 | `show_formdef` | `member` |
 | `submit_form_answer` | `member` |
-| `toggle_member_flag` | `member`, `admin` |
+| `toggle_member_flag` | `member` |
 
 ## Timestamps — always UTC
 
@@ -498,10 +374,9 @@ must not assume one.
    plain text.
 2. **Tool names end in `_create`/`_update`/`_delete`, NOT `_save`** (`onto_trigger_*`,
    `onto_function_*`). Anyone searching for `_save` falsely reports „Tool fehlt".
-3. **Two name families for the same thing**: `onto_scope_*` is the admin view
-   (`onto_scope_create` is `admin`), `ontouser_scope_*` the self-service one. For your own
-   scopes use the `ontouser_*` family — both paths bill and count against
-   `profiles.max_scopes`.
+3. **Two name families for the same thing**: `ontouser_scope_*` is the self-service family for
+   your own scopes — use that one. Both paths bill and count against the account's scope
+   quota (`max_scopes`).
 4. **The order of tools in the catalog is not a priority.** The list is grouped by resource;
    choosing the right path is described in `references/features/`.
 5. **A wrong role assignment is silent.** If a tool becomes visible to more accounts than
@@ -513,11 +388,9 @@ must not assume one.
    body format and the required fields.
 7. **Your own number comes from `auth_status`.** `tools_visible` applies to the logged-in
    account; after every permission change compare it anew instead of deriving it from this catalog.
-8. **`admin` does NOT see everything.** Some tools carry exclusively `member`, others
-   exclusively `admin`; only some both. An admin account that misses `change_password`
-   or `onto_catalog_apply` has no error — the role list there names only
-   `member`. When checking, always compare **both** numbers (`auth_status` with the
-   respective account).
+8. **Compare with `auth_status`, not with this file.** `tools_visible` is the number for the
+   logged-in account, and it changes with role and scope changes. After every permission
+   change, read it again.
 
 ## Tool descriptions and annotations
 

@@ -127,7 +127,7 @@ Return: `{udid, key, scope_id}` (the `udid` is the identifier for `_update`/`_de
 - **`scopes` is filled from `scope_id` at creation** — the caller does not need to pass it.
   The list is the permission for execution, see Security.
 - `scope_id` is mandatory; you need **`can_manage_scope`** there (403 otherwise). The
-  public scope only via admin.
+  public scope only through the operator.
 - `key` is sanitised to `[a-zA-Z0-9_]` and must be unique (409 otherwise).
 - `_delete` is a **soft delete** (`status=deleted`) — reversible.
 - **`_create` and `_update` are schema writes**: they change what the platform
@@ -184,7 +184,8 @@ A typo in the link type is caught on save if the caller passes the valid link ty
 ## Security (fail-closed, all verified)
 
 - **Visibility per row** via scope management — no admin bypass.
-- **The target scope must be managed** (`can_manage_scope=1`); the public scope only admin.
+- **The target scope must be managed** (`can_manage_scope=1`); the public scope only through the
+  operator.
   The check happens server-side per scope, fail-closed.
 - The target scope is **the permission**: it determines which objects the rule may act on.
   If it is drawn too wide, the rule applies everywhere in that area. Keep it narrow.

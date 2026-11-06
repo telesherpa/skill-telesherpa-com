@@ -5,7 +5,7 @@ there is a record that also withstands an audit — one row per check with time,
 account and a plausibility rating.
 
 **For whom:** Operator/administrator. Object types are platform schema (`onto_type_create` is
-admin-only); customer agents work with the types that are there and build actions,
+the operator's job); customer agents work with the types that are there and build actions,
 views and reports on them.
 
 The technical behaviour is documented in `references/features/scan-and-checkpoints.md` (server contract,
@@ -22,7 +22,7 @@ execution rule, field formats). What follows is the order in which you build som
 | Must it be proven **who** checked, or also **where**? | Today the device position is **not** part of the record. Anyone who needs it must commission it explicitly |
 | How much feedback is reasonable? | Sound, colour and haptics per level; too much feedback gets tuned out |
 
-## 1. Create type and fields (admin)
+## 1. Types and fields (a prerequisite, not your step)
 
 ```
 onto_type_create        name="checkpoint", label="mo.Checkpoint",

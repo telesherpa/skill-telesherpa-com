@@ -23,12 +23,11 @@ send `tools/list` with it. Without the header the server answers
 `400 Missing session ID` — that reads like a broken server and is really a missing
 handshake step.
 
-## 3. `admin` is not a superset of `member`
+## 3. Work with a member account
 
-The filter is "the account holds **at least one** of the required roles". An account
-with only `admin` does **not** see the `member` tools. "The admin sees everything"
-is false unless the account carries both roles — check `auth_status` instead of
-assuming.
+The tool list you receive depends on the role and the scopes of your account, not on
+the service. Use a member account, and if the list looks short, read `auth_status`
+for that account before you assume a server problem.
 
 ## 4. Undeclared parameters are rejected, loudly
 

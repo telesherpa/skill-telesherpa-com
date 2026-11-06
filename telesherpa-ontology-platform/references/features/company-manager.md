@@ -1,7 +1,7 @@
 # Leading accounts — the company manager
 
 A **scope** can lead accounts. One flag on the account says who leads it
-(`profiles.managed_by_scope_id`), and a manager — a human **or an agent** — can then run that
+(`managed_by_scope_id`), and a manager — a human **or an agent** — can then run that
 account's access, rights, budget and exit from inside a conversation.
 
 This reference is written for the agent that holds the manager role. It says what the tools do,
@@ -58,7 +58,7 @@ In short: **onboard, budget, grant, revoke, exit — all from the tool call you 
 
 ## 3. Tool map (exact parameters)
 
-All tools need the `member` role (or `admin`) **and** `can_manage_scope` in the scope that carries
+All of these tools need `can_manage_scope` in the scope that carries
 the marker.
 
 | Tool | Kind | Parameters |
@@ -139,7 +139,8 @@ revocation has to be verifiable on both sides: the account redeems it, the log s
 - `ontouser_team_suspend` removes the `member` role and deletes every token. From then on the token
   endpoint answers `403 {"error":"account_suspended"}`. The account gets **no mail** — the reason
   appears only when it tries to log in. Tell the person yourself.
-- Admin accounts cannot be suspended through the marker, and nobody can suspend himself.
+- An account above the manager cannot be suspended through the marker, and nobody can suspend
+  himself.
 - `offboard` with `mode=release` does mail: every manager of a **foreign** scope the account stays in
   receives a notification (`scope_user_released`, “released from management, still a member of your
   scope”), and the response lists them under `gemeldet`. Suspension is silent, release is not.
@@ -180,7 +181,7 @@ history per account is a different log (object events), not this one.
 
 Two limits to know before you promise traceability:
 
-- `onto_action_logs` requires the **`admin` role**. A plain manager (`member`) gets `403` — he cannot
+- The action log is not part of a manager's rights: a plain manager gets `403` and cannot
   read the log of his own team today. That is a gap, not a design decision.
 - There is **no filter** by profile, scope or action — only `page`/`limit`. Reading a specific
   account's history means paging through and filtering yourself.
