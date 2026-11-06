@@ -96,7 +96,12 @@ Rows that carry **no** link of a given type — open shifts nobody is assigned t
 "ohne_link": {"link": "worksShift", "richtung": "rueckwaerts"}
 ```
 
-Add `"linkvalue"` when only one meaning of the link must be missing.
+Add `"linkvalue"` when only one meaning of the link must be missing. The same key works
+inside a counter — that is how "open shifts nobody is assigned to" is counted:
+
+```json
+{"type": "shift", "label": "open", "ohne_link": {"link": "worksShift", "richtung": "rueckwaerts"}}
+```
 
 ## Fits me — matching my own links
 
@@ -125,6 +130,16 @@ otherwise:
 ```
 
 `op` is one of `=`, `!=`, `>`, `<`, `>=`, `<=`; `wert` must be a number.
+
+One rule needs no field: the statutory break depends on the shift length.
+
+```json
+{"key": "pause", "art": "pause", "text": "break too short"}
+```
+
+It reports shifts over 6 h with less than 30 min break and shifts over 9 h with less
+than 45 min — the length comes from `shiftStart` and `shiftEnd`, the break from
+`breakMinutes`.
 
 ## Rule columns across rows — per person
 
@@ -171,6 +186,22 @@ offenders:
 Each counter needs `type`, `label` and — if it filters a value — a `wert`;
 `leer`/`nicht_leer` need none. A filter without a value is refused. `"from": "objects"`
 is required, otherwise the counter block is ignored.
+
+A counter takes the same window as the table. Say so explicitly if it counts one day:
+
+```json
+{"type": "shift", "label": "open today", "filter": [
+  {"feld": "shiftStatus", "op": "=",  "wert": "offen"},
+  {"feld": "shiftStart",  "op": ">=", "wert": "{period_start}"},
+  {"feld": "shiftStart",  "op": "<=", "wert": "{period_end_dt}"}
+]}
+```
+
+`"scopes": [80]` narrows one counter to a scope — needed when the original counts a
+single scope while the reader may see several.
+
+The header is rendered from `items`; the counter block writes it for you. If a counter
+never shows up, that list is missing.
 
 ## Pitfalls
 
