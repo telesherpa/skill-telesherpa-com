@@ -1,7 +1,7 @@
 ---
 name: shift-planning
 description: Use when an agent must set up shift planning for a restaurant or other shift-based business on Telesherpa — three scopes (master data, planning, team), shifts from templates, staff self-service (requests, swaps, clock in/out) through a team door, notifications to affected people only, and a monthly planned-vs-actual CSV for payroll. Also use when extending or auditing such a workspace.
-version: 1.1.2
+version: 1.1.3
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -28,7 +28,7 @@ allowed keys and error meaning; never translate keys or option values back into 
 | Field | Content |
 |---|---|
 | Verified against | **platform state 2026-11-07** (tested by the authors with member rights only; where this skill says "tested build" it means that build) |
-| Status | 1.1.2. All files are written in full: this file, prerequisites, intake, phases 0–4, acceptance scenario, measurement, publication check, glossary, country module DE. The seven block views (phases 1 and 3) are confirmed in the browser as manager and as staff. **Before go-live:** run the acceptance scenario in your own workspace — every workspace differs in configuration. Points that depend on your setup are marked "(confirm)". |
+| Status | 1.1.3. All files are written in full: this file, prerequisites, intake, phases 0–4, acceptance scenario, measurement, publication check, glossary, country module DE. The seven block views (phases 1 and 3) are confirmed in the browser as manager and as staff. **Before go-live:** run the acceptance scenario in your own workspace — every workspace differs in configuration. Points that depend on your setup are marked "(confirm)". |
 | Platform skill state | Links point to the main branch of the platform skill, read on 2026-11-06. If a linked file has moved, look it up by name in the platform skill and report the broken link; do not guess its content. |
 | Industry | Restaurants and other shift-based businesses (care, retail, events). Restaurant values are examples. |
 | Tool count | **Not stated on purpose.** Measure: `GET https://mcp.telesherpa.com/health` (field `tools`) and `auth_status` for what *your* account sees. |
@@ -44,7 +44,7 @@ CSV for the payroll office.
 as a bar, line, pie or stacked chart, as a map, and as a downloadable CSV — but **a member
 cannot build a report**; that is an admin task, ordered through the service channel. So tell the
 manager what is possible and file the request with them; the menu, the wording and the service
-request template are in the platform skill: `../telesherpa-ontology-platform/references/features/reports.md`.
+request template are in the platform skill: [reports.md](../../telesherpa-ontology-platform/references/features/reports.md).
 The four that fit this solution: hours per week planned vs. actual, shifts per person, absences
 per month and kind, shifts per station.
 
@@ -172,6 +172,7 @@ Platform references (do not duplicate them here):
 | Scopes, rights, three-scope pattern | [scopes-and-permissions.md](../../telesherpa-ontology-platform/references/features/scopes-and-permissions.md) |
 | Scope bridges (`result_scope_id`) | [scope-bridges.md](../../telesherpa-ontology-platform/references/features/scope-bridges.md) |
 | Tool traps, prices, time, async triggers | [tool-traps.md](../../telesherpa-ontology-platform/references/features/tool-traps.md) |
+| Reports, charts, CSV — what to order for the manager | [reports.md](../../telesherpa-ontology-platform/references/features/reports.md) |
 | Member-agent rules (i18n, JSON mode, filters, `access.require`, placeholders, deleting) | [member-agent-rules.md](../../telesherpa-ontology-platform/references/features/member-agent-rules.md) |
 | Notifications and link events (`link_removed`) | [notifications-and-link-events.md](../../telesherpa-ontology-platform/references/features/notifications-and-link-events.md) |
 | Start cards and `blocks` | [start-cards.md](../../telesherpa-ontology-platform/references/features/start-cards.md) |
