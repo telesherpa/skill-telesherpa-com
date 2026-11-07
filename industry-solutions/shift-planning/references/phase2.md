@@ -691,16 +691,17 @@ e-mail (confirm).
 | staff's own absence refused ("does not concern your person") | no master person with the login e-mail, or the action links a different `concerns` target | fix the person's `email`; keep the action's `concerns` link to the source person |
 | health details in an absence | free text in `absenceNote` | label "(no diagnosis)", manager removes it; never show the note in views |
 
-## 10. Points to confirm in your workspace
+## 10. Checks after phase 2
 
-1. Guard on the three request actions (not yet tested).
-2. `{user_person}` instead of the person prompt on `sp_shift_request`.
-3. Form guard on `sp_absence_request`: own-person save and colleague refusal are
-   confirmed; rerun P2-5 and P2-5b in each new workspace.
-4. `sp_swap_decide` on takeover/handover: second `replace_link` skipped without error.
-5. Which phase-3 messages a decided swap produces (status stays unchanged).
-6. Precheck with `published` in `against_status`.
-7. Block-only equivalent of the request inbox (badge column, person columns, order).
-8. Absence inbox with a person column.
-9. Display of qualification files via `hasfile` in the detail page.
-10. Form-writer right for saving forms; legacy field `proposedKey` can be dropped.
+Run these once in your workspace; they are part of the acceptance scenario
+([acceptance-scenario.md](acceptance-scenario.md), section 7):
+
+- each of the three request actions refuses a decision by a staff member who is not
+  the manager (the guard answers, nothing changes);
+- `sp_absence_request` saves the own person and refuses a colleague (P2-5, P2-5b);
+- `sp_swap_decide` handles takeover and handover without a second link error, and the
+  requester receives exactly one message while the shift status stays unchanged;
+- the precheck reports a published week as published when you retry it
+  (`against_status`);
+- a qualification file is visible on the detail page (`hasfile`), and a staff member
+  with the form-writer right can save a form.

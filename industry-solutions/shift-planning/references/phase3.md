@@ -773,12 +773,13 @@ the platform skill (confirm).
 | a button without prompts opens no dialog | prompt-less action in a team view | give every staff action at least one optional prompt with a default |
 | start card missing for staff | staff cannot read the card's scope, or the view is hidden for them (`access.require`) | card in the team scope, view readable for staff |
 
-## 13. Points to confirm in your workspace
+## 13. Checks after phase 3
 
-1. Browser check of "My absences" (§7.4) and of "Request shift" by a staff account on
-   an open shift that is not yet linked to them (P3-13).
-2. Optional `blocks` container syntax for "My area".
-3. Plan-level summary message at first publication.
-4. Message for the person picked on a handover; message when a person is added to an
-   already published shift without a status change.
-5. Expiry argument name of `create_invite_code`.
+Run these once in your workspace; they are part of the acceptance scenario
+([acceptance-scenario.md](acceptance-scenario.md), section 7):
+
+- a staff account opens "My absences" (§7.4) and requests an open shift that is not
+  yet linked to it (P3-13) — both work with staff rights only;
+- the first publication produces one plan summary, not one message per shift;
+- a handover notifies the person picked, and adding a person to an already published
+  shift notifies that person without a status change.

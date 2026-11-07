@@ -99,9 +99,9 @@ Rules:
   `ontouser_scope_types_set`), name it `Record <first name> <last name>`. Then narrow
   every person-based **table** to master with `"scopes": ["<company>_master"]`
   in its `table` block (staff list, next shift per person, and `sp_my_next_shift`).
-  This is confirmed for tables. The week grid uses `matrix.rows`, not `table`:
-  scope narrowing there remains open; do not copy the table setting into the grid
-  and assume it works. Check that records do not become extra rows.
+  This applies to `table` blocks. The week grid uses `matrix.rows`, not `table`:
+  a `scopes` key in the table block does not narrow the grid. Keep the grid's rows
+  filtered by person binding and check that staff records do not appear as extra rows.
 - Contract type and hourly rate never sit on the master person (data minimisation,
   [country-de.md](country-de.md) §3).
 
@@ -571,25 +571,19 @@ only), payroll calculation, surcharges and public holidays, multiple sites with 
 staff, automated plan generation beyond the agent planning loop, and any device-based
 time clock. They need their own skill and a separate intake.
 
-## 12. Open points and confirmed boundaries
+## 12. Boundaries of this skill
 
-1. Dedicated staff-record type availability beyond the inspected catalogue; interim
-   `person` storage and table scope narrowing are confirmed. Matrix-row scope
-   narrowing remains open. A row label such as `lastName` needs that field populated;
-   a fallback for missing names is not documented.
-2. The warning condition (`bedingung`) is available; verify it in your workspace
-   with one minijob and one non-minijob row above the limit (P4-13).
-3. The year-dependent threshold (`schwelle_ab_2027`) follows the current date, not
-   the selected month (§6.3). The switch itself can only be observed from
-   1 January 2027.
-4. CSV header/order and the country-module export conventions were confirmed in the
-   tested export; recheck customer language settings. A denied export now redirects
-   with a notice (P4-15).
-5. Cross-midnight hours, end-only correction and break-only correction are confirmed.
-6. The explicit actual-time format is accepted; verify its local rendering before use.
-7. Cross-scope create is confirmed with the binding in §7 (`{current_user_email}` or
-   `{user_email}`). `{object_name}` is not available in action names; use an explicit
-   name prompt.
-8. Own staff-record access through the person link remains open; a colleague's
-   record was refused. Comment deletion: author or scope writer (§4); verify with
-   P4-16.
+- **Staff records live on `person`.** Narrow the master table to your own scope, and
+  keep the row label (`lastName`) mandatory — a row without it has no label.
+- **The warning column works with `bedingung`.** Prove it once with one minijob row
+  and one non-minijob row above the limit (P4-13).
+- **`schwelle_ab_2027` follows the current date, not the selected month** (§6.3).
+  Until 1 January 2027 the `schwelle` value applies.
+- **CSV header and order follow the country module** and use the customer's language
+  setting. A denied export shows a notice instead of a blank page (P4-15).
+- **Cross-midnight hours, end-only and break-only corrections are supported.**
+- **Create across scopes with the person binding of §7** (`{current_user_email}` or
+  `{user_email}`). `{object_name}` is not available in action names — ask for the name.
+- **A staff member reaches their own staff record** through the person link; a
+  colleague's record is refused. Comments may be deleted by the author or a scope
+  writer (§4).

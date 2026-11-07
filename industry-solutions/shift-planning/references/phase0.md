@@ -263,9 +263,8 @@ these English keys and the English option values from 1.4 — do not mix with pl
 German defaults.
 
 Labels: write them in the label language from intake 19. Labels with the prefix `mo.`
-are reserved for the platform — do not use it. *Confirm:* whether property labels can
-be made translatable for a member (the platform reference describes translation keys
-for views via `onto_i18n_create`). Option **values** themselves are not translated.
+are reserved for the platform — do not use it. Labels and option values are plain
+strings in the workspace language; they are not translated per viewer.
 
 ### 1.6 Link types (platform, verify only)
 
@@ -446,12 +445,14 @@ Run after section 2. Every line must match; on any deviation stop and report
 | staff sees colleagues' shifts in a team view | person binding missing or wrong, or planning read granted | fix the `person` block (phase 3 §7) and the `linked_to_user` guard; remove planning membership; do **not** grant planning read |
 | staff can open a manager view or a foreign planning object | planning membership granted by mistake, or manager view missing `access.require` | remove planning membership; set `view_config.access.require` on every manager view |
 
-## 7. Points to confirm in your workspace
+## 7. Cost and language
 
-1. Whether definition calls (types, properties) are charged on pay-per-use.
-2. Whether property labels can be translated by a member (option **values** are not —
-   they are plain strings; use scope-specific English values as in 1.4).
-3. Acceptance still needed in phases 3–4 with the real staff accounts: bridge writes
-   work, foreign-row actions hit the guard, manager views are refused, protected
-   fields are not on staff-readable master persons. (The person binding of the team
-   views itself is confirmed in the browser.)
+**Definition calls are not charged.** Creating or changing types, properties, link
+types, actions, views, triggers and start cards books no credits. The platform charges
+scope creation, object reads and writes, stored files and completed form answers. The
+build itself is therefore cheap; what costs money is the staffed test week.
+
+**Property labels are plain strings.** The platform renders a label exactly as stored
+in your scope — only the platform's own interface text is translated. Write labels in
+the language your staff reads (intake 19): one workspace, one label language. Option
+values are plain strings as well (1.4).

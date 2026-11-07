@@ -221,3 +221,32 @@ counter totals in the browser and record pass/fail separately per view.
   `ontouser_team_offboard` (`mode` per decision); left-over credit returns to the
   manager.
 - Never move test data into a real customer's scopes.
+
+## 7. Additional checks from the phase chapters
+
+These belong to a full acceptance run. Each line: what you do, what must happen.
+
+**Phase 2 — requests**
+1. A staff account submits a request through each of the three request actions; a
+   second staff account tries to decide it. The guard refuses the second one and the
+   request keeps its status.
+2. `sp_absence_request` saves the own person and refuses a colleague (P2-5, P2-5b).
+3. Decide a takeover and a handover with `sp_swap_decide`: no second link error, the
+   requester gets exactly one message, the shift status stays unchanged.
+4. Publish a week, then run the precheck again with `against_status` set to
+   `published` — it reports the published state instead of offering a second publish.
+
+**Phase 3 — staff view**
+5. A staff account opens "My absences" and requests an open shift that is not yet
+   linked to it (P3-13) — with staff rights only, no planning membership.
+6. The first publication produces one plan summary message, not one per shift.
+7. A handover notifies the person picked; adding a person to an already published
+   shift notifies that person although the status does not change.
+
+**Phase 4 — corrections and payroll**
+8. The warning column flags one minijob row and one non-minijob row above the limit
+   and leaves the rows below it alone (P4-13).
+9. A denied export shows a notice instead of a blank page (P4-15).
+10. A staff member opens their own staff record through the person link; a colleague's
+    record is refused. Deleting a comment works for its author and for a scope writer
+    (P4-16).

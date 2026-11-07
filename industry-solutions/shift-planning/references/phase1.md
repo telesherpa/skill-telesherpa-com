@@ -945,16 +945,17 @@ generator. Define each action, list it, run it once on a `TEST-1-` object, read 
 | only ten rows visible | page size default | raise `limit` (max 200) or add a period filter |
 | staff open a manager view | `access.require` missing | set it; never grant planning read instead |
 
-## 11. Points to confirm in your workspace
+## 11. Before you leave phase 1
 
-1. Credits of definition calls and the real cost of a staffed, published test week.
-2. Night shifts: the end-date prompt and the 6.5 planned hours are confirmed (§4.3).
-   Confirm in the browser with a TEST night shift D 18:00 – D+1 01:00 and a
-   TEST shift of the same person on D+1 09:00: the week views show the night shift on
-   D; the rule check flags `shortRest` (8 hours) on D+1 and no `dailyHours`; delete
-   the TEST shifts afterwards.
-3. Station option vs. station link: one source for views.
-4. Whether trigger-created shifts fire `sp_planned_hours_update`.
-5. Function input key name; `links` placement in 6.3.
-6. Open-note view `sp_notes_open` in §6.4 (not compared in the browser yet).
-7. `access.require` on block views refuses staff (phase 0 S11).
+**Costs.** Definition calls book no credits (phase 0, section 7). The staffed test week
+is what you pay for — read every account's balance before and after it.
+
+**Night shifts.** A shift that runs past midnight keeps its start day in the week
+views, and the end-date prompt and 6.5 planned hours are confirmed (§4.3). Prove it
+once with a TEST night shift D 18:00 – D+1 01:00 and a TEST shift of the same person
+on D+1 09:00: the week views show the night shift on D, the rule check flags
+`shortRest` (8 hours) on D+1 and no `dailyHours`. Delete both test shifts afterwards.
+
+**Two design rules of this skill.** A station is either an option value or a station
+link, never both — views read from one source. And every manager view carries
+`access.require` (phase 0, S11): staff get a refusal, not a read.

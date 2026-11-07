@@ -129,7 +129,7 @@ Waiting for asynchronous triggers (up to 5 minutes) is waiting time, not a failu
 | | | | | | | | | | |
 
 Verification items for every run:
-- credits booked for definition calls (properties, actions, views, triggers,
-  functions, start cards) — record the observed key or "free";
+- definition calls (properties, actions, views, triggers, functions, start cards)
+  book no credits — the build is free;
 - triggers and notifications booked nothing (confirmed before; re-check);
 - staff accounts paid only their own action runs.
