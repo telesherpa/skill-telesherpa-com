@@ -83,6 +83,11 @@ the most time:
 - **Decide who aggregates.** Either the query returns raw rows and the chart counts them, or the
   query aggregates itself and the chart reads the ready numbers. Mixing the two produces bars of
   height 1 — the classic first-day mistake.
+- **A stacked chart needs one column per category, not one row per category.** A query that
+  returns `month, kind, count` cannot feed a stack of four kinds — the chart asks for a column
+  per series and finds none, and the chart stays empty while the table looks perfect. Pivot it in
+  the query (`SUM(CASE WHEN kind = '…' THEN 1 ELSE 0 END) AS …`) so every series has its own
+  column.
 - **Never join a one-to-many table without grouping.** A person with two shifts joined onto
   something that has one row per notification becomes two rows for the same shift, and the
   report silently double-counts.
