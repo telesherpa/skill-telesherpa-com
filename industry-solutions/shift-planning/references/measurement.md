@@ -32,7 +32,7 @@ Read `onto_credit_balance` of the **manager account and every staff account** be
 and after each phase. The difference is the phase cost. Also count the calls by price
 key (from the price table) to explain the difference.
 
-Estimates (to verify in the first paid run; definition calls have no price key):
+Estimates — definition calls have no price key, so read your balance before and after to see what your run actually cost:
 
 | Phase | Main costs | Estimate (credits) |
 |---|---|---|
@@ -43,8 +43,8 @@ Estimates (to verify in the first paid run; definition calls have no price key):
 | 4 | staff records (5 × ~35), clocking 2 × 20, corrections 23 × 20 | ~700 |
 | Total | | ~4,100 ≈ 41 EUR |
 
-Cost per action (rule of thumb, to verify): 20 per action run + 10 per created object
-+ 5 per link + 5 per comment effect (to verify) + 25 per `replace_link` (remove 20 +
+Cost per action (rule of thumb; your statement is the truth): 20 per action run + 10 per created object
++ 5 per link + 5 per comment effect (estimate) + 25 per `replace_link` (remove 20 +
 create 5). Use it to explain the difference to the estimate.
 
 Running costs of a business in operation (monthly) are not part of this file yet; they

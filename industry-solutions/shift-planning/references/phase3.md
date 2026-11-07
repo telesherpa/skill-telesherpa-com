@@ -27,7 +27,7 @@ grant planning read "so views work".
 
 **Budget (pay-per-use):** accounts and rights are cheap writes; the expensive part is
 the staff accounts' own action runs (20 credits each, paid from **their** balance).
-Give each staff test account a small balance (e.g. 200 credits, to verify against the
+Give each staff test account a small balance (e.g. 200 credits; confirm against the
 acceptance scenario). **Triggers and notifications cost no credits** — only the
 writes that cause them do.
 
@@ -167,7 +167,7 @@ Rules:
   published shift hears about it once; the marker `sent` stops repeats. There is **no
   bulk publish** — shifts are published one by one (phase 1), so the first-publication
   messages arrive per shift. A single summary per person and plan is an open decision
-  (to verify: plan-level message, not part of this skill yet).
+  (confirm: plan-level message, not part of this skill yet).
 - Later changes to an announced shift (`firstNoticeStatus = sent`) notify only the
   affected persons via the change rules above.
 - **Always `to_linkvalue`** on request and absence rules. `to_link: "concerns"` alone
@@ -215,11 +215,11 @@ Known gaps:
   been confirmed for all event/schedule orderings; do not present this as passed.
 - A **handover** has no `takingOver` person; the person the manager picks gets the
   shift through `replace_link` but no request message, and the shift status does not
-  change, so no shift rule fires (to verify: a message for the new person on
+  change, so no shift rule fires (confirm: a message for the new person on
   handover).
 - `sp_msg_shift_restaffed` fires only when the status **changes** to `published`; a
   person added to an already published shift without a status change is not told
-  (to verify).
+  (confirm).
 - A cancelled shift that was never published (`firstNoticeStatus` ≠ `sent`) sends
   nothing — intended: nobody had been told about it.
 - The manager notes of phase 1/2 (cancelled shift, absence released) stay in planning;
@@ -541,7 +541,7 @@ link direction.
   "sort": {"key": "updated", "dir": "desc"}}}
 ```
 
-Companion view `sp_my_absences` — "My absences" (to verify in browser):
+Companion view `sp_my_absences` — "My absences" (confirm in the browser):
 
 ```json
 {"elements": ["filter", "table"],
@@ -662,7 +662,7 @@ A simple "Open shifts" table without `passt` can be used by managers in planning
 
 `sp_my_area` is optional: link "My shifts", "My week", "My requests", "My absences"
 and "Open shifts for me", plus Request absence (day-off wish) on the own person.
-A composite `elements: ["blocks"]` page remains optional (to verify the exact
+A composite `elements: ["blocks"]` page remains optional (confirm the exact
 container syntax). The required views above do not depend on it.
 
 No planning membership and no copies of shifts into team are needed.
@@ -718,7 +718,7 @@ It has no roles.
 Order: accounts and rights → staff views → start card → notification rules (e-mail
 and push off) → publish one test shift → check messages → acceptance → switch e-mail
 and push on. The exact arguments of `create_invite_code` (expiry field name) come from
-the platform skill (to verify).
+the platform skill (confirm).
 
 ## 10. Smoke tests
 
@@ -738,7 +738,7 @@ the platform skill (to verify).
 | P3-10 | reject a shift request | only the requester |
 | P3-11 | approve a day-off wish | only the person |
 | P3-12 | staff account: `onto_credit_balance` after its actions | balance reduced by its own action runs only |
-| P3-13 | staff account: "Request shift" on a row of "Open shifts for me" | request created in planning, `requestedBy` = own person; shift unchanged; the new request appears in "My requests" (to verify with a staff account) |
+| P3-13 | staff account: "Request shift" on a row of "Open shifts for me" | request created in planning, `requestedBy` = own person; shift unchanged; the new request appears in "My requests" (worth confirming with a staff account) |
 
 ## 11. Browser checks
 
@@ -749,7 +749,7 @@ the platform skill (to verify).
 | staff | open "My next shift" | exactly one row (the next own shift) or none |
 | staff | own person → Request absence → Day-off wish | request created; appears in "My absences" as requested |
 | staff | My week / My requests | correct period and only own or involved rows |
-| staff | My absences | only own absences (to verify in browser) |
+| staff | My absences | only own absences (confirm in the browser) |
 | staff | Open shifts for me | unstaffed future shifts at qualified stations only |
 | staff | open a colleague's shift or a manager view by URL (week list, inbox, payroll) | refused / redirected |
 | staff | read colleagues on master | only basic fields (name, login e-mail, stations); no pay, health, private contact |
@@ -773,7 +773,7 @@ the platform skill (to verify).
 | a button without prompts opens no dialog | prompt-less action in a team view | give every staff action at least one optional prompt with a default |
 | start card missing for staff | staff cannot read the card's scope, or the view is hidden for them (`access.require`) | card in the team scope, view readable for staff |
 
-## 13. Open points (to verify)
+## 13. Points to confirm in your workspace
 
 1. Browser check of "My absences" (§7.4) and of "Request shift" by a staff account on
    an open shift that is not yet linked to them (P3-13).

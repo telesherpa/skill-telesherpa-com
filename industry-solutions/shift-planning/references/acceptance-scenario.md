@@ -130,7 +130,7 @@ in October, none crosses midnight.
 | 3.1 | M | create `sp_my_next_shift`, `sp_my_shifts`, `sp_my_week`, `sp_my_requests`, `sp_my_absences`, `sp_open_shifts`, start card "My shifts" | definitions use `person`/`passt` as in phase 3; `onto_startcard_index` lists the card in `trattoria_team`; as S1 the card opens the own shifts |
 | 3.2 | S2 | log in, start page | card "My shifts"; only own shifts (Sat 21 only, after the takeover) |
 | 3.3 | S3 | "My shifts" | Thu 19 and Fri 20 (taken over) |
-| 3.4 | S1 | "My absences" | day-off wish 22 approved, vacation 18 approved, no colleague's absence (to verify in browser: "My absences" is not yet confirmed) |
+| 3.4 | S1 | "My absences" | day-off wish 22 approved, vacation 18 approved, no colleague's absence (confirm in the browser) |
 | 3.4a | S2 / S3 | "My requests" | own or involved takeover / shift requests, correct statuses; no unrelated requests; newest change first |
 | 3.4b | S2 / S3 | "My week" for 2026-11-16 | same own shifts as My shifts within the selected week; changing week changes the rows |
 | 3.4c | S3, then S1 | "Open shifts for me" | S3 sees the unstaffed Service lunch Sat 21 (qualified); S1 does not (kitchen only); staffed, cancelled and past shifts excluded |
@@ -163,7 +163,7 @@ in October, none crosses midnight.
 | TEST-A-Test Cook | 4 | 24.00 | 24.00 | 384.00 | – |
 
 - Cancelled shift (Pat, 2026-10-24) is not counted.
-- 47.25 × 13.90 = 656.775 → shown as 656.78 (to verify: rounding of the warning amount).
+- 47.25 × 13.90 = 656.775 → shown as 656.78 (confirm: rounding of the warning amount).
 - Persons without a staff record do not appear (`nur`).
 
 ## 4. Notification expectations

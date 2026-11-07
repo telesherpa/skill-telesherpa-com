@@ -1,7 +1,7 @@
 ---
 name: shift-planning
 description: Use when an agent must set up shift planning for a restaurant or other shift-based business on Telesherpa — three scopes (master data, planning, team), shifts from templates, staff self-service (requests, swaps, clock in/out) through a team door, notifications to affected people only, and a monthly planned-vs-actual CSV for payroll. Also use when extending or auditing such a workspace.
-version: 0.5.0
+version: 0.5.1
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -28,7 +28,7 @@ allowed keys and error meaning; never translate keys or option values back into 
 | Field | Content |
 |---|---|
 | Verified against | **platform state 2026-11-07** (tested by the authors with member rights only; where this skill says "tested build" it means that build) |
-| Status | 0.5.0. All files are written in full: this file, prerequisites, intake, phases 0–4, acceptance scenario, measurement, publication check, glossary, country module DE. The seven block views (phases 1 and 3) are confirmed in the browser as manager and as staff. Points not yet proven on the platform are marked "(to verify)" in each phase file and listed in its "Open points" section. Open: the first measured paid run by a fresh agent. |
+| Status | 0.5.1. All files are written in full: this file, prerequisites, intake, phases 0–4, acceptance scenario, measurement, publication check, glossary, country module DE. The seven block views (phases 1 and 3) are confirmed in the browser as manager and as staff. **Before go-live:** run the acceptance scenario in your own workspace — every workspace differs in configuration. Points that depend on your setup are marked "(confirm)". |
 | Platform skill state | Links point to the main branch of the platform skill, read on 2026-11-06. If a linked file has moved, look it up by name in the platform skill and report the broken link; do not guess its content. |
 | Industry | Restaurants and other shift-based businesses (care, retail, events). Restaurant values are examples. |
 | Tool count | **Not stated on purpose.** Measure: `GET https://mcp.telesherpa.com/health` (field `tools`) and `auth_status` for what *your* account sees. |
@@ -90,7 +90,7 @@ Short form. The platform references linked below are authoritative.
    answers as if it did not exist. **One exception:** an open shift that matches the
    person's qualifications is listed through `passt` ("Open shifts for me") and can be
    requested, although it does not hang on the person yet (whether its detail page
-   and comments open for staff: to verify, phase 3 P3-13). They work through the **team door** (views and
+   and comments open for staff — confirm, phase 3 P3-13). They work through the **team door** (views and
    actions in the team scope). Team views list what is reachable for the signed-in
    person — "My shifts" uses a **shift** base set with a `person` block via
    `worksShift`, request/absence views bind via `concerns`, "Open shifts for me" uses
@@ -168,14 +168,14 @@ Platform references (do not duplicate them here):
 | Triggers and functions | [automation-and-functions.md](../../telesherpa-ontology-platform/references/features/automation-and-functions.md) |
 | Managed staff accounts, invite codes | [company-manager.md](../../telesherpa-ontology-platform/references/features/company-manager.md) |
 
-### Confirmed / still to verify
+### Confirmed, and what to confirm
 
 - **Block views (confirmed in the browser, 2026-11-06):** the seven views My shifts,
   My week, My requests, Open shifts for me (phase 3) and Rule check, Shift lead today,
   Trash (phase 1) were rebuilt from blocks only and compared row by row with a
   running test workspace, as manager and as staff. Rows, counter values and rule
-  warnings matched. Views are built from blocks only. The companion view "My absences" uses the same binding and is
-  still (to verify in browser).
+  warnings matched. The companion view "My absences" uses the same binding — confirm it
+  in the browser.
 - **One block list shows one object type.** "My requests" with absences, or a trash
   over several types, are two (or more) lists.
 - **Placeholders in view blocks:** `{period_start}` and `{period_end}` (first and last

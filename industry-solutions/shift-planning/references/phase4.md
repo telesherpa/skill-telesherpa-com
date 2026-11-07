@@ -79,22 +79,22 @@ Rules:
   and therefore never hit a record.
 - **Own record through the person link.** The record hangs on the master person with
   `concerns`, like an absence. The person link may therefore let the staff member
-  open their **own** record by URL (to verify with a staff account). Seeing the own
+  open their **own** record by URL (worth confirming with a staff account). Seeing the own
   rate and address is usually acceptable; a colleague's record must stay closed.
   If the business wants the own record closed too, link it with a link type that is
-  not `concerns` (to verify: which link types open an object for the person).
+  not `concerns` (confirm which link types open an object for the person).
 - **Shift leads see and change pay.** Everyone with planning write — shift leads
   included (phase 0) — can read the staff records and the payroll view and can also
   change the records (hourly rate, contract type). This is the default of this skill;
   there is no extra gate. Mention it to the business in intake question 9. If they want pay hidden from shift leads, move the
   staff records into a separate scope that shift leads cannot read and give the
-  payroll view `access.require` on that scope (to verify in the workspace before
+  payroll view `access.require` on that scope (confirm in the workspace before
   relying on it).
 - The master person keeps only basic fields (phase 1). Remove `contractType`,
   `hourlyRate`, `phone` and address from master persons and from every master view
   and form.
 - **Record type:** a dedicated object type ("staff record") is preferred; request it
-  through `ontouser_service_request` (to verify: availability). **Interim:** use the
+  through `ontouser_service_request` (confirm: availability). **Interim:** use the
   type `person` in the planning scope (add `person` to the planning types with
   `ontouser_scope_types_set`), name it `Record <first name> <last name>`. Then narrow
   every person-based **table** to master with `"scopes": ["<company>_master"]`
@@ -230,7 +230,7 @@ with a 30-minute break gives 6.5 hours). End-only and break-only corrections wer
 confirmed to recalculate the result without changing the start.
 
 No notification in this phase. Optional manager hint "clocked in but not out after
-the shift end" as a scheduled rule writing a `planNote` (to verify).
+the shift end" as a scheduled rule writing a `planNote` (confirm).
 
 ## 6. Views
 

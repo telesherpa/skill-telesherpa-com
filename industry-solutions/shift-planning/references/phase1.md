@@ -11,11 +11,10 @@ compute automatically. Staff do nothing yet (their door is phase 2/3).
 team **RW**).
 
 **Budget (pay-per-use):** the build itself is mostly definition calls (actions, views,
-triggers, functions), which have no own price key (to verify, see
+triggers, functions), which have no own price key (see
 [prerequisites](prerequisites.md) §4). Business data: about 10 credits per object
 (`create_object`), 5 per link, 20 per action run. A test week of 25 shifts staffed and
-published by action costs roughly 25 × (20 + 20) = 1,000 credits plus reads (to verify
-in the first paid run; log what is booked).
+published by action costs roughly 25 × (20 + 20) = 1,000 credits plus reads (confirm in the first paid run; log what is booked).
 
 Placeholders used below (in addition to phase 0): `<business_udid>`, `<site_udid>`,
 `<station_udid_kitchen>` (one per station), `<template_udid_kitchen_early>` (one per
@@ -109,7 +108,7 @@ for the week generator (4.7):
 | `planDay1` … `planDay7` | string (`YYYY-MM-DD`) | Plan day Mon … Sun | written by the agent, fires the day trigger |
 | `generatedDay1` … `generatedDay7` | string | Generated day Mon … Sun | set by the day trigger, blocks a second run |
 
-The tested build used these keys without explicit definitions (to verify: whether
+The tested build used these keys without explicit definitions (confirm whether
 undeclared keys are enough; declaring them is the safe choice).
 
 **Protected data (E2).** `sp_staff_create` writes only basic fields to the master
@@ -151,7 +150,7 @@ values are the convention of this skill.
 
 Create with `onto_formdef_create` (scope planning), then `onto_formdef_save` with the
 full definition (see recipe). Saving a form definition needs a form-writer right
-(to verify for your account). Note: actions of type `form_answer` ignore `condition`;
+(confirm for your account). Note: actions of type `form_answer` ignore `condition`;
 put restrictions into the gate instead.
 
 ## 4. Actions
@@ -247,7 +246,7 @@ period. `sp_period_publish` only marks the period; each shift is published with
   (phase 3). Ask for it in intake 10.
 - `birthYear` (and the login e-mail) are readable by colleagues — intake 13a.
   `birthYear`: make it optional if intake 10 or 13a says
-  youth protection does not matter (to verify: `int` prompt with `required: false` and
+  youth protection does not matter (confirm: `int` prompt with `required: false` and
   an empty value then writes `-01-01`; test before relying on it).
 
 ```json
@@ -262,7 +261,7 @@ period. `sp_period_publish` only marks the period; each shift is published with
 
 `sp_revoke_qualification`: same frame, single `station` picker, link
 `{"type": "concerns", "from": "{object_udid}", "to": "{station}", "remove": "pair"}`.
-Removing the pair without naming the link value works (to verify: whether
+Removing the pair without naming the link value works (confirm whether
 adding `"linkvalue": "qualifiedFor"` is accepted with `remove: "pair"`).
 
 `sp_template_create` (on `space`): prompts `templateName` text*, `start` time*, `end`
@@ -325,7 +324,7 @@ duplicate.
 
 Notes:
 - Start, end and break are typed again; the action does not read them from the
-  template (to verify: whether prompt defaults can read template fields).
+  template (confirm whether prompt defaults can read template fields).
 - `stationValue` sets the `station` option that the views show and filter on;
   `stationObj` sets the `station` link that the staffing picker and "Open shifts for
   me" match on. Always set both to the same station (phase 0 §1.6). The reference
@@ -333,7 +332,7 @@ Notes:
   showed an empty station for such shifts.
 - The staff picker here is **not** limited to qualified people. Prefer
   `sp_open_shift_create` + `sp_shift_staff` when qualification matters, or add the
-  `options_filter` of 4.4 (to verify on a template target).
+  `options_filter` of 4.4 (worth confirming on a template target).
 - Shifts over midnight: `{date} {end}` is on the same day. The hour calculation
   itself handles midnight once `shiftEnd` carries the next date (confirmed: 18:00–01:00
   with a 30-minute break gives 6.5 planned hours; phase 4 §5 for actual hours). What
@@ -342,7 +341,7 @@ Notes:
   and set `shiftEnd = {endDate} {end}` (confirmed: start D 18:00, end D+1 01:00,
   break 30 → end stored on D+1, 6.5 planned hours). For a day shift the end date
   equals the shift date. Apply the same to `sp_open_shift_create`. The weekly
-  generator still creates no shifts over midnight. Still to verify in the browser:
+  generator still creates no shifts over midnight. Confirm in the browser:
   the week views list the shift on its start day, and the rule check (`shortRest`,
   `dailyHours`) treats it as intended (§11 open point 2).
 
@@ -424,7 +423,7 @@ property (`orderStatus`), not for `startedAt` / `completedAt`; hang triggers on
 
 - `sp_demand_report` on `space`, scopes master:
   `{"type": "form_answer", "name": "Demand {now}", "form": "<demand_form_udid>", "result_scope_id": <planning_scope_id>, "require_scope_write": <planning_scope_id>}`.
-  (Without `result_scope_id` demand objects land in master; set it. To verify that
+  (Without `result_scope_id` demand objects land in master; set it. To confirm that
   the answer is created in planning.)
 - `sp_demand_status` on `demand`, planning: prompt `demandStatus` select
   (`open`, `planned`, `covered`, `dropped`); `props: {"demandStatus": "{demandStatus}"}`; gate planning.
@@ -499,7 +498,7 @@ read the fields of the input object directly.
 
 Notes: `sp_person_hours` sums **all** shifts of a person, not a month — monthly sums
 are phase 4. An empty `sum_of` stays empty (not `0`). Name the
-input `objekt` (to verify: whether the input key is free or must be that word; test
+input `objekt` (confirm whether the input key is free or must be that word; test
 `sp_planned_hours` once with `onto_function_run` before wiring the trigger).
 
 ### 5.2 Triggers
@@ -556,7 +555,7 @@ template whose `weekdays` contains `2`):
 
 - In triggers the link key is `linktype` (in actions it is `type`).
 - The values (`09:00`, `15:30`, `30`, `6`, `kitchen`, `early`) are copied from the
-  template; `plannedHours` is written directly (to verify: whether objects created by a
+  template; `plannedHours` is written directly (confirm whether objects created by a
   trigger fire `sp_planned_hours_update`; until verified, write it).
 - The condition is checked against the current state: never reset `planDay<N>` to an
   empty string and set it again in one go — that produces shifts without a date.
@@ -580,7 +579,7 @@ Create with `onto_interface_create_def` (`name`, `label`, `description`,
 `scope_id = <planning_scope_id>`, `roles: ["member"]`, `object_type_ids`,
 `view_config` as JSON **string**). All phase-1 views are manager views:
 `view_config.access.require = "write"` (write on the planning scope). The reference
-build had not yet set the gate on these views (to verify after setting: staff are
+build had not yet set the gate on these views (confirm after setting: staff are
 refused, phase 0 S11). The person rows come from master; the manager reads both
 scopes, staff never open these views. Views show at most 500 rows — always restrict by
 period or filter.
@@ -665,7 +664,7 @@ shifts ignored; persons without an upcoming shift drop out (`nur`).
 
 All columns with `"link": "next"` read the **same** shift (the link group is chosen
 once). One copy of the `links` block at the top level is the documented form; a
-second copy inside `table` also occurs (to verify which one the renderer needs).
+second copy inside `table` also occurs (confirm which one the renderer needs).
 
 ### 6.4 Rule check, shift-lead dashboard and trash — block views
 
@@ -822,7 +821,7 @@ actions and the write gate. A `type` is required — a list without one is refus
 #### `sp_notes_open` — "Open manager notes"
 
 Use `serviceOrder` with `wo` filters `task = planNote`, `orderStatus = open`, and
-row action `sp_note_done` (to verify in browser). No counter is needed to use the
+row action `sp_note_done` (confirm in the browser). No counter is needed to use the
 filtered table. Do not widen rights or copy data to make any view work.
 
 ## 7. Recipe (tool order with example arguments)
@@ -934,7 +933,7 @@ generator. Define each action, list it, run it once on a `TEST-1-` object, read 
 |---|---|---|
 | staff see "Create staff member" on the site | master action without `require_scope_write: <master_scope_id>` | add the gate |
 | shift created but `plannedHours` empty | trigger created after the shift, or trigger condition missing a key | create triggers first; set start/end once more by action |
-| `plannedHours` negative or wrong for a night shift | end on the same date as start | end-date prompt (to verify, 4.3) |
+| `plannedHours` negative or wrong for a night shift | end on the same date as start | end-date prompt (confirm it, 4.3) |
 | station column empty in the week list | `station` option not set by the create action | set `stationValue` (4.3) |
 | staffing picker empty | shift has no `station` link, or persons lack `qualifiedFor` | link the station; qualify the person |
 | release removed every person | `remove: true` used | always `remove: "pair"` |
@@ -946,11 +945,11 @@ generator. Define each action, list it, run it once on a `TEST-1-` object, read 
 | list stops at 500 rows | view limit | restrict with `param`/`zeitraum`/filters |
 | staff open a manager view | `access.require` missing | set it; never grant planning read instead |
 
-## 11. Open points (to verify)
+## 11. Points to confirm in your workspace
 
 1. Credits of definition calls and the real cost of a staffed, published test week.
 2. Night shifts: the end-date prompt and the 6.5 planned hours are confirmed (§4.3).
-   Still to verify in the browser with a TEST night shift D 18:00 – D+1 01:00 and a
+   Confirm in the browser with a TEST night shift D 18:00 – D+1 01:00 and a
    TEST shift of the same person on D+1 09:00: the week views show the night shift on
    D; the rule check flags `shortRest` (8 hours) on D+1 and no `dailyHours`; delete
    the TEST shifts afterwards.

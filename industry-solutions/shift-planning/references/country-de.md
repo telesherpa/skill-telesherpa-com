@@ -67,7 +67,7 @@ also marks the 16- and 17-year-olds; the manager decides).
 | Recording working time | employers must record working time | Federal Labour Court (BAG), decision of 2022-09-13, 1 ABR 22/21 |
 | Recording for minijobs and hospitality | for minijobbers and in the sectors of § 2a SchwarzArbG (which include restaurants and hospitality): start, end and duration of daily working time recorded by the end of the 7th day after the work, kept for at least 2 years | § 17 (1) MiLoG — https://www.gesetze-im-internet.de/milog/__17.html |
 
-Checked: 2026-11-06. *To verify* in the next yearly review: whether a new
+Checked: 2026-11-06. *Confirm* in the next yearly review: whether a new
 working-time recording law has come into force.
 
 How the workspace supports this:

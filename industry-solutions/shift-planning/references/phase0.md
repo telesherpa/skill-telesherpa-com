@@ -263,7 +263,7 @@ these English keys and the English option values from 1.4 — do not mix with pl
 German defaults.
 
 Labels: write them in the label language from intake 19. Labels with the prefix `mo.`
-are reserved for the platform — do not use it. *To verify:* whether property labels can
+are reserved for the platform — do not use it. *Confirm:* whether property labels can
 be made translatable for a member (the platform reference describes translation keys
 for views via `onto_i18n_create`). Option **values** themselves are not translated.
 
@@ -446,7 +446,7 @@ Run after section 2. Every line must match; on any deviation stop and report
 | staff sees colleagues' shifts in a team view | person binding missing or wrong, or planning read granted | fix the `person` block (phase 3 §7) and the `linked_to_user` guard; remove planning membership; do **not** grant planning read |
 | staff can open a manager view or a foreign planning object | planning membership granted by mistake, or manager view missing `access.require` | remove planning membership; set `view_config.access.require` on every manager view |
 
-## 7. Open points (to verify)
+## 7. Points to confirm in your workspace
 
 1. Whether definition calls (types, properties) are charged on pay-per-use.
 2. Whether property labels can be translated by a member (option **values** are not —

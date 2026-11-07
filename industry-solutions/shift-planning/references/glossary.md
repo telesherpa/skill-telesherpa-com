@@ -28,7 +28,7 @@ comments) — so nothing that the person must not read belongs on it. A request 
 open to **everyone it is linked to**: the requester and the named partner
 (`takingOver`). Exception: open shifts matching the person's qualifications are
 listed through `passt` and can be requested without a person link (detail page and
-comments for staff: to verify).
+comments for staff — confirm).
 
 ### Signed-in person
 The master `person` whose `email` equals the login e-mail of the calling account

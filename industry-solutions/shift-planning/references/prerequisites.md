@@ -74,7 +74,7 @@ has any, are not part of this table — ask the operator before a paid run.
 Notes:
 - The live table on 2026-11-06 returned **17 operation keys plus 5 scope tiers**. Count what you get and log it; the live table always wins.
 - **Deleting costs 20 credits** — as much as an action. A test run that creates probes and deletes them pays twice. Budget the clean-up, or keep test objects with the `TEST-` prefix.
-- Creating property definitions, actions, views, triggers and functions has no own price key in the table. *To verify* in the first paid run whether these calls are free or booked under another key.
+- Creating property definitions, actions, views, triggers and functions has no own price key in the table. Whether these calls are free or booked under another key is visible on your statement after the first run.
 - **Triggers and notifications cost no credits** (confirmed); only the writes that cause them do (see SKILL.md).
 
 ## 5. Object types: catalogue, preset, or missing

@@ -21,7 +21,7 @@ by the manager (20). A test set of six requests with decisions costs about
 6 × (20 + 10 + 20) = 300 credits plus reads. Links, comment effects and link moves
 are not in this figure: a request with four links adds about 20, a swap decision that
 moves two links (remove 20 + create 5 each) about 50 — see the cost table in
-[measurement.md](measurement.md) §3 (all to verify in the first paid run).
+[measurement.md](measurement.md) §3 (estimates; your statement is the truth).
 
 Placeholders (in addition to phases 0–1): `<absence_form_udid>`,
 `<qualification_form_udid>`, `<request_udid>`, `<absence_udid>`,
@@ -37,7 +37,7 @@ Placeholders (in addition to phases 0–1): `<absence_form_udid>`,
 View block fields (`richtung`, `werte`, `wo`, `via`, `objekt`, `dateien`, …) are
 platform keywords; see the vocabulary note in [phase1.md](phase1.md). Every view and
 subform in this file is built from blocks; where a wanted effect is not yet proven
-with blocks it says "(to verify: block-only equivalent)".
+with blocks it says "(confirm: block-only equivalent)".
 
 ---
 
@@ -105,14 +105,14 @@ phase: `requestedBy`, `takingOver`, `counterShift`.
 | changeRequest → person | `concerns` | `takingOver` | swap, takeover | manager reads it for the decision prompt |
 | changeRequest → shift | `concerns` | `counterShift` | swap | `sp_swap_decide` |
 | absence → person | `concerns` | `concernsPerson` | absence form (link to the object the form ran on) | precheck, staff detail, notifications |
-| file ↔ person | form-answer link | – | qualification form | staff detail panel "Files" (to verify: shown via `hasfile`) |
+| file ↔ person | form-answer link | – | qualification form | staff detail panel "Files" (confirm: shown via `hasfile`) |
 | person → shift | `worksShift` | – | phase 1; **moved** by decisions | guards, views |
 | manager note → shift | `concerns` | `followUpOf` | approval precheck | notes |
 
 ## 3. Forms
 
 Create with `onto_formdef_create` in the **team** scope (staff open it there), then
-`onto_formdef_save`. Saving needs a form-writer right (to verify for your account).
+`onto_formdef_save`. Saving needs a form-writer right (confirm for your account).
 
 ### 3.1 `sp_absence_request` — Request absence (answer type `absence`)
 
@@ -152,7 +152,7 @@ person cannot submit at all (fail-closed).
 
 Do not try to express "own person only" as an action `condition` comparing a field
 with a user placeholder (for example `email eq {current_user_email}`): whether
-condition values substitute user placeholders is **to verify before use**; if they do
+condition values substitute user placeholders is **worth confirming before use**; if they do
 not, the condition never matches and the button disappears for everyone.
 
 Sick leave stores only the kind and the period (country module, e.g.
@@ -240,11 +240,11 @@ Additionally:
   the partner (core rule 1; "My requests" lists it for them): the message text and
   the `description` "created by <login e-mail>" included. The login e-mail is basic
   data colleagues can read anyway; the message is not private. Label the prompt so
-  staff know (as above) and do not ask for private reasons here (to verify with two
+  staff know (as above) and do not ask for private reasons here (worth confirming with two
   staff accounts, phase 3).
 - **Guard:** staff reach only their own shifts through the team views; add the guard
   as shown anyway — it
-  blocks a request on a colleague's shift opened by URL (to verify with a staff
+  blocks a request on a colleague's shift opened by URL (worth confirming with a staff
   account in phase 3).
 
 `sp_takeover_request`: same body without the `counterShift` prompt and link; name
@@ -275,7 +275,7 @@ links `shiftSwap` → `{object_udid}` and `requestedBy` → `{user_person}`.
 
 A `person` prompt lets the caller pick any person. For staff use, replace the
 `person` prompt by `"to": "{user_person}"` so nobody can ask in a colleague's name
-(to verify: keep the prompt only if a manager files requests for others).
+(confirm: keep the prompt only if a manager files requests for others).
 
 **No comment effect on the shift.** Do not add a comment such as "Shift request by
 {person_name}" to this action. The shift is open, so every qualified colleague can
@@ -290,8 +290,8 @@ person picked in the prompt.)
 `passt` in "Open shifts for me" (phase 3 §7.5, confirmed). The button then runs on a
 shift that does not hang on that person. Test this in phase 3 with a staff account
 (P3-13): the request must be created, the shift itself must stay unchanged, and a
-shift of a station the person is not qualified for must not be offered (to verify
-with a staff account).
+shift of a station the person is not qualified for must not be offered — confirm
+with a staff account.
 
 ```json
 {"key": "sp_absence_request", "label": "Request absence", "body": {
@@ -342,7 +342,7 @@ with a staff account).
   creates one manager note per shift. `{n}` and `{namen}` are the platform's
   placeholders (count, names).
 - `against_status`: list both `planned` and **`published`**, otherwise published
-  shifts are not checked. Include `published` (to verify that the precheck then also releases published
+  shifts are not checked. Include `published` (confirm that the precheck then also releases published
   shifts and that the removed person is notified by the `link_removed` rule, phase 3).
 - Gate approve/reject (`require_scope_write`).
 
@@ -390,13 +390,13 @@ Accepting does **not** staff the shift. The manager opens the shift and runs
   (`object1`) of its `worksShift` link with the prompted person; on a swap the second
   effect gives the counter shift to the requester. Exactly these links move — nothing
   else is touched.
-- For `takeover` and `handover` there is no `counterShift` link (to verify: the second
+- For `takeover` and `handover` there is no `counterShift` link (confirm: the second
   effect is skipped without error).
 - For `handover` the manager chooses the person in the prompt; for `swap`/`takeover`
   copy the `takingOver` person of the request.
 - The decision does not change `shiftStatus`. The phase-3 message "you took over this
   shift" hangs on `shiftStatus = swapped`; the decision path therefore reaches people
-  through the request rules (4.7), not through the shift (to verify which messages a
+  through the request rules (4.7), not through the shift (confirm which messages a
   swap produces in phase 3).
 
 `sp_swap_reject`: same condition; prompt
@@ -427,7 +427,7 @@ request). It sets `swapped`, which the publish action accepts again (phase 1).
 Older builds still write `proposedKey` (`worksShift` / a shift-request
 marker) and keeps it as a hidden inbox column. No gate, button or notification uses
 it any more; all decisions read `requestKind`. A fresh build can leave it out
-(to verify: nothing else depends on it).
+(confirm: nothing else depends on it).
 
 ### 4.7 Triggers and notifications
 
@@ -461,7 +461,7 @@ views ("My requests", "My shifts" with the request buttons) are phase 3.
 Wanted effect: all change requests, newest/open first; filters
 status and kind; columns title, kind, status as coloured badge (open = amber,
 accepted = green, rejected = red), created by, date, shift, persons; a hidden `udid`
-column; row buttons chosen by `requestKind` and `changeStatus`. Block form (to verify: block-only equivalent —
+column; row buttons chosen by `requestKind` and `changeStatus`. Block form (confirm: block-only equivalent —
 especially the badge column, the person list and the "open first" order):
 
 ```json
@@ -503,10 +503,10 @@ especially the badge column, the person list and the "open first" order):
   `requestKind`). With blocks, `filter` names the column keys.
 - A badge column looks like
   (`"type": "badge", "map": {"proposed": {"type": "badge", "color": "#f9a825", "value": "open"}, …}`);
-  whether `badge`/`map` work on block columns is to verify. `werte` is the fallback.
+  whether `badge`/`map` work on block columns is worth confirming. `werte` is the fallback.
 - Absences are **not** in this inbox. Managers decide them on the absence (buttons
   `sp_absence_approve` / `sp_absence_reject`) or from the staff detail (5.3). An
-  absence inbox: (to verify: block list of `absence` with a person column via
+  absence inbox: (confirm: block list of `absence` with a person column via
   `concerns`/`concernsPerson` and `row_actions` on `absenceStatus = requested`).
 
 ### 5.2 `sp_staff_list` — staff list (manager)
@@ -586,9 +586,9 @@ never get in (`access.require`).
 - Do not list `performs` as link for absences (an older actual-time path); this skill
   does not use it.
 - `absenceNote` is deliberately not shown (no diagnosis surface).
-- Optional panel "Requests": `objekt: "changeRequest"`, `via: {"link": "concerns", "richtung": "rueckwaerts", "linkvalue": "requestedBy"}`, columns kind, status, created (to verify: not yet built).
+- Optional panel "Requests": `objekt: "changeRequest"`, `via: {"link": "concerns", "richtung": "rueckwaerts", "linkvalue": "requestedBy"}`, columns kind, status, created (confirm: not yet built).
 - Protected data (pay, contract, private contact) is a separate manager-only panel or
-  view once phase 4 has fixed where it lives (to verify).
+  view once phase 4 has fixed where it lives (confirm).
 
 ## 6. Recipe (tool order with example arguments)
 
@@ -637,7 +637,7 @@ Order: forms → staff actions → manager actions → views → tests. Define t
 after the decision actions exist (row actions name them). Run the request actions as a
 **staff test account** (the bridge and the guard only prove something there); as the
 manager, `{user_person}` resolves only if a master person carries the manager's login
-e-mail (to verify).
+e-mail (confirm).
 
 ## 7. Smoke tests (MCP)
 
@@ -691,7 +691,7 @@ e-mail (to verify).
 | staff's own absence refused ("does not concern your person") | no master person with the login e-mail, or the action links a different `concerns` target | fix the person's `email`; keep the action's `concerns` link to the source person |
 | health details in an absence | free text in `absenceNote` | label "(no diagnosis)", manager removes it; never show the note in views |
 
-## 10. Open points (to verify)
+## 10. Points to confirm in your workspace
 
 1. Guard on the three request actions (not yet tested).
 2. `{user_person}` instead of the person prompt on `sp_shift_request`.
