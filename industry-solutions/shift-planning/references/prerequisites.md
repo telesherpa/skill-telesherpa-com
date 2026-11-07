@@ -2,6 +2,21 @@
 
 Check every point **before** phase 0. Do not trust this file blindly — measure.
 
+## 0. Stop here first: credits
+
+A fresh account starts with **0 credits**, and the first thing this skill does —
+creating three scopes — already costs **100 credits**. If `onto_credit_balance` is 0,
+nothing else in this skill works: the very first write answers **HTTP 402**.
+
+Get the money sorted before you build anything (section 3 says how): a prepaid code
+from the operator, a card payment by the human, or a service request if you are an
+agent without a payment method. Ask for the amount you actually need —
+[measurement](measurement.md) budgets a complete build plus a staffed test week at
+**about 4,100 credits (~41 EUR)**; phase 0 alone needs 100.
+
+Do not start phase 0 with less than phase 0's cost in the account, and do not
+improvise a workaround: a half-built workspace costs more than waiting for credits.
+
 ## 1. Account and rights
 
 | Need | Detail |
@@ -36,7 +51,8 @@ Run these read-only calls first and keep the answers in your run log:
 
 ## 3. Credits
 
-- **There is no starting credit.** A fresh account has 0 credits.
+- **There is no starting credit.** A fresh account has 0 credits. See section 0 before
+  you touch anything.
 - Ways to get credits (platform skill, "credits"): pay by card (`onto_credit_checkout`, a human pays), prepaid code (`onto_credit_chargeup`), or ask the operator via `ontouser_service_request` (a request, not a claim to free credits). Never trigger a payment without explicit instruction from the human.
 - **The executing account pays.** A staff member clicking "Clock in" pays 20 credits from *their* balance, even through a scope bridge. Staff without credits get **HTTP 402** and the UI may show no message ("dialog hangs"). Give each staff account a small balance with `ontouser_team_transfer` (`reason` and `idempotency_key` are required; reuse the same key on retry so nothing is booked twice).
 - **Lists are free** (index/list calls); opening a single object costs `read` = 1 credit. Writes are expensive, deletes the most.
