@@ -430,7 +430,13 @@ patterns, not a technical feature in itself:
 14a. **Filter parameters are stateless for you.** A declared filter (e.g. `q` on
     `onto_trigger_index`) applies to that one call and is not remembered — neither by you nor for the
     next call. That is deliberate: a browser user would find a filter it cannot see confusing.
-15. Write permission on a scope ≠ permission to run consequential actions such as
+15. **An update call changes only what you send.** Fields you leave out stay as they are — that is
+    the rule across the platform (property sets, property definitions, reports, invite bundles,
+    user accounts). Send the full list only when you really mean to replace it. If you cannot
+    express what you want with a partial update, read the record first, then send the complete
+    set: a blind update with half the fields is the most common way an agent quietly destroys
+    data.
+16. Write permission on a scope ≠ permission to run consequential actions such as
     `create_service_order` — that can be gated separately by RBAC (see
     `service-order-dispatch.md`).
 16. **Form tools (`prepare_form_answer`, `submit_form_answer`, `show_form_answer`,
