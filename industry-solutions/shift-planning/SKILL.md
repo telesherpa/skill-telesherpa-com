@@ -48,7 +48,8 @@ CSV for the payroll office.
 - Automatic scheduling / AI planning (Phase 5, later / out of scope — see "Agent planning loop").
 - Tip pooling, POS, geofencing, team chat.
 - **Publishing several shifts in one bulk action** — decided against; publish shift by shift.
-- Raising the **500-row limit** of views — it stays; design views with filters/periods.
+- Raising the **row limit** of views — they are paginated (10 rows per page by default,
+  200 at most, cards stop at 60). With a period filter you rarely need more.
 - Legal advice. Working-time rules appear as checks and warnings, never as a verdict.
 
 ## Build order — phases 0–4
@@ -187,8 +188,9 @@ Platform references (do not duplicate them here):
 - **Night shifts:** hours across midnight are calculated correctly when the end
   carries the next date (confirmed, planned and actual hours). Create actions need an
   `endDate` prompt for that (confirmed, phase 1 §4.3); without it the end lands on the
-  shift date. Week-view placement and the rule check for night shifts are still to
-  verify in the browser (phase 1 open point 2).
+  shift date. The rule check compares real timestamps (previous end against next start),
+  so a shift ending 01:00 counts against a 09:00 start; week views place a night shift
+  on its **start day**. Confirm both in your workspace with one test night shift.
 - **Credits for triggers and notifications (confirmed):** triggers and notification
   rules consume **no** credits; only the user-triggered writes that
   cause them do.

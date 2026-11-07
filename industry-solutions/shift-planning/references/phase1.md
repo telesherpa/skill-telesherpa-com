@@ -581,8 +581,8 @@ Create with `onto_interface_create_def` (`name`, `label`, `description`,
 `view_config.access.require = "write"` (write on the planning scope). The reference
 build had not yet set the gate on these views (confirm after setting: staff are
 refused, phase 0 S11). The person rows come from master; the manager reads both
-scopes, staff never open these views. Views show at most 500 rows — always restrict by
-period or filter.
+scopes, staff never open these views. Views are paginated (10 rows per page by default,
+200 at most) — a period filter is still the cheaper design.
 
 ### 6.1 `sp_week_list` — week list (manager)
 
@@ -942,7 +942,7 @@ generator. Define each action, list it, run it once on a `TEST-1-` object, read 
 | comment shows no text | optional prompt empty → effect skipped | give the prompt a `default` |
 | `{staff_name}` stays literal in a name | `{<prompt>_name}` works only in effects | use it in comments only |
 | view refuses to save | placeholder or `werte` key wrong, or a filter names a property instead of a column key | use column keys in `filter`/`sort`/`zeitraum` |
-| list stops at 500 rows | view limit | restrict with `param`/`zeitraum`/filters |
+| only ten rows visible | page size default | raise `limit` (max 200) or add a period filter |
 | staff open a manager view | `access.require` missing | set it; never grant planning read instead |
 
 ## 11. Points to confirm in your workspace

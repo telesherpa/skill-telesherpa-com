@@ -234,8 +234,8 @@ and a **person binding**. A team view without person binding is refused when sav
 The `person` block carries `link`, `richtung`, `prop` and `type`; it compares
 against the signed-in person automatically. Do not add a `wert` or an e-mail
 placeholder to that block. `passt` binds matching open shifts to the viewer instead.
-Every view shows only own or explicitly matching rows; there is no person parameter. Views show at most 500 rows — keep a
-period or an upcoming-only filter. All views in this section are confirmed in the
+Every view shows only own or explicitly matching rows; there is no person parameter. Views are paginated (10 rows per
+page by default, 200 at most) — keep a period or an upcoming-only filter. All views in this section are confirmed in the
 browser as staff (only own rows) and as manager, except "My absences" (7.4).
 
 ### 7.1 `sp_my_next_shift` — "My next shift" (block view, tested)

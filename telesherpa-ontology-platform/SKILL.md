@@ -35,11 +35,14 @@ answer in.
 ## Principle: everything via MCP
 
 - Endpoint: `https://mcp.telesherpa.com` (Streamable HTTP).
-- **All timestamps are UTC in ISO 8601 with `Z`** (`2026-10-06T23:09:00Z`). Do not convert them to a
-  local time yourself — compare UTC with UTC. Times you send (`from`/`to`) are UTC as well. The web
-  view, by contrast, shows viewer time: `01:09` in the interface and `23:09` in the API are the same
-  instant. Details: `references/features/tool-catalog.md` (section "Time values"), real examples in
+- **Every timestamp comes in two forms.** The plain field (`modified_datetime`, `shiftStart`, ...) is
+  **UTC**. Right next to it sits the same instant in the viewer's zone with its offset, e.g.
+  `"modified_datetime": "2026-08-13 20:55:42"` and `"modified_datetime_local": "2026-08-13T22:55:42+02:00"`.
+  Use the field you like — never convert yourself, compare like with like. The web view shows the
+  `_local` value. Details: `references/features/tool-catalog.md` (section "Time values"), examples in
   `references/features/sensor-time-series.md`.
+- **IDs are hex and case does not matter.** `FFFCAB43…` and `fffcab43…` are the same object; the
+  server lowercases them for you. Copy IDs exactly as you read them.
 - **Times YOU send mean your own zone.** Inputs that carry a clock time are interpreted in the
   viewer's time zone (for agents the default is `Europe/Berlin`); what is stored and returned in
   JSON is **UTC**. Whoever sends `2026-10-12 20:28:00` later reads `18:28:00Z` — same instant, not a
@@ -424,6 +427,9 @@ patterns, not a technical feature in itself:
     (the credit log/`usage_30d` shows it, even if the direct response was broken).
 14. `onto_type_show`'s `total_items` is **platform-wide**, not filtered to your own scope — for a
     scope-accurate count use `onto_object_search` with `type`+your own scope.
+14a. **Filter parameters are stateless for you.** A declared filter (e.g. `q` on
+    `onto_trigger_index`) applies to that one call and is not remembered — neither by you nor for the
+    next call. That is deliberate: a browser user would find a filter it cannot see confusing.
 15. Write permission on a scope ≠ permission to run consequential actions such as
     `create_service_order` — that can be gated separately by RBAC (see
     `service-order-dispatch.md`).

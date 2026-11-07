@@ -83,9 +83,14 @@ Fail-closed: an unknown operator counts as **not satisfied** (not as „always t
 ## Creating a rule/function via MCP (today's way)
 
 ```
-onto_function_index  → does the function already exist? (name or udid)
-onto_trigger_index   → which rules run in the scope?
+onto_function_index    → does the function already exist? (name or udid)
+onto_trigger_index     → which rules run in the scope? (`q` filters by name, for this call only)
+onto_dispatch_status   → did they run? backlog, errors, last events
 ```
+
+**A rule does not fire instantly.** Events are picked up every 60 s, time-based rules every
+5 minutes; a busy queue takes longer. So after creating a rule and making a change, look at
+`onto_dispatch_status` instead of repeating the action or assuming it failed.
 
 **Create a function** — `onto_function_create`:
 

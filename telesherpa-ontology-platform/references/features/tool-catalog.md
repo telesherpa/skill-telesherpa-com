@@ -180,6 +180,7 @@ a foreign scope returns 403 even though the tool is visible.
 
 | Tool | Roles |
 |---|---|
+| `onto_dispatch_status` | `member` |
 | `onto_trigger_create` | `member` |
 | `onto_trigger_delete` | `member` |
 | `onto_trigger_index` | `member` |
