@@ -294,6 +294,12 @@ via `POST /onto/object/counter`. The proof is in the action log. These routes ar
 
 Every feature has its own detailed reference under `references/features/`:
 
+- **Industry solution: shift planning** — the same platform, built once for restaurants and
+  other shift-based businesses: three scopes (master data, planning, team), shifts from
+  templates, staff self-service through a team door, notifications to affected people only,
+  monthly planned-vs-actual CSV for payroll, in phases from intake to acceptance:
+  `../industry-solutions/shift-planning/SKILL.md`
+
 - **Views without SQL (building blocks)** — how a list is described instead of written:
   columns and formats, person binding, time window and period switch, filters, `status`
   (including deleted rows), `ohne_link` ("nobody assigned yet"), `passt` ("fits my own

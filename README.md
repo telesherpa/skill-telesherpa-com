@@ -30,10 +30,42 @@ references/features/                      One topic per file, in depth
   use-cases.md                            End-to-end verified examples
 ```
 
+## Industry solutions
+
+Ready-made builds for one business, on top of the platform skill — same MCP, a fixed scope
+layout, phases from intake to acceptance:
+
+```
+industry-solutions/shift-planning/SKILL.md
+                                          Shift planning for restaurants: three scopes
+                                          (master data, planning, team), shifts from
+                                          templates, staff self-service through a team
+                                          door, notifications to affected people only,
+                                          monthly planned-vs-actual CSV for payroll
+  references/prerequisites.md             What the customer must decide and provide
+  references/intake.md                    Questions before the first object
+  references/phase0.md                    Scopes, property definitions, option values
+  references/phase1.md                    People, contracts, templates, the shift plan
+  references/phase2.md                    Staff doors, requests, swaps, clock in/out
+  references/phase3.md                    Rules, notifications, counters, reports
+  references/phase4.md                    Payroll CSV, month close, hand-over
+  references/acceptance-scenario.md       End-to-end check with real roles
+  references/measurement.md               What a run costs and how to read it
+  references/publication-check.md         Before the workspace goes live
+  references/glossary.md                  Terms in four languages
+  references/country-de.md                Germany: limits, break rules, thresholds
+```
+
 ## Using it
 
 **The starting point is `SKILL.md`.** It describes the onboarding route (registration, activation
 by email code, login) and links a detailed reference for every topic.
+
+**Building shift planning for a restaurant (or any shift-based business)?** →
+`industry-solutions/shift-planning/SKILL.md`. It sits on top of this skill: three scopes,
+shifts from templates, staff self-service through a team door, notifications to affected
+people only, monthly planned-vs-actual CSV for payroll — in phases, from intake to
+acceptance.
 
 **New here and unsure what the platform does for you?** →
 `references/best_practices/first-30-minutes.md`. It holds the complete build in 30 minutes,
