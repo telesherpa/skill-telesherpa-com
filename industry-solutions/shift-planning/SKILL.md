@@ -1,7 +1,7 @@
 ---
 name: shift-planning
 description: Use when an agent must set up shift planning for a restaurant or other shift-based business on Telesherpa — three scopes (master data, planning, team), shifts from templates, staff self-service (requests, swaps, clock in/out) through a team door, notifications to affected people only, and a monthly planned-vs-actual CSV for payroll. Also use when extending or auditing such a workspace.
-version: 1.1.1
+version: 1.1.2
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -28,7 +28,7 @@ allowed keys and error meaning; never translate keys or option values back into 
 | Field | Content |
 |---|---|
 | Verified against | **platform state 2026-11-07** (tested by the authors with member rights only; where this skill says "tested build" it means that build) |
-| Status | 1.1.1. All files are written in full: this file, prerequisites, intake, phases 0–4, acceptance scenario, measurement, publication check, glossary, country module DE. The seven block views (phases 1 and 3) are confirmed in the browser as manager and as staff. **Before go-live:** run the acceptance scenario in your own workspace — every workspace differs in configuration. Points that depend on your setup are marked "(confirm)". |
+| Status | 1.1.2. All files are written in full: this file, prerequisites, intake, phases 0–4, acceptance scenario, measurement, publication check, glossary, country module DE. The seven block views (phases 1 and 3) are confirmed in the browser as manager and as staff. **Before go-live:** run the acceptance scenario in your own workspace — every workspace differs in configuration. Points that depend on your setup are marked "(confirm)". |
 | Platform skill state | Links point to the main branch of the platform skill, read on 2026-11-06. If a linked file has moved, look it up by name in the platform skill and report the broken link; do not guess its content. |
 | Industry | Restaurants and other shift-based businesses (care, retail, events). Restaurant values are examples. |
 | Tool count | **Not stated on purpose.** Measure: `GET https://mcp.telesherpa.com/health` (field `tools`) and `auth_status` for what *your* account sees. |
@@ -40,6 +40,14 @@ requests (absence, day-off wish, shift request, swap, takeover, handover) and cl
 in/out themselves; managers get planned vs. actual hours per person and month as a
 CSV for the payroll office.
 
+**Charts and reports: offer them, do not promise them.** The platform can show the same numbers
+as a bar, line, pie or stacked chart, as a map, and as a downloadable CSV — but **a member
+cannot build a report**; that is an admin task, ordered through the service channel. So tell the
+manager what is possible and file the request with them; the menu, the wording and the service
+request template are in the platform skill: `../telesherpa-ontology-platform/references/features/reports.md`.
+The four that fit this solution: hours per week planned vs. actual, shifts per person, absences
+per month and kind, shifts per station.
+
 ## Out of scope (do not build, do not promise)
 
 - Payroll calculation, DATEV or other payroll-system formats (DATEV is an outlook only;
@@ -47,6 +55,9 @@ CSV for the payroll office.
   plus optional columns, see phase 4).
 - Automatic scheduling / AI planning (Phase 5, later / out of scope — see "Agent planning loop").
 - Tip pooling, POS, geofencing, team chat.
+- **Building reports and charts yourself.** Reading a report is a member feature; creating one
+  needs the admin role. Order it (see "Charts and reports" above) instead of attempting the save
+  call — it answers 403.
 - **Publishing several shifts in one bulk action** — decided against; publish shift by shift.
 - Raising the **row limit** of views — they are paginated (10 rows per page by default,
   200 at most, cards stop at 60). With a period filter you rarely need more.

@@ -107,6 +107,11 @@ you can do yourself.
 
 ### `onto_report_*`
 
+Reading is for members. **Building is not:** `save`, `copy` and `delete` answer 403 for a
+member, and the platform has no member-facing report editor. A member agent that needs a report
+orders it through the service channel — capabilities, examples and the request template:
+[reports.md](reports.md).
+
 | Tool | Roles |
 |---|---|
 | `onto_report_aggregate` | `member` |
@@ -115,6 +120,9 @@ you can do yourself.
 | `onto_report_json` | `member` |
 | `onto_report_map_data` | `member` |
 | `onto_report_show` | `member` |
+| `onto_report_save` | `admin` |
+| `onto_report_copy` | `admin` |
+| `onto_report_delete` | `admin` |
 
 ### `onto_catalog_*`
 

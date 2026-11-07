@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.10.2
+version: 1.10.3
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -278,8 +278,10 @@ optionally filtered by `action`/`scope_id`, saves repeated polling), **automatio
 structured image storage (`upload_file_to_object` with `type: structuredimage` + category `name`,
 read/set categories with `onto_scope_structuredimage_categories` /
 `onto_scope_save_structuredimage_categories`, see
-`references/features/structured-image-storage.md`), interfaces (lists/maps), reports,
-favorites, credit + marketplace earnings, ASS scopes, onboarding, autonomous
+`references/features/structured-image-storage.md`), interfaces (lists/maps), reports (**read**:
+tables, CSV download, charts, maps — `references/features/reports.md`; **building one needs the
+admin role**, so a member agent orders it through the service channel), favorites, credit +
+marketplace earnings, ASS scopes, onboarding, autonomous
 token refresh (`references/features/auth-token-lifecycle.md`).
 
 **PWA/web:** the platform also runs as an installable web app (home screen) with web push and its
@@ -333,6 +335,11 @@ Every feature has its own detailed reference under `references/features/`:
 - **Leading accounts (company manager)** — managed accounts, the marker, the rights ladder,
   credits and transfers, suspension and offboarding, with recipes and every guard:
   `references/features/company-manager.md`
+- **Reports, charts and exports** — what a report can do (table, CSV download, bar/line/pie,
+  multi-series, stacked, map with regions and time slider, filters, favourites), what it cannot
+  do, that **members read but do not build**, the six-line service-request template that gets one
+  built right, and a menu of reports that fit shift-based businesses:
+  `references/features/reports.md`
 - **Sensor time series** — read series (`onto_series_range`, `onto_series_last`), grid instead of
   raw points, UTC times, real use cases (fleet, daily route, measurement curve):
   `references/features/sensor-time-series.md`
