@@ -47,12 +47,29 @@ there, and do not give it write access.
 |---|---|
 | a view | `access.require` in the view configuration: `"write"`, `"manage"` or a scope id; missing means read is enough; an unknown value is denied |
 | an action | the action carries the scope it runs in; the executing account needs write there |
+| a form | `guards` in the form definition — `[{"type": "linked_to_user", "linktype": "concerns"}]` binds the submission to the person it concerns; without it the form behaves as before |
 | your own endpoint | check the scope in the endpoint as well, even if the menu already hides the page |
 | the sidebar | `required_role` and `require_scope_manage` — a menu entry can be hidden per account |
 
 **A hidden menu entry is not a lock.** Both doors belong together: hide the entry
 *and* check inside the page. A page that only disappears from the menu is still
 reachable by URL.
+
+### Forms and the person binding
+
+An action can be guarded so that it only runs on the person's own row. A form had no such
+guard: an account that could read a colleague could fill in a form **for** them — an
+absence in someone else's name.
+
+```json
+"guards": [{"type": "linked_to_user", "linktype": "concerns"}]
+```
+
+The submission is checked against the object the answer concerns — for an absence, the
+person. If that object is the signed-in person's own person, the binding holds. Anything
+else is refused before the first write, and a refusal is logged with account and address.
+No exception for administrators. Without `guards` a form behaves as before, so existing
+forms are untouched.
 
 ## 6. A layout that works for shift planning
 

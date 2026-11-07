@@ -29,6 +29,43 @@ Minimal shape:
 (`text`, `datum`, `zeit`, `wochentag_datum`, `wochentag_datum_zeit`, `zeitspanne`,
 `kalenderwoche`, `jahr`, `zahl`, `waehrung`, `monat`, `warnung`).
 
+## A warning column — amount over a threshold
+
+`warnung` computes one row instead of reading a field: hours times hourly rate. It needs
+two columns that are already in the list.
+
+```json
+{"key": "minijob", "format": "warnung", "wert": "ist", "stundenlohn": "lohn",
+ "schwelle": 603, "schwelle_ab_2027": 633, "text": "over the limit: {betrag} EUR"}
+```
+
+| Key | Meaning |
+|---|---|
+| `wert` | column key holding the hours |
+| `stundenlohn` | column key holding the hourly rate |
+| `schwelle` | limit, default 603 |
+| `schwelle_ab_2027` | limit from 2027 on (the year comes from the server, no upkeep) |
+| `text` | cell text, placeholders `{betrag}`, `{stunden}`, `{grenze}` |
+
+The cell stays empty when one of the two values is missing — no invented number.
+
+### Only for some rows
+
+Without a second condition the warning fires for every row that crosses the limit, so a
+part-time contract would be flagged like a marginal one. Add `bedingung` — a list of
+conditions on **column keys**, joined with AND:
+
+```json
+{"key": "minijob", "format": "warnung", "wert": "ist", "stundenlohn": "lohn",
+ "bedingung": [{"spalte": "vertrag", "op": "=", "wert": "minijob"}],
+ "schwelle": 603, "text": "over the limit: {betrag} EUR"}
+```
+
+`op` is one of `=`, `!=`, `>`, `<`, `>=`, `<=`; numbers are compared as numbers, the rest
+as text. A named column must appear **before** the warning column — otherwise the
+definition is refused. If a named column is missing from a row, the condition does not
+hold and the cell stays empty. Without `bedingung` the column behaves as before.
+
 ## Whose rows? — the person binding
 
 A view that lives in one scope but shows data from another (a team door) must bind the
