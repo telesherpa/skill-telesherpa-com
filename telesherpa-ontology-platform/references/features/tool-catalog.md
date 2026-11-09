@@ -379,3 +379,38 @@ selectable for a model — both are part of it.
 
 The descriptions are maintained centrally and are read in at startup. They can therefore be
 changed without touching the tool definitions.
+
+## Connections and outbox (since 2.3.3)
+
+Five tools expose the write-back building blocks (*Anbindungen*) that previously existed only
+in the web UI:
+
+| Tool | Method/path | Role | Purpose |
+|---|---|---|---|
+| `onto_connection_index` | GET `onto/credential/index` | member | list connections; secrets are never returned, only `secret_set` |
+| `onto_connection_save` | POST `onto/credential/save` | member | create **or change** a connection (same `target_key` replaces, id stays) |
+| `onto_connection_remove` | POST `onto/credential/remove` | member | delete by `id`; foreign connections answer 404 |
+| `onto_connection_check` | GET `onto/credential/check` | member | vault self-test: key loaded, encrypt/decrypt round trip |
+| `onto_outbox_index` | POST `onto/outbox/index` | admin | inspect the delivery queue (status, attempts, response_code, last_error) |
+| `onto_outbox_preview` | POST `onto/outbox/preview` | admin | dry run of an `http_call`; `send=1` would really send |
+| `onto_outbox_retry` | POST `onto/outbox/retry` | admin | resend a single row immediately |
+
+The effect type is `http_call` inside a trigger's `effects`:
+
+```json
+{"type":"http_call","target":"<target_key of a connection>","method":"POST",
+ "path":"/api/x","body":{"udid":"{udid}"},"shadow":true,"timeout":10}
+```
+
+Placeholders: `{udid}`, `{object_id}`, `{action}` and any property as `{property}`.
+`shadow: true` only logs. Without a resolvable acting identity the effect is refused
+(fail-closed) and logged as `effect_config_error`.
+
+Notes that cost time if unknown:
+
+- `credential/index` must be called with **GET**; a POST with an empty body answers
+  "Ungültiger Request-Body", which looks like a permission error.
+- `outbox/preview` is **not** side-effect free: it creates an outbox row. Without a matching
+  connection the row is immediately `dead` with "kein Credential fuer Ziel ...".
+- Changing a connection = `save` with the same `target_key`. There is no update call and no
+  history.
