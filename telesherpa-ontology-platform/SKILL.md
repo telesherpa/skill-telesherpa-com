@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.10.3
+version: 1.11.0
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -358,6 +358,10 @@ Every feature has its own detailed reference under `references/features/`:
 - **Automation & functions** — rules (triggers) react to object changes, functions are named
   computations; creation via MCP, event buffer, the two worker ticks, effect types, operator list:
   `references/features/automation-and-functions.md`
+- **Connections and write-back (Anbindungen)** — credentials for third-party systems, the
+  `http_call` effect, the delivery queue, and the symmetric read path: a pull job receives the
+  stored connections and reads them with `tscred`, so a system that needs a key can be read as
+  well as written: `references/features/anbindungen.md`
 - **Auth & token lifecycle** — refresh-token self-renewal, mandatory session vs. stateless
   envelope, diagnosis for auth errors: `references/features/auth-token-lifecycle.md`
 - **Real use cases** — end-to-end verified examples (closing a field-service documentation gap,
