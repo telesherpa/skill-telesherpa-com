@@ -57,7 +57,7 @@ Run these read-only calls first and keep the answers in your run log:
 - **The executing account pays.** A staff member clicking "Clock in" pays 20 credits from *their* balance, even through a scope bridge. Staff without credits get **HTTP 402** and the UI may show no message ("dialog hangs"). Give each staff account a small balance with `ontouser_team_transfer` (`reason` and `idempotency_key` are required; reuse the same key on retry so nothing is booked twice).
 - **Lists are free** (index/list calls); opening a single object costs `read` = 1 credit. Writes are expensive, deletes the most.
 
-## 4. Price list (live, read 2026-11-06, about 18:57 Europe/Berlin (UTC+1))
+## 4. Price list (live, read 2026-11-11, about 18:55 Europe/Berlin (UTC+1))
 
 Read it again at the start of every run with `onto_credit_pricing`; the live table wins.
 

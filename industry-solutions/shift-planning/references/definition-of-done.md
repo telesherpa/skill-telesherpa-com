@@ -80,6 +80,6 @@ Each of these was observed in a real run, not invented:
 ## For the platform operator
 
 If this audit has to be run by hand for every build, most agents will skip it. A single
-read-only tool — `workspace_audit(scope_id)` returning the ten numbers above as one JSON
+read-only tool — `workspace_audit(scope_id)` returning the twelve numbers above as one JSON
 object — would make "are you finished?" a number the agent has to quote, instead of a
 paragraph it can write. Until then this file is the substitute.

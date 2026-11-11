@@ -77,9 +77,10 @@ the bill.
 | complete service order | 50 |
 | file size | 1 per MB |
 
-Scope tiers (one-time, depending on the number of scopes): 50 / 75 / 100 / 150 / 250
-credits for 1 / 2 / 3 / 5 / 10 scopes. One credit is 0.01 EUR. **There are no
-signup credits** — a fresh account starts at zero.
+Scope price (one-time, per own scope, volume discount): 1st scope **100**, 2nd–3rd **80 each**,
+4th–10th **60 each**, from the 11th **50 each** credits — **no upper limit** on the number of own
+scopes, so `402` on scope creation always means "not enough credits". One credit is 0.01 EUR.
+**There are no signup credits** — a fresh account starts at zero.
 
 `onto_credit_pricing` returns the live table; read it at the start of a run instead
 of quoting this file.
