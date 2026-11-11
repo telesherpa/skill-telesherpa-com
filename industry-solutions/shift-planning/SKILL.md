@@ -1,7 +1,7 @@
 ---
 name: shift-planning
 description: Use when an agent must set up shift planning for a restaurant or other shift-based business on Telesherpa — three scopes (master data, planning, team), shifts from templates, staff self-service (requests, swaps, clock in/out) through a team door, notifications to affected people only, and a monthly planned-vs-actual CSV for payroll. Also use when extending or auditing such a workspace.
-version: 1.1.3
+version: 1.2.0
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -23,12 +23,35 @@ customer's staff are set in the label language agreed in [intake](references/int
 **Tool responses and error texts may use the platform language.** Read the returned
 allowed keys and error meaning; never translate keys or option values back into a call.
 
+## Before you claim anything — ten checks
+
+**A workspace is not set up because objects exist.** Before you write any progress or
+completion report, run these checks and quote the values you read back. A statement
+without numbers from a read-back is a claim, not a status.
+
+| # | Check | Query |
+|---|---|---|
+| 1 | The three scopes exist with the agreed suffixes, and you are manager of all three | `ontouser_scope_index` |
+| 2 | Per scope: number of objects, members, managers | `onto_scope_index` (fields `obj_count`, `user_count`, `manager_count`) |
+| 3 | Scope-specific property definitions exist (stations, contract types, status/kind sets) — not only the platform defaults | `onto_property_def_index` (entries with `scope_id` = your scope, `is_override`) |
+| 4 | Views and the start card exist | `onto_settings_list` per scope |
+| 5 | Every action carries your planning scope id and `require_scope_write` | `onto_actiondef_list` |
+| 6 | The notification and helper triggers exist | `onto_trigger_index` |
+| 7 | Objects per type match the intake (business, site, stations, persons, templates, period, shifts) | `onto_object_index` |
+| 8 | One published shift really hangs on its person | `onto_object_graph` on that shift, link `worksShift` |
+| 9 | One real end-to-end step as staff: a published shift appears under "My shifts"; a request lands in the inbox | `ontouser_*` views as that account |
+| 10 | The credit balance you report is the one you measured | `onto_credit_balance` |
+
+A status message names its phase — **"Phase X of 5"**. "Everything is set up" is not a
+status: it names no phase, no number and no check. If you cannot fill the table, you are
+not done, and the correct answer is the missing line, not a summary.
+
 ## Status
 
 | Field | Content |
 |---|---|
 | Verified against | **platform state 2026-11-07** (tested by the authors with member rights only; where this skill says "tested build" it means that build) |
-| Status | 1.1.3. All files are written in full: this file, prerequisites, intake, phases 0–4, acceptance scenario, measurement, publication check, glossary, country module DE. The seven block views (phases 1 and 3) are confirmed in the browser as manager and as staff. **Before go-live:** run the acceptance scenario in your own workspace — every workspace differs in configuration. Points that depend on your setup are marked "(confirm)". |
+| Status | 1.2.0. Added in this version: the ten checks before any progress or completion report, the per-phase Definition of Done, the closed list of link types, and three new stop rules against premature "done" claims. All files are written in full: this file, prerequisites, intake, phases 0–4, acceptance scenario, measurement, publication check, glossary, country module DE, definition of done. The seven block views (phases 1 and 3) are confirmed in the browser as manager and as staff. **Before go-live:** run the acceptance scenario in your own workspace — every workspace differs in configuration. Points that depend on your setup are marked "(confirm)". |
 | Platform skill state | Links point to the main branch of the platform skill, read on 2026-11-06. If a linked file has moved, look it up by name in the platform skill and report the broken link; do not guess its content. |
 | Industry | Restaurants and other shift-based businesses (care, retail, events). Restaurant values are examples. |
 | Tool count | **Not stated on purpose.** Measure: `GET https://mcp.telesherpa.com/health` (field `tools`) and `auth_status` for what *your* account sees. |
@@ -47,6 +70,28 @@ manager what is possible and file the request with them; the menu, the wording a
 request template are in the platform skill: [reports.md](../../telesherpa-ontology-platform/references/features/reports.md).
 The four that fit this solution: hours per week planned vs. actual, shifts per person, absences
 per month and kind, shifts per station.
+
+## Definition of Done — per phase, checkable
+
+"The workspace is configured" means one sentence, and it has a test: **a person who has
+never seen the build can do their daily work without asking anyone.** Everything below is
+a precondition for saying that, not a description of it.
+
+| Phase | Minimum artefact | The proof you must quote |
+|---|---|---|
+| 0 | three scopes with the agreed suffixes, the rights matrix, scope-specific property definitions, the smoke test | `ontouser_scope_index` lists three; the staff test returns **403** on the planning scope; `onto_property_def_index` shows definitions with your scope id |
+| 1 | business, site, stations, staff persons, templates, planning period, shifts, published shifts, hours functions, week grid | object counts per type; one shift read back with its `publishedAt` and its `worksShift` link |
+| 2 | request and absence forms, the deciding actions, the inbox views | one request created as staff, visible in the inbox, decided once |
+| 3 | staff accounts, "My shifts", "Open shifts for me", notifications to affected people only | the staff login sees its own shift and **not** a colleague's |
+| 4 | clocking through the scope bridge, staff record with pay, payroll-prep view and CSV | one clock-in object, one CSV row with planned and actual hours |
+
+**The hard rule:** the workspace counts as configured only when
+[acceptance-scenario.md](references/acceptance-scenario.md) has run **end to end once** and
+its result is quoted, step by step. Until then the status is "Phase X of 5".
+
+**"Created" is not "configured".** An object list proves that rows exist. A working
+workspace proves that the next person can use it: a published shift shows up in the
+staff view, a request arrives in the inbox, a clock-in lands on the right day.
 
 ## Out of scope (do not build, do not promise)
 
@@ -165,6 +210,26 @@ Short form. The platform references linked below are authoritative.
     publication** (each staffed person, once per shift). No bulk publish; triggers and
     notifications cost no credits ([phase3.md](references/phase3.md) §6).
 
+### Link types of this solution — use these, invent none
+
+The platform has 27 link types, most of them for other industries. This solution uses
+exactly these, in this direction:
+
+| Link | Direction | What it carries |
+|---|---|---|
+| `worksShift` | **person → shift** | the person the shift belongs to. This is the only path by which staff reach their own shift |
+| `concerns` | object → person | absences, requests, and the person's qualifications for a station; the link value carries the role |
+| `derivedFrom` | shift → `shiftTemplate` | traceability: which template produced the shift |
+
+**No invention.** A link type that is not in `onto_link_index` with matching `types1` and
+`types2` for the pair you need does not exist for you, whatever its name suggests —
+`assignedTo`, for example, is defined **room → person**, not person → shift. And: a link
+you have not read back with `onto_object_graph` does not exist in the report either.
+
+**Names are part of the check.** Object names follow the pattern agreed in the intake
+(e.g. `2026-11-15 17:30-23:00 service`). Quote five names in the report and compare them
+with the pattern; a deviation is a finding, not a matter of taste.
+
 Platform references (do not duplicate them here):
 
 | Topic | Reference |
@@ -230,10 +295,35 @@ scope, writing through a different tool because the intended one failed.
 | The business is not on Europe/Berlin time | Stop before phase 0 and file `ontouser_service_request`; this skill assumes Europe/Berlin (writes are interpreted in that zone). |
 | Anything that would message real people outside a test | Ask the human first. |
 | Intake answer missing (stations, manager, contract types, country) | Ask; do not assume restaurant defaults for a real customer. |
+| **You are about to report completion or "everything is set up"** | Stop. Run the ten checks above and quote the values. A summary without numbers, phases or checks is not a status report; it is out of contract. |
+| **A link or property you need is missing from the schema** | Do not invent or repurpose one. `onto_link_index` shows `key`, `types1`, `types2`; if the pair is not there, file a service request and stop. |
+| **You have built objects but no view, no action and no trigger** | That is not a phase, that is a fragment. Name the phase you are in and what is missing before reporting anything. |
 
 Report format (to the human and, for platform faults, via `ontouser_service_request`
 with `category: "bug"`): what you tried (tool + arguments without secrets), what you
 expected, what came back (status + error text), what you did not do because of it.
+
+### Report shape — use this, every time
+
+```
+Phase X of 5.
+
+| Check (from the ten) | Value read back |
+|---|---|
+| scopes                | 3 — …_master, …_planning, …_team |
+| objects per type      | person 8, shift 12, shiftTemplate 4, space 5, building 1 |
+| property definitions  | 14 in …_planning, 6 in …_master |
+| views                 | 5 in …_team, 3 in …_planning |
+| actions               | 9, all with require_scope_write = …_planning |
+| triggers              | 3 |
+| acceptance steps      | 7 of 12 passed — steps 8–12 open |
+
+Not done yet: <bullet list, each with the phase it belongs to>
+```
+
+Two lines are forbidden in this report: "everything is set up" and "done" — they say
+nothing that can be checked. The number of passed acceptance steps is the only honest
+answer to "are you finished".
 
 ## Agent planning loop (planned)
 
@@ -259,5 +349,6 @@ described when Phase 5 is decided.
 - [glossary.md](references/glossary.md) — terms, keys, example labels
 - [country-de.md](references/country-de.md) — Germany: minijob, minimum wage, working time, data protection
 - [acceptance-scenario.md](references/acceptance-scenario.md) — end-to-end test with expected values
+- [definition-of-done.md](references/definition-of-done.md) — the audit before any status report: ten checks, phase gates, status vocabulary, failure patterns
 - [measurement.md](references/measurement.md) — paid test run: budget, stop criteria, log template
 - [publication-check.md](references/publication-check.md) — what must never be in this public skill
