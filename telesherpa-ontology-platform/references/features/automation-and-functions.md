@@ -66,11 +66,16 @@ is not reachable from outside.
 }
 ```
 
-**Allowed `on` values:** `insert`, `update`, `delete`, `schedule`.
+**Allowed `on` values:** `insert`, `update`, `delete`, `schedule`, `link_removed`.
+`link_removed` fires when a link of one of the listed `link_types` is removed — with
+`remove: "pair"` as well as with `replace_link`; `to_removed: true` addresses the person
+who was released.
 
-**Allowed `effects[].type`:** `set_property`, `create_object`, `create_link`, **`run_function`**.
-`notify` and `webhook` are **deliberately not allowed** — they would remain silently ineffective.
-The validator rejects them on save with a plain-text message.
+**Allowed `effects[].type`:** `set_property`, `create_object`, `create_link`, **`run_function`**,
+**`notify`**, `run_import_source`, `http_call`.
+`webhook` is **deliberately not allowed** — it would remain silently ineffective.
+The validator rejects it on save with a plain-text message.
+Details for `notify` and `link_removed`: `notifications-and-link-events.md`.
 
 **`condition.changed`** — fire only if one of these fields has changed.
 For an operation that writes several fields (e.g. form submit), this is the

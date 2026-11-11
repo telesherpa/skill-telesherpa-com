@@ -50,8 +50,8 @@ Do not enter phase N+1 while the proof of phase N is missing. In practice:
 
 | Say this | Only when |
 |---|---|
-| "Phase 0 of 5 complete" | the three scopes, the property definitions and the 403 test are quoted |
-| "Phase 1 of 5, 60 %" | object counts are quoted and the missing pieces are named |
+| "Stage 0 of 4 complete" | the three scopes, the property definitions and the 403 test are quoted |
+| "Stage 1 of 4, 60 %" | object counts are quoted and the missing pieces are named |
 | "Blocked: <reason>" | a stop rule fired; name the tool, the status code and the response |
 | "Configured" | the acceptance scenario ran end to end and its steps are quoted |
 

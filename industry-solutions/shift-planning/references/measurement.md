@@ -36,12 +36,12 @@ Estimates — definition calls have no price key, so read your balance before an
 
 | Phase | Main costs | Estimate (credits) |
 |---|---|---|
-| 0 | three-scope tier 100; reads | ~110 |
+| 0 | three scopes at the volume price 100 + 80 + 80 = 260; reads | ~270 |
 | 1 | ~33 shifts × (from-template run 20 + object 10 + links ~25 + publish run 20 ≈ 75) plus master objects and templates; open shift + staff instead ≈ 90–95 per shift | ~2,600 |
 | 2 | requests (~55 each incl. links) and decisions (~75–80 for a swap incl. link moves), 4 requests, 3 absences | ~600 |
 | 3 | account setup, transfers, staff reads; notifications free | ~100 (+ staff balances transferred, not spent) |
 | 4 | staff records (5 × ~35), clocking 2 × 20, corrections 23 × 20 | ~700 |
-| Total | | ~4,100 ≈ 41 EUR |
+| Total | | ~4,260 ≈ 43 EUR |
 
 Cost per action (rule of thumb; your statement is the truth): 20 per action run + 10 per created object
 + 5 per link + 5 per comment effect (estimate) + 25 per `replace_link` (remove 20 +

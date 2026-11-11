@@ -88,7 +88,7 @@ in October, none crosses midnight.
 | # | Role | Step | Expected result |
 |---|---|---|---|
 | 0.1 | M | read prerequisites: health, `auth_status`, `onto_credit_balance`, `onto_credit_pricing` | pay-per-use account; balance ≥ budget; price table saved with time |
-| 0.2 | M | create the three scopes ([phase0.md](phase0.md)) | `ontouser_scope_index` lists exactly `trattoria_master`, `trattoria_planning`, `trattoria_team`; balance −100 (three-scope tier) |
+| 0.2 | M | create the three scopes ([phase0.md](phase0.md)) | `ontouser_scope_index` lists exactly `trattoria_master`, `trattoria_planning`, `trattoria_team`; balance −260 (three scopes at the volume price: 100 + 80 + 80) |
 | 0.3 | M | activate types and create the scope-own properties | `ontouser_scope_types` per scope as in phase 0; option values English (`published`, `kitchen`, `minijob`, …) |
 | 0.4 | M | activated staff accounts S1–S3 exist through the authorised test-account route (placeholder example.com addresses alone cannot be activated) as managed accounts (phase 3 §3 may be pulled forward) and get rights | S1–S3: master R, **no** planning membership, team RW |
 

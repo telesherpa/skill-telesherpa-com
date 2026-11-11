@@ -10,7 +10,8 @@ business data yet (that is phase 1).
 **Input:** answered [intake](intake.md) (questions 1, 8, 9, 13, 19, 21) and the checks
 from [prerequisites](prerequisites.md).
 
-**Budget (pay-per-use):** 100 credits for the three-scope tier, plus reads. Definition
+**Budget (pay-per-use):** 260 credits for the three scopes (100 + 80 + 80 — the price per scope
+falls with the number of own scopes; there is no upper limit), plus reads. Definition
 calls (types, properties) have no own price key — log what is booked.
 
 Placeholders used below: `<company>` (scope slug from intake 21),
@@ -413,7 +414,7 @@ Run after section 2. Every line must match; on any deviation stop and report
 | S6 | `onto_type_show` `changeRequest` with planning scope | `requestKind` with `swap`, `takeover`, `handover`, `shiftRequest` |
 | S7 | `onto_type_show` `shift`, `absence`, `demand` with planning scope; `shiftTemplate` with master scope | every option field of the override table in 1.4 shows exactly the English values and defaults listed there |
 | S8 | `onto_link_index` | `worksShift` person → shift; `bestehtAus`, `derivedFrom`, `concerns`, `hasfile` present |
-| S9 | `onto_credit_balance` | spend so far ≈ scope tier (100) + reads; log it |
+| S9 | `onto_credit_balance` | spend so far ≈ 260 (100 + 80 + 80) + reads; log it |
 | S10 | `ontouser_team_show` (each existing managed account) | memberships exactly as in matrix 1.2; staff = master **read**, **no** planning membership, team read+write |
 | S11 | Browser as staff (once an account exists): open team "my …" views; try a manager/planning view URL | team views show **only own** rows; direct open of a manager view is **refused** |
 
@@ -436,7 +437,7 @@ Run after section 2. Every line must match; on any deviation stop and report
 | Symptom | Cause | Fix |
 |---|---|---|
 | `ontouser_scope_create` refused | name has upper case, `-` or is longer than 30 characters | use `a-z0-9_` |
-| HTTP 402 on scope creation | no credits for the scope tier | stop; credits first |
+| HTTP 402 on scope creation | not enough credits for the **next** scope — the number of scopes is **not** limited | stop; top up. Do not retry, do not shrink the plan |
 | a type disappears from the dialog | `ontouser_scope_types_set` replaced the list | always send the full list |
 | `types_set` refuses to remove a type | objects of that type still exist in the scope | leave it active |
 | new property not visible on shift | created without `scope_id`, or `type_ids` wrong | read `type.id` again; recreate with `scope_id` |

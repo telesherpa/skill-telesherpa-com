@@ -46,10 +46,11 @@ industry-solutions/shift-planning/SKILL.md
   references/intake.md                    Questions before the first object
   references/phase0.md                    Scopes, property definitions, option values
   references/phase1.md                    People, contracts, templates, the shift plan
-  references/phase2.md                    Staff doors, requests, swaps, clock in/out
-  references/phase3.md                    Rules, notifications, counters, reports
-  references/phase4.md                    Payroll CSV, month close, hand-over
-  references/acceptance-scenario.md       End-to-end check with real roles
+  references/phase2.md                    Requests, swaps, decisions, staff list and detail
+  references/phase3.md                    Staff accounts, "My shifts", open shifts, start card, notifications
+  references/phase4.md                    Time tracking, change log, staff record, payroll CSV
+  references/acceptance-scenario.md       End-to-end check with real roles (50 steps)
+  references/definition-of-done.md        The audit before any status report
   references/measurement.md               What a run costs and how to read it
   references/publication-check.md         Before the workspace goes live
   references/glossary.md                  Terms in four languages
@@ -68,23 +69,23 @@ people only, monthly planned-vs-actual CSV for payroll — in phases, from intak
 acceptance.
 
 **New here and unsure what the platform does for you?** →
-`references/best_practices/first-30-minutes.md`. It holds the complete build in 30 minutes,
+`telesherpa-ontology-platform/references/best_practices/first-30-minutes.md`. It holds the complete build in 30 minutes,
 including the cost calculation.
 
 **Which tool for what, and does my account even see it?** →
-`references/features/tool-catalog.md` (the member-visible tools). How many your account sees
+`telesherpa-ontology-platform/references/features/tool-catalog.md` (the member-visible tools). How many your account sees
 is returned by `auth_status`.
 
-**Leading other accounts (company manager)?** → `references/features/company-manager.md`. Managed accounts, the marker, the rights ladder, credits and transfers, suspension and offboarding — with recipes and every guard.
+**Leading other accounts (company manager)?** → `telesherpa-ontology-platform/references/features/company-manager.md`. Managed accounts, the marker, the rights ladder, credits and transfers, suspension and offboarding — with recipes and every guard.
 
-**Building automation?** → `references/features/automation-and-functions.md`. Rules (triggers) and
+**Building automation?** → `telesherpa-ontology-platform/references/features/automation-and-functions.md`. Rules (triggers) and
 functions can also be **created via MCP** — not just read.
 
-**Images in categories?** → `references/features/structured-image-storage.md`. Categories are
+**Images in categories?** → `telesherpa-ontology-platform/references/features/structured-image-storage.md`. Categories are
 readable and settable via MCP; the file name has to match the `imagename` exactly.
 
 **"Login keeps coming back" / "no push on the iPhone"?** →
-`references/features/pwa-and-session.md`.
+`telesherpa-ontology-platform/references/features/pwa-and-session.md`.
 
 For agents that load the skill programmatically: read `SKILL.md` first, then pull in the linked
 reference for the specific topic — the files are deliberately kept small.
