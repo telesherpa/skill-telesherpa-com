@@ -49,7 +49,7 @@ industry-solutions/shift-planning/SKILL.md
   references/phase2.md                    Requests, swaps, decisions, staff list and detail
   references/phase3.md                    Staff accounts, "My shifts", open shifts, start card, notifications
   references/phase4.md                    Time tracking, change log, staff record, payroll CSV
-  references/acceptance-scenario.md       End-to-end check with real roles (50 steps)
+  references/acceptance-scenario.md       End-to-end check with real roles (44 steps + 18 negative tests)
   references/definition-of-done.md        The audit before any status report
   references/measurement.md               What a run costs and how to read it
   references/publication-check.md         Before the workspace goes live
