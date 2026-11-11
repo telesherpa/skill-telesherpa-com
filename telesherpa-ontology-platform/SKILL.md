@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.11.0
+version: 1.11.1
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -66,6 +66,29 @@ answer in.
   scopes; if the list looks short, check `auth_status` for that account instead of assuming a
   server problem.
   Member-visible tools, grouped by resource: `references/features/tool-catalog.md`.
+
+## Reporting: numbers, not adjectives
+
+Whoever builds a workspace reports what they **read back**, never what they intended.
+Every progress or completion message carries three things: the phase it is in, the numbers
+from the checks, and the items that are still missing.
+
+- **"Done" is not a status.** It names no phase, no number and no check, so nothing can be
+  verified against it — and in practice a build that reports it is a fragment: objects
+  exist, but no view, no action and no trigger.
+- **A structure you claim must be visible in the API.** Three scopes, a rights matrix, a
+  set of views: if the call does not list it, it does not exist.
+- **A link you did not read back does not exist.** `onto_link_index` shows `key`, `types1`,
+  `types2`; a familiar name does not mean the pair fits (e.g. `assignedTo` is room →
+  person, not person → shift).
+- **Quote the balance you measured** with `onto_credit_balance`, never arithmetic from
+  memory.
+
+The numbers to quote: `ontouser_scope_index` (scopes), `onto_scope_index`
+(`obj_count`, `user_count`, `manager_count`), `onto_property_def_index`,
+`onto_settings_list`, `onto_actiondef_list`, `onto_trigger_index`, `onto_object_index`.
+Per-phase gates, status vocabulary and the observed failure patterns:
+`industry-solutions/shift-planning/references/definition-of-done.md`.
 
 ## Onboarding (zero-touch)
 
