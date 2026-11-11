@@ -15,7 +15,7 @@ Read this before you write a progress or completion message.
 
 Anything that cannot be traced to that sentence is not part of "done".
 
-## The audit — one call per line, quote the value
+## The audit — one call per line, quote the value (twelve checks)
 
 Run these in order. Keep the numbers; they go into the report verbatim.
 
@@ -24,13 +24,15 @@ Run these in order. Keep the numbers; they go into the report verbatim.
 | 1 | the three scopes exist | `ontouser_scope_index` | the three names with their suffixes and `can_manage_scope` |
 | 2 | the scopes are populated and who is in them | `onto_scope_index` | `obj_count`, `user_count`, `manager_count` per scope |
 | 3 | the customer-specific values exist | `onto_property_def_index` | count of entries whose `scope_id` is your scope; the option values for station and contract type |
-| 4 | something is visible to a human | `onto_settings_list` with `scope_id` | number of views, start cards |
+| 4 | something is visible to a human, and the start card is registered | `onto_settings_list` with `scope_id`, `onto_startcard_index` | number of views per scope; the start card row ("My shifts") |
 | 5 | buttons exist and are gated | `onto_actiondef_list` | count; for each, `require_scope_write` and the scope list |
 | 6 | automation exists | `onto_trigger_index` | count and the scope list |
 | 7 | the intake was actually built | `onto_object_index` | objects per type |
 | 8 | the staff path works | `onto_object_graph` on a published shift | the `worksShift` edge with person UDID |
 | 9 | a human can work with it | the member view as that account | one own shift visible, one colleague's shift **not** visible |
-| 10 | the money claim | `onto_credit_balance` | the balance, measured now |
+| 10 | time tracking works | `ontouser_object_show` on the `serviceVisit` of a clock-in, the change-log view | start/end/break on the right day; a correction shows reason and old → new |
+| 11 | the payroll export is usable | the CSV, opened and read | one row per person with planned and actual hours and the minijob warning |
+| 12 | the money claim | `onto_credit_balance` | the balance, measured now |
 
 `onto_object_show` answers **404 "object not found or no access"** for objects in a scope
 you are not a member of. That is the platform working as designed (fail-closed), not an
