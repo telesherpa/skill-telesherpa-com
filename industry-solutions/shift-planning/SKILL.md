@@ -1,7 +1,7 @@
 ---
 name: shift-planning
 description: Use when an agent must set up shift planning for a restaurant or other shift-based business on Telesherpa — three scopes (master data, planning, team), shifts from templates, staff self-service (requests, swaps, clock in/out) through a team door, notifications to affected people only, and a monthly planned-vs-actual CSV for payroll. Also use when extending or auditing such a workspace.
-version: 1.2.1
+version: 1.2.2
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -53,7 +53,7 @@ not done, and the correct answer is the missing line, not a summary.
 | Field | Content |
 |---|---|
 | Verified against | **platform state 2026-11-11** (tested by the authors with member rights only; where this skill says "tested build" it means that build) |
-| Status | 1.2.1. In 1.2.0: the twelve checks before any progress or completion report, the per-phase Definition of Done, the closed list of link types, three stop rules against premature "done" claims. In 1.2.1 (review feedback): the checks now reach stage 4 (clock-in, change log, payroll CSV), the start card is read via `onto_startcard_index`, the status line says "stage X of 4" instead of the misleading "of 5", the report example counts against the 50 acceptance steps, and the link list carries `bestehtAus`, `hasfile` and `performs` (with the note that `employedAt`/`qualifiedFor` are link values, not types). All files are written in full: this file, prerequisites, intake, phases 0–4, acceptance scenario, measurement, publication check, glossary, country module DE, definition of done. The seven block views (phases 1 and 3) are confirmed in the browser as manager and as staff. **Before go-live:** run the acceptance scenario in your own workspace — every workspace differs in configuration. Points that depend on your setup are marked "(confirm)". |
+| Status | 1.2.2. In 1.2.0: the per-phase Definition of Done, the report shape and three stop rules against premature "done" claims. In 1.2.1 (review feedback): twelve checks (was ten) reaching stage 4 (clock-in, change log, payroll CSV), the start card read via `onto_startcard_index`, the status line "stage X of 4" instead of the misleading "of 5", the report example counting real acceptance steps, the link list extended by `bestehtAus`, `hasfile` and `performs` (with the note that `employedAt`/`qualifiedFor` are link values, not types), and the budget figures moved to the volume price (three scopes 260 instead of 100). In 1.2.2 (second review pass): `definition-of-done.md` carries the same twelve checks and reads the start card via `onto_startcard_index`; `concerns` is documented as any → any with a link value; `prerequisites.md` no longer mixes tier prices with the volume price; the changelog no longer credits 1.2.0 with the twelve checks. All files are written in full: this file, prerequisites, intake, phases 0–4, acceptance scenario, measurement, publication check, glossary, country module DE, definition of done. The seven block views (phases 1 and 3) are confirmed in the browser as manager and as staff. **Before go-live:** run the acceptance scenario in your own workspace — every workspace differs in configuration. Points that depend on your setup are marked "(confirm)". |
 | Platform skill state | Links point to the main branch of the platform skill, read on 2026-11-11 (platform skill 1.11.2). If a linked file has moved, look it up by name in the platform skill and report the broken link; do not guess its content. |
 | Industry | Restaurants and other shift-based businesses (care, retail, events). Restaurant values are examples. |
 | Tool count | **Not stated on purpose.** Measure: `GET https://mcp.telesherpa.com/health` (field `tools`) and `auth_status` for what *your* account sees. |
@@ -221,7 +221,7 @@ list with all `concerns` link values — if the two ever disagree, phase 0 wins.
 | Link | Direction | What it carries |
 |---|---|---|
 | `worksShift` | **person → shift** | the person the shift belongs to. This is the only path by which staff reach their own shift |
-| `concerns` | object → person | absences, requests, and the person's qualification for a station; the **link value** names the role (`concernsPerson`, `station`, `takingOver`, `handingOver`, … — exact list in phase0 §1.6) |
+| `concerns` | any → any | absences, requests, qualifications, stations, periods — the **link value** names the role (`concernsPerson`, `station`, `takingOver`, `handingOver`, … — exact list in phase0 §1.6) |
 | `derivedFrom` | shift → `shiftTemplate` | traceability: which template produced the shift |
 | `bestehtAus` | organisation → building → space | the site/station tree |
 | `hasfile` | any → file | qualification documents and attachments |
@@ -326,14 +326,14 @@ Stage X of 4 (0–4).
 | views / start card    | 5 views in …_team, 3 in …_planning; start card "My shifts" |
 | actions               | 9, all with require_scope_write = …_planning |
 | triggers              | 3 |
-| acceptance steps      | 31 of 50 passed — steps 2.6 … 4.8 open |
+| acceptance steps      | 24 of 40 passed (0.1 … 4.8), negative tests 6 of 18 (N1 … N18) open |
 
 Not done yet: <bullet list, each with the stage it belongs to>
 ```
 
 Two lines are forbidden in this report: "everything is set up" and "done" — they say
-nothing that can be checked. The count of passed acceptance steps (the scenario has 50,
-numbered 0.1 … 4.8) is the only honest answer to "are you finished".
+nothing that can be checked. The count of passed acceptance steps is the only honest answer to "are you
+finished" — the scenario numbers them 0.1 … 4.8 and adds the negative tests N1 … N18.
 
 ## Agent planning loop (planned)
 

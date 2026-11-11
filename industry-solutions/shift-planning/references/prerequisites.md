@@ -5,14 +5,14 @@ Check every point **before** phase 0. Do not trust this file blindly — measure
 ## 0. Stop here first: credits
 
 A fresh account starts with **0 credits**, and the first thing this skill does —
-creating three scopes — already costs **100 credits**. If `onto_credit_balance` is 0,
+creating three scopes — already costs **260 credits** (100 + 80 + 80, the price per scope falls with the number of own scopes). If `onto_credit_balance` is 0,
 nothing else in this skill works: the very first write answers **HTTP 402**.
 
 Get the money sorted before you build anything (section 3 says how): a prepaid code
 from the operator, a card payment by the human, or a service request if you are an
 agent without a payment method. Ask for the amount you actually need —
 [measurement](measurement.md) budgets a complete build plus a staffed test week at
-**about 4,100 credits (~41 EUR)**; phase 0 alone needs 100.
+**about 4,260 credits (~43 EUR)**; phase 0 alone needs 260.
 
 Do not start phase 0 with less than phase 0's cost in the account, and do not
 improvise a workaround: a half-built workspace costs more than waiting for credits.
@@ -81,9 +81,11 @@ Read it again at the start of every run with `onto_credit_pricing`; the live tab
 | `delete_object` | 20 | removing an object |
 | `complete_service_order` | 50 | completing a service order |
 
-Scope tiers (one-time, by number of own scopes): 1 = 50, 2 = 75, **3 = 100**, 5 = 150, 10 = 250 credits.
-1 credit = 0.01 EUR. The tier depends on how many scopes the account owns in total;
-the 100 of this skill assume a fresh account without other scopes. If the account
+Scope price (one-time, per own scope, volume discount): 1st scope **100**, 2nd–3rd **80 each**,
+4th–10th **60 each**, from the 11th **50 each** credits. There is **no upper limit** on the
+number of own scopes — 402 on `ontouser_scope_create` means "not enough credits", never
+"plan reached". 1 credit = 0.01 EUR. The 260 of this skill assume a fresh account without
+other scopes; an account that already manages scopes starts higher up the ladder. If the account
 already owns scopes, log what is actually booked. Recurring plan fees, if your plan
 has any, are not part of this table — ask the operator before a paid run.
 
@@ -136,7 +138,7 @@ The same template (category `bug`) is used for any platform fault from the stop 
 ## 6. Checklist
 
 - [ ] health ok, `auth_status` member, tool list contains every tool named in phase 0
-- [ ] billing model known; balance covers the phase-0 budget (≥ 100 credits for three scopes plus margin)
+- [ ] billing model known; balance covers the phase-0 budget (≥ 260 credits for three scopes plus margin)
 - [ ] price table saved with timestamp
 - [ ] all twelve types readable with `onto_type_show` (`changeRequest` may be missing from the **activation** list of `ontouser_scope_types` and still work — phase 0 §1.3)
 - [ ] intake answered and confirmed by the business

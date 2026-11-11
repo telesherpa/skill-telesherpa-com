@@ -97,7 +97,7 @@ in October, none crosses midnight.
 | # | Role | Step | Expected result |
 |---|---|---|---|
 | 1.1 | M | create site and four stations (`sp_site_create`, `sp_station_create`) | objects in master with `station` values as in 1.1 |
-| 1.2 | M | create P1–P5 (`sp_staff_create`), qualifications (`sp_qualify_for_station`) | master persons with name, login e-mail, birth year only; links `employedAt`, `qualifiedFor` (P3 two stations) |
+| 1.2 | M | create P1–P5 (`sp_staff_create`), qualifications (`sp_qualify_for_station`) | master persons with name, login e-mail, birth year only; `concerns` links with the link values `employedAt` (site) and `qualifiedFor` (station, P3 two stations) |
 | 1.3 | M | create the six templates (`sp_template_create`) | six `shiftTemplate` objects in master; planned hours as in 1.3 after the trigger |
 | 1.4 | M | month A: create the 23 shifts already staffed (`sp_shift_from_template` with the person; `sp_shift_staff` only applies to open shifts), publish each (`sp_shift_publish`) | 23 shifts, 23 `worksShift` links; status `published`; initialise historical shifts to `firstNoticeStatus = sent` before enabling notification rules, so month A has no catch-up messages |
 | 1.5 | M | cancel Pat's 2026-10-24 shift (`sp_shift_cancel`) | status `cancelled`; manager note created (`sp_cancelled_shift_note`) |
