@@ -1,7 +1,7 @@
 ---
 name: telesherpa-ontology-platform
 description: Onboard agents on the Telesherpa Ontology Platform.
-version: 1.11.2
+version: 1.11.3
 author: Telesherpa
 license: MIT
 platforms: [linux, macos, windows]
@@ -54,6 +54,19 @@ answer in.
   `Bad Request: Missing session ID` — even with a perfect token. (Alternative for clients without a
   session slot: the stateless envelope via protocol 2026-07-28.)
   Details: `references/features/auth-token-lifecycle.md`.
+- **The session lives in a header, not in the URL.** `?session_id=…` is ignored and answers
+  `400 Bad Request: Missing session ID`, exactly like no session at all. Send `mcp-session-id`
+  as a **header**, all 32 characters, on every POST after `initialize` — a truncated 8-character
+  fragment fails the same way and looks like a JSON problem when it is not.
+- **Two credentials, two hosts — do not mix them.** The OAuth access token of this server is valid
+  **only** at the MCP endpoint. Against the app API (`https://app.telesherpa.com/…?format=json`) it
+  is refused (401/403); that is by design, not a defect. For the app API ask the operator for a
+  login and fetch a session token from `POST /de/ontouser/user/token?format=json` (access 10 h,
+  refresh 30 days). The reverse is refused too: an app token at the MCP endpoint returns
+  `401 — not issued for this server`.
+- **Never assemble MCP requests in a shell with escaped JSON.** Hand-built bodies are the most
+  common source of `400 Bad Request`. Use an MCP client, or a language in which the body is a
+  native structure (dict/object) — the JSON is then produced, never quoted by hand.
 - **How many tools you get** depends on your account: `auth_status` returns the number your
   account can see, and the service reports the catalogue size under `/health`. Never quote a
   number from a document — both values move with every release. Without a token only the
