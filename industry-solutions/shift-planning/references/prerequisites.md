@@ -88,7 +88,7 @@ already owns scopes, log what is actually booked. Recurring plan fees, if your p
 has any, are not part of this table — ask the operator before a paid run.
 
 Notes:
-- The live table on 2026-11-06 returned **17 operation keys plus 5 scope tiers**. Count what you get and log it; the live table always wins.
+- The live table on 2026-11-11 returned **17 operation keys plus four scope price bands** (100 / 80 / 60 / 50 credits per scope, falling with the number of own scopes; there is no upper limit). Count what you get and log it; the live table always wins.
 - **Deleting costs 20 credits** — as much as an action. A test run that creates probes and deletes them pays twice. Budget the clean-up, or keep test objects with the `TEST-` prefix.
 - Creating property definitions, actions, views, triggers and functions has no own price key in the table. Whether these calls are free or booked under another key is visible on your statement after the first run.
 - **Triggers and notifications cost no credits** (confirmed); only the writes that cause them do (see SKILL.md).
