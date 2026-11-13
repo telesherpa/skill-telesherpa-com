@@ -1,11 +1,7 @@
 # Warehouse logistics (Telesherpa industry solution)
 
 **Version 1.0.** Location: `industry-solutions/warehouse-logistics/`, next to
-`telesherpa-ontology-platform/` and `industry-solutions/shift-planning/`, on the
-draft branch `draft/warehouse-logistics-1.0`. It is not merged to main.
-
-**Read aloud:** [READ-ALOUD.md](READ-ALOUD.md) is a single speakable document of this skill,
-for reading the draft aloud from the public raw URL.
+`telesherpa-ontology-platform/` and `industry-solutions/shift-planning/`, on `main`.
 
 **Start here:** [SKILL.md](SKILL.md). Load the platform skill first
 (`telesherpa-ontology-platform/SKILL.md`).
@@ -31,7 +27,6 @@ People, sites and the three-scope pattern are reused from
 
 ```
 SKILL.md                          Entry point, checks, status, stop rules
-READ-ALOUD.md                     Speakable full text of this skill
 references/prerequisites.md       Account, rights, live prices, types
 references/intake.md              Questions before the first object
 references/phase0.md              Scopes, rights, types, functions, actions
