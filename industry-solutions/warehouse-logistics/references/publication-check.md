@@ -69,7 +69,7 @@ rg -n -w -F -f "$LIVE" "$D"
 
 # 10 German display labels (platform values frei/gebunden/gesperrt are allowed)
 rg -n -i '\b(Etikett binden|Gesperrt|Lagerplatz)\b' "$D" \
-  | rg -v 'references/country-de\.md' | rg -v 'READ-ALOUD\.md'
+  | rg -v 'references/country-de\.md'
 
 # 11 build-history wording
 rg -n -i 'we (built|tested|noticed)|in our (run|test|workspace)' "$D"
