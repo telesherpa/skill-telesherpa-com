@@ -55,6 +55,19 @@ industry-solutions/shift-planning/SKILL.md
   references/publication-check.md         Before the workspace goes live
   references/glossary.md                  Terms in four languages
   references/country-de.md                Germany: limits, break rules, thresholds
+industry-solutions/warehouse-logistics/SKILL.md
+                                          Warehouse logistics with QR labels: three scopes
+                                          (master data, warehouse, team), packages with lot
+                                          and best-before, printed labels with their own
+                                          codes, single-scan bind and rebind, stock bookings
+                                          that write a stockMovement and set the quantity
+industry-solutions/maintenance-inspections/SKILL.md
+                                          Maintenance and inspection deadlines: three scopes
+                                          (master data, maintenance, team), assets with open
+                                          serviceOrders as the source of truth for each due
+                                          date, views for overdue / due in 30 days / open,
+                                          inspection form with photos and signature, defect
+                                          reports on an asset
 ```
 
 ## Using it
@@ -67,6 +80,15 @@ by email code, login) and links a detailed reference for every topic.
 shifts from templates, staff self-service through a team door, notifications to affected
 people only, monthly planned-vs-actual CSV for payroll — in phases, from intake to
 acceptance.
+
+**Warehouse with printed labels?** → `industry-solutions/warehouse-logistics/SKILL.md`:
+packages with lot and best-before, labels that carry their own codes, single-scan bind,
+rebind and stock bookings.
+
+**Maintenance and inspections on machines, vehicles or buildings?** →
+`industry-solutions/maintenance-inspections/SKILL.md`: an open service order per asset is
+the due date, an inspection form with photos and signature writes the next one, and
+defects are reported on the asset.
 
 **New here and unsure what the platform does for you?** →
 `telesherpa-ontology-platform/references/best_practices/first-30-minutes.md`. It holds the complete build in 30 minutes,
