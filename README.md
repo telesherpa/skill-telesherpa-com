@@ -68,6 +68,23 @@ industry-solutions/maintenance-inspections/SKILL.md
                                           date, views for overdue / due in 30 days / open,
                                           inspection form with photos and signature, defect
                                           reports on an asset
+industry-solutions/art-exhibition-transport/SKILL.md
+                                          Art and exhibition transport: three scopes (master
+                                          data, transport, team), packed items and crates as
+                                          assets, one open serviceOrder per item as the
+                                          transport job, collection and delivery condition
+                                          reports with photos and two signatures
+industry-solutions/conservation-surveyor-casefile/SKILL.md
+                                          Conservation and surveyor case files: three scopes
+                                          (master data, cases, team), objects as assets, one
+                                          open serviceOrder per case as the deadline, survey
+                                          form with findings, photos and signature
+industry-solutions/venue-rental-handover/SKILL.md
+                                          Clubhouse and community-hall rental: three scopes
+                                          (master data, venue, team), buildings as venues,
+                                          one open serviceOrder per booking, handover and
+                                          return protocols with meter readings, photos and
+                                          two signatures
 ```
 
 ## Using it
@@ -89,6 +106,18 @@ rebind and stock bookings.
 `industry-solutions/maintenance-inspections/SKILL.md`: an open service order per asset is
 the due date, an inspection form with photos and signature writes the next one, and
 defects are reported on the asset.
+
+**Art and exhibition transport?** → `industry-solutions/art-exhibition-transport/SKILL.md`:
+packed items and crates as assets, one open service order per item is the transport job, and
+collection and delivery condition reports carry photos plus the signatures of both parties.
+
+**Case files for a conservator or surveyor?** →
+`industry-solutions/conservation-surveyor-casefile/SKILL.md`: one open service order per case is
+the deadline, the survey form writes findings, photos and the next due date.
+
+**Renting a clubhouse or community hall?** → `industry-solutions/venue-rental-handover/SKILL.md`:
+one open service order per booking, handover and return protocols with meter readings, photos and
+two signatures, and defects reported on the venue.
 
 **New here and unsure what the platform does for you?** →
 `telesherpa-ontology-platform/references/best_practices/first-30-minutes.md`. It holds the complete build in 30 minutes,
