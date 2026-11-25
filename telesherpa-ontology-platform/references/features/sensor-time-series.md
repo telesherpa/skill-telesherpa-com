@@ -45,6 +45,7 @@ call — instead of N individual queries.
 ## Time: everything UTC
 
 `points[].ts` and `series_ts` are **UTC in ISO 8601 with `Z`** — `2026-10-06T23:09:00Z`. `from`/`to`
+are read as **UTC** even without a zone (measured 2026-11-25: naive vs `Z` = identical window). 
 are also read as UTC. **Do not convert yourself:** whoever first turns UTC into local time
 in order to compare two values builds in exactly the error the conversion was meant to
 avoid. Compare UTC with UTC.

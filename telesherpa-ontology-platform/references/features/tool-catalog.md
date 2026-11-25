@@ -331,7 +331,7 @@ with the message in the inbox (`ontouser_notification_index`).
 | `submit_form_answer` | `member` |
 | `toggle_member_flag` | `member` |
 
-## Timestamps — always UTC
+## Timestamps — UTC, in two shapes
 
 **Every timestamp this service returns is UTC.** Object fields come back bare, without a zone
 suffix — measured 2026-11-25: `"modified_datetime": "2026-11-25 19:40:42"` plus
@@ -342,9 +342,11 @@ input is read in the viewer's zone.
 
 - **Do not convert yourself.** Anyone converting UTC to a local time in order to compare two values
   builds in the very error the conversion was supposed to avoid. Compare UTC with UTC.
-- **What you send is also UTC.** `from`/`to` on `onto_series_range` are read as UTC
-  — as `2026-10-06T23:09:00Z` or `2026-10-06 23:09:00`. An appended offset
-  (`+02:00`) is valid and is converted.
+- **Series windows (`from`/`to` on `onto_series_range`) are UTC, with or without a zone.**
+  Measured 2026-11-25: `2026-11-24 09:56:24` and `2026-11-24T09:56:24Z` return the identical window;
+  an appended offset (`+02:00`) is converted.
+- **Property writes are different:** there a value without a zone is read in the viewer's zone
+  (see the top of this section). That is the one place where `Z`/an offset is not optional.
 - **The web view, by contrast, shows viewer time.** If the interface shows `01:09` and the API
   `23:09`, both are correct — that is a 2-hour zone difference, not an error.
 - **Compute a duration** always from two UTC values from **the same** source.

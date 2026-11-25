@@ -51,6 +51,10 @@ answer in.
   Whoever sends `2026-10-12 20:28:00` therefore stores `18:28:00` UTC and reads back
   `2026-10-12T20:28:00+02:00` as the local value — same instant, not a shift. To be
   unambiguous, send `2026-10-12T18:28:00Z`.
+  **Exception — series windows:** `from`/`to` on `onto_series_range` are read as **UTC** even
+  without a zone (measured 2026-11-25: `2026-11-24 09:56:24` and `2026-11-24T09:56:24Z` return the
+  identical window; an appended offset is converted). Reads are UTC in two shapes: series points
+  with `Z`, object fields without.
 - `?format=json` in the URL = JSON mode (an agent always uses this). Without it = web mode
   (session cookie, 302 redirects).
 - **Auth needs BOTH**: a valid `Authorization: Bearer <access_token> **and** the
