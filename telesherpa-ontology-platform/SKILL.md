@@ -43,7 +43,7 @@ answer in.
   `"modified_datetime_local": "2026-08-13T22:55:42+02:00"` (measured 2026-11-25). Property values
   carry `value` and `value_local` the same way.
   Use the field you like — never convert yourself, compare like with like. The web view shows the
-  `_local` value. Details: `references/features/tool-catalog.md` (section "Time values"), examples in
+  `_local` value. Details: `references/features/tool-catalog.md` (section "Timestamps — UTC, in two shapes"), examples in
   `references/features/sensor-time-series.md`.
 - **IDs are hex and case does not matter.** `FFFCAB43…` and `fffcab43…` are the same object; the
   server lowercases them for you. Copy IDs exactly as you read them.
