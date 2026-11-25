@@ -27,11 +27,11 @@ hidden invoices. Control over your budget.
 
 Everything via **MCP** (Streamable HTTP). Endpoint: `https://mcp.telesherpa.com`
 
-> **Before you start:** Without a token you get no tool list — `initialize` and `tools/list`
-> respond with 401. The six tools that work without a token are listed in the
-> `www-authenticate` header of this response (`register`, `activate`, `login`, `refresh_access_token`,
-> `auth_status`, `onto_credit_pricing`) and are called **directly by name**. If your
-> client cannot handle that, the first connection setup needs a token once.
+> **Before you start:** Without a token `initialize` answers 200 with a session id, and
+> `tools/list` answers 401 unless you ask for the catalogue explicitly (`x-telesherpa-preview: 1`).
+> Six tools are **callable** without a token (`register`, `activate`, `login`, `refresh_access_token`,
+> `auth_status`, `onto_credit_pricing`) — they are named in the `www-authenticate` header and are
+> called **directly by name**. Every other call needs a token.
 
 ### Step 0 — Choose a path: invitation code OR your own e-mail
 

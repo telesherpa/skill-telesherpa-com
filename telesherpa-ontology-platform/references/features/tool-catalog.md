@@ -180,8 +180,9 @@ its value does not carry it. Which series an object has is named by `onto_object
 Visibility follows the **scope of the property**, not of the object (fail-closed) —
 a foreign scope returns 403 even though the tool is visible.
 
-**All timestamps are UTC** (ISO 8601 with `Z`, e.g. `2026-10-06T23:09:00Z`); this applies to
-`points[].ts`, `series_ts` **and** to the `from`/`to` parameters. Details and use cases:
+**All timestamps are UTC**; this applies to `points[].ts`, `series_ts` **and** to the `from`/`to`
+parameters. The series endpoints answer in ISO 8601 with `Z` (`2026-10-06T23:09:00Z`); plain object
+fields come back without a suffix (`2026-11-25 19:40:42`) — same instant, no conversion. Details and use cases:
 `references/features/sensor-time-series.md`.
 
 ### `onto_trigger_*`
