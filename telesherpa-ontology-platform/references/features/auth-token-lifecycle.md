@@ -44,7 +44,8 @@ curl -s -D /tmp/mh.txt -X POST "https://mcp.telesherpa.com/?format=json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"cli","version":"1.0"}}}'
 grep -i "mcp-session-id" /tmp/mh.txt | tr -d '\r' | awk '{print $2}'
 ```
-**Send this header with every further call.** Lifetime: 12 h of inactivity.
+**Send this header with every further call.** Lifetime: **10 h** (`expires_in` 36000 s,
+measured 2026-11-25) — this is the token lifetime, not a session idle timeout.
 After that, `initialize` again — that is not an error state.
 
 ### Mode B — stateless (protocol "Era 2026-07-28")

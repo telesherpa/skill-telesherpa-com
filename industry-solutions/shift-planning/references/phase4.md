@@ -42,8 +42,8 @@ record (see 1.2). View block keywords as in phase 1.
 | `actualChangedAt` | datetime | | all three actions (`{now}`) |
 
 The **planned** break stays in `breakMinutes` (phase 1); planned and actual are never
-mixed. Times are entered and shown in Europe/Berlin; reads through the tools return
-UTC.
+mixed. Reads are UTC (plus `_local` for the viewer's zone); writes without a zone are read
+in the viewer's zone, so send `Z`/an offset.
 
 ### 1.2 Decision: where protected data lives
 
@@ -555,7 +555,7 @@ names.
 | clock-in writes, but into the wrong scope | `result_scope_id` outside `action` | move it inside `action` |
 | `actualHours` empty | trigger missing `actualEnd` in `changed`; or function not in planning | fix trigger/function; wait 5 min |
 | `actualHours` never recalculated after correction | trigger, function or required actual time missing | inspect the definition and values, wait for the trigger, test end-only and break-only changes |
-| times off by one or two hours | value written as UTC | write local time (Europe/Berlin); reads return UTC |
+| times off by one or two hours | a naive local time was read in the viewer's zone and stored as UTC, or a value was hand-converted | send `Z`/an offset; compare against the `_local` field, never against a hand-converted value |
 | payroll counts cancelled shifts | `ziel.wo` without the status filter | add `shiftStatus != cancelled` |
 | payroll lists record rows twice | `person` base set without `scopes` narrowing | add `"scopes": ["<company>_master"]` |
 | CSV header translated / wrong | labels used as header | set the labels to the generic field names in the documented eight-field order |

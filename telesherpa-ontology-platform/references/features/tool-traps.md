@@ -92,10 +92,12 @@ budget the deletes.
 
 ## 7. Time
 
-- **Writes** are interpreted as `Europe/Berlin`, **reads** come back as UTC.
-- Whoever sends `2026-10-12 20:28:00` will later read `18:28:00Z`: the same instant,
-  not a shift.
-- Ask for the local zone explicitly when a human will read a value.
+- **Writes without a zone** are interpreted in the **viewer's zone** (`Europe/Berlin` by default,
+  measured 2026-11-25: `2026-11-10 09:00:00` → stored `08:00:00` UTC). **Reads** come back as UTC
+  plus the `_local` sibling.
+- Append `Z` or an explicit offset (`2026-11-10T09:00:00Z`) and the value is taken literally — that
+  is the only unambiguous form.
+- Read the `_local` field when a human will read the value; never convert the UTC field yourself.
 
 ## 8. Triggers are asynchronous
 

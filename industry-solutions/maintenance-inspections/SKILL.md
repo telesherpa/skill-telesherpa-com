@@ -215,8 +215,7 @@ Short form. The platform references linked below are authoritative.
     scopes in a later save. A create call with several scopes is rejected (HTTP 400).
 19. **`ontouser_scope_types_set` replaces the list.** Include every type the scope
     must keep.
-20. **Time:** writes are interpreted as Europe/Berlin (the platform zone), reads
-    return UTC.
+20. **Time:** stored and returned as **UTC**, with the `_local`/`value_local` sibling in the viewer's zone. **Naive input is read in the viewer's zone** (default `Europe/Berlin`, measured 2026-11-25: `2026-11-10 09:00:00` is stored as `08:00:00` UTC); append `Z` or an offset (`2026-11-10T09:00:00Z`) and it is taken literally.
 21. **Prices only from the live list.** Call `onto_credit_pricing` at the start of
     the run. Do not copy a price table from memory or from this skill. The platform
     skill and [tool-traps.md](../../telesherpa-ontology-platform/references/features/tool-traps.md)

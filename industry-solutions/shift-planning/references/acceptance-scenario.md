@@ -18,8 +18,8 @@ or browser), not when the write call returned "OK".
   `manager@example.com`); **S** = a staff account (managed, rights per phase 0);
   **T** = trigger / platform (asynchronous, wait up to 5 minutes, scheduled rules
   every 5 minutes).
-- Times are entered in Europe/Berlin; tool reads return UTC — compare after
-  conversion.
+- Times are sent with `Z`/offset (a bare `YYYY-MM-DD HH:MM:SS` is read in the viewer's zone);
+  reads return the UTC value plus the `_local` sibling — compare UTC with UTC.
 - Both test months lie in 2026 (month A = October, month B = November). The
   threshold year follows the current date, not the month: run the payroll checks
   while the current date is in 2026, or compare against the 2026 limit by hand.

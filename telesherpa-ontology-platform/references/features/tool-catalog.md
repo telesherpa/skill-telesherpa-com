@@ -332,9 +332,12 @@ with the message in the inbox (`ontouser_notification_index`).
 
 ## Timestamps — always UTC
 
-**Every timestamp this service returns is UTC in ISO 8601 with `Z`** — e.g.
-`2026-10-06T23:09:00Z`. The value carries its zone itself; you need no conversion and
-must not assume one.
+**Every timestamp this service returns is UTC.** Object fields come back bare, without a zone
+suffix — measured 2026-11-25: `"modified_datetime": "2026-11-25 19:40:42"` plus
+`"modified_datetime_local": "2026-11-25T20:40:42+01:00"`; property values pair `value` with
+`value_local`. Some endpoints answer in ISO 8601 with `Z`; it is the same instant. Treat a value
+without suffix as UTC when **reading** — but send `Z`/an offset when **writing**, because a naive
+input is read in the viewer's zone.
 
 - **Do not convert yourself.** Anyone converting UTC to a local time in order to compare two values
   builds in the very error the conversion was supposed to avoid. Compare UTC with UTC.

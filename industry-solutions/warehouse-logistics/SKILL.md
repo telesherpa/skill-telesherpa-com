@@ -201,8 +201,7 @@ Short form. The platform references linked below are authoritative.
 12. **Unlink with `remove: "pair"`**, never `remove: true`. `label_rebind` already
     replaces `identifies` on the label side (`replace: "source"`) and the execute
     response reports the removed edge as `links_entfernt`.
-13. **Time:** writes are interpreted as Europe/Berlin (the platform zone), reads
-    return UTC.
+13. **Time:** stored and returned as **UTC**, with the `_local`/`value_local` sibling in the viewer's zone. **Naive input is read in the viewer's zone** (default `Europe/Berlin`, measured 2026-11-25: `2026-11-10 09:00:00` is stored as `08:00:00` UTC); append `Z` or an offset (`2026-11-10T09:00:00Z`) and it is taken literally.
 14. **Scan routes are not an MCP tool.** `POST /onto/object/match_actions`,
     `POST /onto/object/execute_action`, `POST /onto/object/counter` and
     `GET /ontouser/scan` run over HTTP with session/bearer (role `member`). Details:

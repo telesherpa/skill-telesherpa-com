@@ -27,7 +27,7 @@ improvise a workaround.
 | A manager (human or agent) | Named in [intake](intake.md). Holds read + write + manage on all three scopes. |
 | At least one staff test account | An **activated managed account** with rights as in phase 0. Human registration needs an activation e-mail at a dedicated controlled mailbox; documentation addresses at `example.com` cannot be activated. See [company-manager.md](../../../telesherpa-ontology-platform/references/features/company-manager.md). |
 | Browser access for acceptance | Print PDF, short URL before sign-in, the scan page and what a staff member sees are not proven by MCP lists alone. Plan a human or a browser-capable agent logging in as manager **and** as staff, and one logged-out fetch of `/q/<code>`. |
-| Time zone | The platform interprets writes as Europe/Berlin and returns UTC on reads. If the business is in another zone, stop before phase 0 and file `ontouser_service_request`. |
+| Time zone | Stored and returned as **UTC**, with the `_local`/`value_local` sibling in the viewer's zone. **Naive input is read in the viewer's zone** (default `Europe/Berlin`, measured 2026-11-25: `2026-11-10 09:00:00` is stored as `08:00:00` UTC); append `Z` or an offset (`2026-11-10T09:00:00Z`) and it is taken literally. If the business is in another zone, note it in phase 0. |
 
 ## 2. First step: measure, do not assume
 

@@ -205,8 +205,7 @@ Short form. The platform references linked below are authoritative.
     [scope-bridges.md](../../telesherpa-ontology-platform/references/features/scope-bridges.md)
     is authoritative.
 12. **Unlink with `remove: "pair"`**, never `remove: true`.
-13. **Time:** writes are interpreted as Europe/Berlin (the platform zone), reads return
-    UTC. `time` prompts need two digits (`07:30`).
+13. **Time:** stored and returned as **UTC**, with the `_local`/`value_local` sibling in the viewer's zone. **Naive input is read in the viewer's zone** (default `Europe/Berlin`, measured 2026-11-25: `2026-11-10 09:00:00` is stored as `08:00:00` UTC); append `Z` or an offset (`2026-11-10T09:00:00Z`) and it is taken literally. `time` prompts need two digits (`07:30`).
 14. **Notify only affected people.** Swap, cancellation and assignment changes reach
     only the persons involved. The only message to everybody concerned is the **first
     publication** (each staffed person, once per shift). No bulk publish; triggers and
@@ -281,10 +280,9 @@ Platform references (do not duplicate them here):
 - **Credits for triggers and notifications (confirmed):** triggers and notification
   rules consume **no** credits; only the user-triggered writes that
   cause them do.
-- **`{now}` in actions:** written into a `datetime` property or a comment it is the
-  current local time (Europe/Berlin) and is read back as UTC like any other written
-  time. Check it once in phase 1 (P1-8) by reading back `publishedAt` and the comment
-  time.
+- **`{now}` in actions:** written into a `datetime` property or a comment it carries the
+  platform timestamp and is read back unchanged (UTC). Check it once in phase 1 (P1-8) by
+  reading back `publishedAt` and the comment time.
 
 ## Stop and escalate
 
@@ -302,7 +300,7 @@ scope, writing through a different tool because the intended one failed.
 | Smoke test (phase 0) deviates from this skill | Stop before building. Report the deviation with tool, call and response. |
 | MCP timeout / connection drop on a write | Read back. Only repeat if the read-back proves nothing was written. |
 | 3 consecutive failed attempts at the same step (any error), or spend above the agreed budget | Stop and report (see [measurement.md](references/measurement.md)). |
-| The business is not on Europe/Berlin time | Stop before phase 0 and file `ontouser_service_request`; this skill assumes Europe/Berlin (writes are interpreted in that zone). |
+| The business is not on Europe/Berlin time | Stop before phase 0 and file `ontouser_service_request`; a naive time is read in the **viewer's** zone, which defaults to Europe/Berlin. |
 | Anything that would message real people outside a test | Ask the human first. |
 | Intake answer missing (stations, manager, contract types, country) | Ask; do not assume restaurant defaults for a real customer. |
 | **You are about to report completion or "everything is set up"** | Stop. Run the twelve checks above and quote the values. A summary without numbers, phases or checks is not a status report; it is out of contract. |

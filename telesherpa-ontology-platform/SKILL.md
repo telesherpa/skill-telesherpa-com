@@ -10,7 +10,9 @@ platforms: [linux, macos, windows]
 # Telesherpa Ontology Platform for Agents and Field Service
 
 **Location in the repo:** all files live in the subfolder `telesherpa-ontology-platform/`. Raw
-URLs need it (`.../raw/branch/main/telesherpa-ontology-platform/SKILL.md`); without it you get a 404.
+URLs need it — use
+`https://raw.githubusercontent.com/telesherpa/skill-telesherpa-com/main/telesherpa-ontology-platform/SKILL.md`
+(the Codeberg form `.../raw/branch/main/<path>` returns 404 on GitHub); without the subfolder you get a 404.
 
 **Introduction:** this is the showcase and the complete onboarding for the Telesherpa Ontology
 Platform (B2AI) aimed at AI agents and field service. An agent loads this skill to understand what
@@ -37,16 +39,18 @@ answer in.
 - Endpoint: `https://mcp.telesherpa.com` (Streamable HTTP).
 - **Every timestamp comes in two forms.** The plain field (`modified_datetime`, `shiftStart`, ...) is
   **UTC**. Right next to it sits the same instant in the viewer's zone with its offset, e.g.
-  `"modified_datetime": "2026-08-13 20:55:42"` and `"modified_datetime_local": "2026-08-13T22:55:42+02:00"`.
+  `"modified_datetime": "2026-08-13 20:55:42"` (UTC, **no** `Z` suffix) and
+  `"modified_datetime_local": "2026-08-13T22:55:42+02:00"` (measured 2026-11-25). Property values
+  carry `value` and `value_local` the same way.
   Use the field you like — never convert yourself, compare like with like. The web view shows the
   `_local` value. Details: `references/features/tool-catalog.md` (section "Time values"), examples in
   `references/features/sensor-time-series.md`.
 - **IDs are hex and case does not matter.** `FFFCAB43…` and `fffcab43…` are the same object; the
   server lowercases them for you. Copy IDs exactly as you read them.
-- **Times YOU send mean your own zone.** Inputs that carry a clock time are interpreted in the
-  viewer's time zone; clock times without an explicit offset are read as **UTC** (that is what is stored and returned in
-  JSON is **UTC**. Whoever sends `2026-10-12 20:28:00` later reads `18:28:00Z` — same instant, not a
-  shift. If you want to be certain, send UTC directly.
+- **Times YOU send without a zone are your viewer's zone.** Timestamps are stored and returned as **UTC**, with the `_local`/`value_local` sibling in the viewer's zone. **Naive input is read in the viewer's zone** (default `Europe/Berlin`, measured 2026-11-25: `2026-11-10 09:00:00` is stored as `08:00:00` UTC); append `Z` or an offset (`2026-11-10T09:00:00Z`) and it is taken literally.
+  Whoever sends `2026-10-12 20:28:00` therefore stores `18:28:00` UTC and reads back
+  `2026-10-12T20:28:00+02:00` as the local value — same instant, not a shift. To be
+  unambiguous, send `2026-10-12T18:28:00Z`.
 - `?format=json` in the URL = JSON mode (an agent always uses this). Without it = web mode
   (session cookie, 302 redirects).
 - **Auth needs BOTH**: a valid `Authorization: Bearer <access_token> **and** the
@@ -172,11 +176,14 @@ Per-phase gates, status vocabulary and the observed failure patterns:
    a valid bearer token. Lifetime 10 h (`expires_in`: 36000 s, measured 2026-11-25); afterwards
    simply `initialize` again or refresh with `refresh_access_token`.
    Details: `references/features/auth-token-lifecycle.md`.
-3. **Visible before login (public, proven):** `register`, `activate`, `login`,
-   `refresh_access_token`, `auth_status`, `onto_credit_pricing`. Everything else appears only
+3. **Callable before login (public, proven):** `register`, `activate`, `login`,
+   `refresh_access_token`, `auth_status`, `onto_credit_pricing`. Every other **call** appears only
    AFTER login (RBAC filter) — visibility ≠ bug.
-   **Careful:** `tools/list` without a token returns **HTTP 401**, not a list. The public tools are
-   callable via their **name** (named in the `www-authenticate` hint), not via the list.
+   **The catalogue itself is readable before login, but only on request:** `initialize` answers 200
+   and returns a `mcp-session-id`; `tools/list` with that session and `x-telesherpa-preview: 1`
+   (or `?preview=1`) returns the full catalogue. Without that header `tools/list` answers **401** —
+   so a bare `tools/list` is not the way to discover the six public tools: call them by **name**
+   (the `www-authenticate` hint names them).
 4. **Register** (`register`) — two forms:
    **Route A (agent, no code):** `agent=true` + **`accept_terms` = `true` (mandatory)**; optionally
    `invite_code` in addition. The response contains `username`
@@ -449,8 +456,10 @@ patterns, not a technical feature in itself:
    `refresh_access_token`, `auth_status`, `onto_credit_pricing`). `tools/list` without a token
    returns **HTTP 401** unless you ask explicitly (`x-telesherpa-preview: 1` after `initialize`);
    otherwise call the public tools by name.
-3. **`initialize` is mandatory, not optional** — without `mcp-session-id` every call is rejected
-   with `Bad Request: Missing session ID`, even with a valid bearer token.
+3. **`initialize` is mandatory for session mode** — without `mcp-session-id` every call is rejected
+   with `Bad Request: Missing session ID`, even with a valid bearer token. The one exception is the
+   **stateless envelope** (protocol `2026-07-28`) used for the six public tools, described in step 2:
+   there the session header is not needed because the call carries `mcp-method`/`mcp-name` itself.
 4. `activate` needs no prior login.
 5. `register` has **two forms**: **agent** → `agent=true` + `accept_terms=true` (optionally
    `invite_code`; address and password come back once, the account is active immediately, **no**
