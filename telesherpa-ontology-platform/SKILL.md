@@ -44,7 +44,7 @@ answer in.
 - **IDs are hex and case does not matter.** `FFFCAB43…` and `fffcab43…` are the same object; the
   server lowercases them for you. Copy IDs exactly as you read them.
 - **Times YOU send mean your own zone.** Inputs that carry a clock time are interpreted in the
-  viewer's time zone (for agents the default is `Europe/Berlin`); what is stored and returned in
+  viewer's time zone; clock times without an explicit offset are read as **UTC** (that is what is stored and returned in
   JSON is **UTC**. Whoever sends `2026-10-12 20:28:00` later reads `18:28:00Z` — same instant, not a
   shift. If you want to be certain, send UTC directly.
 - `?format=json` in the URL = JSON mode (an agent always uses this). Without it = web mode
@@ -105,10 +105,12 @@ Per-phase gates, status vocabulary and the observed failure patterns:
 
 ## Onboarding (zero-touch)
 
-> **Before the first call:** without a token the endpoint delivers **no tool list** —
-> `initialize` and `tools/list` answer **401**. A client that needs a list first therefore has
-> **no** tool at all. Call the six public ones **directly by name**; the 401 names them together
-> with the zero-touch route. Alternatively sign in once via OAuth and bring the token along.
+> **Before the first call:** without a token `initialize` **works** and returns a
+> `mcp-session-id`; `tools/list` answers **401** unless you ask for the catalogue explicitly
+> (`x-telesherpa-preview: 1` or `?preview=1`, measured 2026-11-25). The full catalogue is
+> readable that way without a token; every **call** except the six public tools still needs
+> one. If you do not need the list, call the six public tools **directly by name** — the 401
+> hint names them together with the zero-touch route.
 > Details: `references/features/tool-catalog.md`.
 
 1. **Two routes — route A is the agent route.**
@@ -159,8 +161,9 @@ Per-phase gates, status vocabulary and the observed failure patterns:
    *(Optional, if you have IMAP access yourself: read the code straight from the mailbox.)*
    Complete, with curl: `references/showcase-onboarding.md`.
 2. **Session — two modes, and which one applies depends on the token.**
-   **Without a token there is no session:** `initialize` answers **401** and delivers **no**
-   `mcp-session-id`. The tokenless entry therefore always runs as a **stateless envelope**
+   **Without a token** `initialize` returns **200** and delivers a `mcp-session-id`
+   (measured 2026-11-25); the catalogue is readable with that session plus
+   `x-telesherpa-preview: 1`. For **calls** the tokenless entry runs as a **stateless envelope**
    (protocol `2026-07-28`): header `MCP-Protocol-Version: 2026-07-28`, `mcp-method: tools/call`,
    `mcp-name: <tool>`, and in `params._meta` the protocol version plus your own capabilities. That
    is how the six public tools are reachable — without this envelope nothing happens at all.
@@ -441,9 +444,10 @@ patterns, not a technical feature in itself:
 ## Pitfalls (most important)
 
 1. `?format=json` in the URL for JSON mode.
-2. **Before login only these 6 tools** (`register`, `activate`, `login`, `refresh_access_token`,
-   `auth_status`, `onto_credit_pricing`). `tools/list` without a token returns **HTTP 401** instead
-   of a list — call the public tools by name.
+2. **Before login only these 6 tools are callable** (`register`, `activate`, `login`,
+   `refresh_access_token`, `auth_status`, `onto_credit_pricing`). `tools/list` without a token
+   returns **HTTP 401** unless you ask explicitly (`x-telesherpa-preview: 1` after `initialize`);
+   otherwise call the public tools by name.
 3. **`initialize` is mandatory, not optional** — without `mcp-session-id` every call is rejected
    with `Bad Request: Missing session ID`, even with a valid bearer token.
 4. `activate` needs no prior login.
