@@ -12,7 +12,7 @@ platforms: [linux, macos, windows]
 **Location in the repo:** all files live in the subfolder `telesherpa-ontology-platform/`. Raw
 URLs need it — use
 `https://raw.githubusercontent.com/telesherpa/skill-telesherpa-com/main/telesherpa-ontology-platform/SKILL.md`
-(the Codeberg form `.../raw/branch/main/<path>` returns 404 on GitHub); without the subfolder you get a 404.
+(a Codeberg-style raw path with `branch` in it returns 404 on GitHub — use the form above); without the subfolder you get a 404.
 
 **Introduction:** this is the showcase and the complete onboarding for the Telesherpa Ontology
 Platform (B2AI) aimed at AI agents and field service. An agent loads this skill to understand what
