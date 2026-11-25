@@ -169,7 +169,8 @@ Per-phase gates, status vocabulary and the observed failure patterns:
    is how the six public tools are reachable — without this envelope nothing happens at all.
    **With a token** `initialize` returns 200; then `mcp-session-id` comes from the **response
    header**, and calls without that ID are rejected (`Bad Request: Missing session ID`), even with
-   a valid bearer token. Lifetime 12 h of inactivity; afterwards simply `initialize` again.
+   a valid bearer token. Lifetime 10 h (`expires_in`: 36000 s, measured 2026-11-25); afterwards
+   simply `initialize` again or refresh with `refresh_access_token`.
    Details: `references/features/auth-token-lifecycle.md`.
 3. **Visible before login (public, proven):** `register`, `activate`, `login`,
    `refresh_access_token`, `auth_status`, `onto_credit_pricing`. Everything else appears only
